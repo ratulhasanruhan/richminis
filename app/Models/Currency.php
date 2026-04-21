@@ -3,18 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\PreventDemoModeChanges;
 
 class Currency extends Model
 {
-    protected $table = "currencies";
-    protected $fillable = ['name', 'symbol', 'code', 'is_cryptocurrency', 'exchange_rate'];
+    use PreventDemoModeChanges;
 
-    protected $casts = [
-        'id'                => 'integer',
-        'name'              => 'string',
-        'symbol'            => 'string',
-        'code'              => 'string',
-        'is_cryptocurrency' => 'integer',
-        'exchange_rate'     => 'decimal:6',
-    ];
+    //
 }

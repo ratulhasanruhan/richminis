@@ -1,898 +1,482 @@
 <?php
 
+namespace App\Http\Controllers\Api\V2;
 
-use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\EnsureSystemKey;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\OtpController;
-use App\Http\Controllers\Admin\PosController;
-use App\Http\Controllers\Admin\PWAController;
-use App\Http\Controllers\Admin\TaxController;
-use App\Http\Controllers\Admin\CityController;
-use App\Http\Controllers\Admin\MailController;
-use App\Http\Controllers\Admin\PageController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\SiteController;
-use App\Http\Controllers\Admin\UnitController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\StateController;
-use App\Http\Controllers\Admin\StockController;
-use App\Http\Controllers\Admin\ThemeController;
-use App\Http\Controllers\Auth\SignupController;
-use App\Http\Controllers\Admin\CouponController;
-use App\Http\Controllers\Admin\DamageController;
-use App\Http\Controllers\Admin\OutletController;
-use App\Http\Controllers\Admin\SliderController;
-use App\Http\Controllers\Admin\BarcodeController;
-use App\Http\Controllers\Admin\BenefitController;
-use App\Http\Controllers\Admin\CompanyController;
-use App\Http\Controllers\Admin\CookiesController;
-use App\Http\Controllers\Admin\CountryController;
-use App\Http\Controllers\Admin\LicenseController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\AnalyticController;
-use App\Http\Controllers\Admin\CurrencyController;
-use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\EmployeeController;
-use App\Http\Controllers\Admin\LanguageController;
-use App\Http\Controllers\Admin\PosOrderController;
-use App\Http\Controllers\Admin\PurchaseController;
-use App\Http\Controllers\Admin\SupplierController;
-use App\Http\Controllers\Admin\TimezoneController;
-use App\Http\Controllers\Admin\WhatsappController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\OrderAreaController;
-use App\Http\Controllers\Admin\PromotionController;
-use App\Http\Controllers\Auth\DeactivateController;
-use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Controllers\Admin\ProductSeoController;
-use App\Http\Controllers\Admin\SimpleUserController;
-use App\Http\Controllers\Admin\SmsGatewayController;
-use App\Http\Controllers\Admin\SubscriberController;
-use App\Http\Controllers\Frontend\ProfileController;
-use App\Http\Controllers\Admin\CountryCodeController;
-use App\Http\Controllers\Admin\MenuSectionController;
-use App\Http\Controllers\Admin\OnlineOrderController;
-use App\Http\Controllers\Admin\ReturnOrderController;
-use App\Http\Controllers\Admin\SalesReportController;
-use App\Http\Controllers\Admin\SocialMediaController;
-use App\Http\Controllers\Admin\TransactionController;
-use App\Http\Controllers\Auth\RefreshTokenController;
-use App\Http\Controllers\Frontend\OverviewController;
-use App\Http\Controllers\Admin\MenuTemplateController;
-use App\Http\Controllers\Admin\NotificationController;
-use App\Http\Controllers\Admin\ProductBrandController;
-use App\Http\Controllers\Admin\ProductVideoController;
-use App\Http\Controllers\Admin\ReturnReasonController;
-use App\Http\Controllers\Admin\AdministratorController;
-use App\Http\Controllers\Admin\ShippingSetupController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Frontend\TokenStoreController;
-use App\Http\Controllers\Admin\MyOrderDetailsController;
-use App\Http\Controllers\Admin\PaymentGatewayController;
-use App\Http\Controllers\Admin\ProductSectionController;
-use App\Http\Controllers\Admin\ProductsReportController;
-use App\Http\Controllers\Admin\AnalyticSectionController;
-use App\Http\Controllers\Admin\CustomerAddressController;
-use App\Http\Controllers\Admin\EmployeeAddressController;
-use App\Http\Controllers\Admin\ProductCategoryController;
-use App\Http\Controllers\Admin\ReturnAndRefundController;
-use App\Http\Controllers\Admin\ProductAttributeController;
-use App\Http\Controllers\Admin\ProductVariationController;
-use App\Http\Controllers\Admin\PromotionProductController;
-use App\Http\Controllers\Admin\PushNotificationController;
-use App\Http\Controllers\Frontend\ProductReviewController;
-use App\Http\Controllers\Admin\NotificationAlertController;
-use App\Http\Controllers\Admin\CreditBalanceReportController;
-use App\Http\Controllers\Admin\AdministratorAddressController;
-use App\Http\Controllers\Admin\ProductSectionProductController;
-use App\Http\Controllers\Admin\ProductAttributeOptionController;
-use App\Http\Controllers\Admin\ReviewController;
-use App\Http\Controllers\Frontend\PageController as FrontendPageController;
-use App\Http\Controllers\Frontend\OrderController as FrontendOrderController;
-use App\Http\Controllers\Frontend\CouponController as FrontendCouponController;
-use App\Http\Controllers\Frontend\OutletController as FrontendOutletController;
-use App\Http\Controllers\Frontend\SliderController as FrontendSliderController;
-use App\Http\Controllers\Frontend\AddressController as FrontendAddressController;
-use App\Http\Controllers\Frontend\BenefitController as FrontendBenefitController;
-use App\Http\Controllers\Frontend\CookiesController as FrontendCookiesController;
-use App\Http\Controllers\Frontend\ProductController as FrontendProductController;
-use App\Http\Controllers\Frontend\SettingController as FrontendSettingController;
-use App\Http\Controllers\Frontend\LanguageController as FrontendLanguageController;
-use App\Http\Controllers\Frontend\WishlistController as FrontendWishlistController;
-use App\Http\Controllers\Frontend\OrderAreaController as FrontendOrderAreaController;
-use App\Http\Controllers\Frontend\PromotionController as FrontendPromotionController;
-use App\Http\Controllers\Frontend\SubscriberController as FrontendSubscriberController;
-use App\Http\Controllers\Frontend\CountryCodeController as FrontendCountryCodeController;
-use App\Http\Controllers\Frontend\ProductBrandController as FrontendProductBrandController;
-use App\Http\Controllers\Frontend\ReturnReasonController as FrontendReturnReasonController;
-use App\Http\Controllers\Frontend\PaymentGatewayController as FrontendPaymentGatewayController;
-use App\Http\Controllers\Frontend\ProductSectionController as FrontendProductSectionController;
-use App\Http\Controllers\Frontend\ProductCategoryController as FrontendProductCategoryController;
-use App\Http\Controllers\Frontend\ReturnAndRefundController as FrontendReturnAndRefundController;
-use App\Http\Controllers\Frontend\CountryStateCityController as FrontendCountryStateCityController;
-use App\Http\Controllers\Frontend\ProductVariationController as FrontendProductVariationController;
-use App\Http\Controllers\Frontend\PromotionProductController as FrontendPromotionProductController;
-use App\Http\Controllers\Frontend\ProductSectionProductController as FrontendProductSectionProductController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
 
-Route::match(['get', 'post'], '/login', function () {
-    return response()->json(['errors' => 'unauthenticated'], 401);
-})->name('login');
 
-Route::match(['get', 'post'], '/refresh-token', [RefreshTokenController::class, 'refreshToken'])->middleware(['installed']);
+Route::group(['prefix' => 'v2/auth', 'middleware' => ['app_language']], function () {
 
-Route::prefix('auth')->middleware(['installed', 'apiKey', 'localization'])->name('auth.')->namespace('Auth')->group(function () {
-    Route::post('/login', [LoginController::class, 'login']);
-
-    Route::prefix('forgot-password')->name('forgot-password.')->group(function () {
-        Route::post('/', [ForgotPasswordController::class, 'forgotPassword']);
-        Route::post('/otp-phone', [ForgotPasswordController::class, 'otpPhone']);
-        Route::post('/otp-email', [ForgotPasswordController::class, 'otpEmail']);
-        Route::post('/verify-phone', [ForgotPasswordController::class, 'verifyPhone']);
-        Route::post('/verify-email', [ForgotPasswordController::class, 'verifyEmail']);
-        Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-    });
-
-    Route::prefix('signup')->name('signup.')->group(function () {
-        Route::post('/otp-phone', [SignupController::class, 'otpPhone']);
-        Route::post('/otp-email', [SignupController::class, 'otpEmail']);
-        Route::post('/verify-phone', [SignupController::class, 'verifyPhone']);
-        Route::post('/verify-email', [SignupController::class, 'verifyEmail']);
-        Route::post('/register', [SignupController::class, 'register']);
-        Route::post('/login-verify', [SignupController::class, 'signupLoginVerify']);
-        Route::post('/register-validation', [SignupController::class, 'validateRegister']);
+    Route::post('info', [AuthController::class, 'getUserInfoByAccessToken']);
+    Route::controller(AuthController::class)->group(function () {
+        Route::post('login', 'login');
+        Route::post('signup', 'signup');
+        Route::post('social-login', 'socialLogin');
     });
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [LoginController::class, 'logout']);
-        Route::post('/delete-account', [DeactivateController::class, 'deleteAccount']);
+        Route::controller(AuthController::class)->group(function () {
+            Route::get('logout', 'logout');
+            Route::get('user', 'user');
+            Route::get('account-deletion', 'account_deletion');
+            Route::get('resend_code', 'resendCode');
+            Route::post('confirm_code', 'confirmCode');
+        });
     });
-
-    Route::post('/authcheck', function () {
-        if (Auth::check()) {
-            return response()->json(['status' => true]);
-        }
-        return response()->json(['status' => false]);
+    Route::controller(PasswordResetController::class)->group(function () {
+        Route::post('password/forget_request', 'forgetRequest');
+        Route::post('password/confirm_reset', 'confirmReset');
+        Route::post('password/resend_code', 'resendCode');
     });
 });
 
-/* all routes must be singular word*/
-Route::prefix('profile')->name('profile.')->middleware(['installed', 'apiKey', 'auth:sanctum', 'localization'])->group(function () {
-    Route::get('/', [ProfileController::class, 'profile']);
-    Route::match(['post', 'put', 'patch'], '/', [ProfileController::class, 'update']);
-    Route::match(['put', 'patch'], '/change-password', [ProfileController::class, 'changePassword']);
-    Route::post('/change-image', [ProfileController::class, 'changeImage']);
-});
 
-Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(function () {
-    Route::prefix('timezone')->name('timezone.')->group(function () {
-        Route::get('/', [TimezoneController::class, 'index']);
+
+Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
+
+
+    //auth controller
+    Route::post('guest-user-account-create', [AuthController::class, 'guestUserAccountCreate']);
+
+    // auction products routes
+    Route::controller(AuctionProductController::class)->group(function () {
+        Route::get('auction/products', 'index');
+        Route::get('auction/products/{slug}', 'details_auction_product');
+        Route::get('auction/bided-products', 'bided_products_list')->middleware('auth:sanctum');
+        Route::get('auction/purchase-history', 'user_purchase_history')->middleware('auth:sanctum');
     });
+    Route::post('auction/place-bid', [AuctionProductBidController::class, 'store'])->middleware('auth:sanctum');
 
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::get('/total-sales', [DashboardController::class, 'totalSales']);
-        Route::get('/total-orders', [DashboardController::class, 'totalOrders']);
-        Route::get('/total-customers', [DashboardController::class, 'totalCustomers']);
-        Route::get('/total-products', [DashboardController::class, 'totalProducts']);
-        Route::get('/order-statistics', [DashboardController::class, 'orderStatistics']);
-        Route::get('/sales-summary', [DashboardController::class, 'salesSummary']);
-        Route::get('/order-summary', [DashboardController::class, 'orderSummary']);
-        Route::get('/customer-states', [DashboardController::class, 'customerStates']);
-        Route::get('/top-customers', [DashboardController::class, 'topCustomers']);
-        Route::get('/top-products', [DashboardController::class, 'topProducts']);
-    });
-
-    Route::prefix('setting')->name('setting.')->group(function () {
-        Route::prefix('company')->name('company.')->group(function () {
-            Route::get('/', [CompanyController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [CompanyController::class, 'update']);
-        });
-
-        Route::prefix('site')->name('site.')->group(function () {
-            Route::get('/', [SiteController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [SiteController::class, 'update']);
-        });
-
-        Route::prefix('theme')->name('theme.')->group(function () {
-            Route::get('/', [ThemeController::class, 'index']);
-            Route::post('/', [ThemeController::class, 'update']);
-        });
-
-        Route::prefix('pwa')->name('pwa')->group(function () {
-            Route::get('/', [PWAController::class, 'index']);
-            Route::post('/', [PWAController::class, 'update']);
-        });
-
-        Route::prefix('analytic')->name('analytic.')->group(function () {
-            Route::get('/', [AnalyticController::class, 'index']);
-            Route::get('/show/{analytic}', [AnalyticController::class, 'show']);
-            Route::post('/', [AnalyticController::class, 'store']);
-            Route::match(['put', 'patch'], '/{analytic}', [AnalyticController::class, 'update']);
-            Route::delete('/{analytic}', [AnalyticController::class, 'destroy']);
-        });
-
-        Route::prefix('analytic-section')->name('analytic-section.')->group(function () {
-            Route::get('/{analytic}', [AnalyticSectionController::class, 'index']);
-            Route::post('/{analytic}', [AnalyticSectionController::class, 'store']);
-            Route::match(
-                ['put', 'patch'],
-                '/{analytic}/{analyticSection}',
-                [AnalyticSectionController::class, 'update']
-            );
-            Route::delete('/{analytic}/{analyticSection}', [AnalyticSectionController::class, 'destroy']);
-        });
-
-        Route::prefix('mail')->name('mail.')->group(function () {
-            Route::get('/', [MailController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [MailController::class, 'update']);
-        });
-
-        Route::prefix('shipping-setup')->name('shipping-setup.')->group(function () {
-            Route::get('/', [ShippingSetupController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [ShippingSetupController::class, 'update']);
-        });
-
-        Route::prefix('order-area')->name('order-area.')->group(function () {
-            Route::get('/', [OrderAreaController::class, 'index']);
-            Route::post('/', [OrderAreaController::class, 'store']);
-            Route::match(['put', 'patch'], '/{orderArea}', [OrderAreaController::class, 'update']);
-            Route::delete('/{orderArea}', [OrderAreaController::class, 'destroy']);
-        });
-
-        Route::prefix('currency')->name('currency.')->group(function () {
-            Route::get('/', [CurrencyController::class, 'index']);
-            Route::get('/show/{currency}', [CurrencyController::class, 'show']);
-            Route::post('/', [CurrencyController::class, 'store']);
-            Route::match(['put', 'patch'], '/{currency}', [CurrencyController::class, 'update']);
-            Route::delete('/{currency}', [CurrencyController::class, 'destroy']);
-        });
-
-        Route::prefix('tax')->name('tax.')->group(function () {
-            Route::get('/', [TaxController::class, 'index']);
-            Route::get('/show/{tax}', [TaxController::class, 'show']);
-            Route::post('/', [TaxController::class, 'store']);
-            Route::match(['put', 'patch'], '/{tax}', [TaxController::class, 'update']);
-            Route::delete('/{tax}', [TaxController::class, 'destroy']);
-        });
-
-        Route::prefix('product-category')->name('product-category.')->group(function () {
-            Route::get('/', [ProductCategoryController::class, 'index']);
-            Route::get('/depth-tree', [ProductCategoryController::class, 'depthTree']);
-            Route::get('/show/{productCategory}', [ProductCategoryController::class, 'show']);
-            Route::post('/', [ProductCategoryController::class, 'store']);
-            Route::match(['post', 'put', 'patch'], '/{productCategory}', [ProductCategoryController::class, 'update']);
-            Route::delete('/{productCategory}', [ProductCategoryController::class, 'destroy']);
-            Route::get('/ancestors-and-self/{productCategory:slug}', [ProductCategoryController::class, 'ancestorsAndSelf']);
-            Route::get('/tree', [ProductCategoryController::class, 'tree']);
-            Route::get('/export', [ProductCategoryController::class, 'export']);
-            Route::get('/download-attachment', [ProductCategoryController::class, 'downloadAttachment']);
-            Route::post('/import/file', [ProductCategoryController::class, 'import']);
-        });
-
-        Route::prefix('product-brand')->name('product-brand.')->group(function () {
-            Route::get('/', [ProductBrandController::class, 'index']);
-            Route::get('/show/{productBrand}', [ProductBrandController::class, 'show']);
-            Route::post('/', [ProductBrandController::class, 'store']);
-            Route::match(['post', 'put', 'patch'], '/{productBrand}', [ProductBrandController::class, 'update']);
-            Route::delete('/{productBrand}', [ProductBrandController::class, 'destroy']);
-        });
-
-        Route::prefix('supplier')->name('supplier.')->group(function () {
-            Route::get('/', [SupplierController::class, 'index']);
-            Route::get('/show/{supplier}', [SupplierController::class, 'show']);
-            Route::post('/', [SupplierController::class, 'store']);
-            Route::match(['post', 'put',  'patch'], '/{supplier}', [SupplierController::class, 'update']);
-            Route::delete('/{supplier}', [SupplierController::class, 'destroy']);
-        });
-
-        Route::prefix('otp')->name('otp.')->group(function () {
-            Route::get('/', [OtpController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [OtpController::class, 'update']);
-        });
-
-        Route::prefix('social-media')->name('social-media.')->group(function () {
-            Route::get('/', [SocialMediaController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [SocialMediaController::class, 'update']);
-        });
-
-        Route::prefix('sms-gateway')->name('sms-gateway.')->group(function () {
-            Route::get('/', [SmsGatewayController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [SmsGatewayController::class, 'update']);
-        });
-
-        Route::prefix('slider')->name('slider.')->group(function () {
-            Route::get('/', [SliderController::class, 'index']);
-            Route::get('/show/{slider}', [SliderController::class, 'show']);
-            Route::post('/', [SliderController::class, 'store']);
-            Route::match(['post', 'put', 'patch'], '/{slider}', [SliderController::class, 'update']);
-            Route::delete('/{slider}', [SliderController::class, 'destroy']);
-        });
-
-        Route::prefix('language')->name('language.')->group(function () {
-            Route::get('/', [LanguageController::class, 'index']);
-            Route::post('/', [LanguageController::class, 'store']);
-            Route::get('/show/{language}', [LanguageController::class, 'show']);
-            Route::match(['post', 'put', 'patch'], '/update/{language}', [LanguageController::class, 'update']);
-            Route::delete('/{language}', [LanguageController::class, 'destroy']);
-
-            Route::get('/file-list/{language:code}', [LanguageController::class, 'fileList']);
-            Route::post('/file-text', [LanguageController::class, 'fileText']);
-            Route::post('/file-text/store', [LanguageController::class, 'fileTextStore']);
-        });
-
-        Route::prefix('cookies')->name('cookies.')->group(function () {
-            Route::get('/', [CookiesController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [CookiesController::class, 'update']);
-        });
-
-        Route::prefix('page')->name('page.')->group(function () {
-            Route::get('/', [PageController::class, 'index']);
-            Route::get('/show/{page}', [PageController::class, 'show']);
-            Route::post('/', [PageController::class, 'store']);
-            Route::match(['post', 'put', 'patch'], '/{page}', [PageController::class, 'update']);
-            Route::delete('/{page}', [PageController::class, 'destroy']);
-        });
-
-        Route::prefix('license')->name('license.')->group(function () {
-            Route::get('/', [LicenseController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [LicenseController::class, 'update']);
-        });
-
-        Route::prefix('menu-section')->name('menu-section.')->group(function () {
-            Route::get('/', [MenuSectionController::class, 'index']);
-        });
-
-        Route::prefix('menu-template')->name('menu-template.')->group(function () {
-            Route::get('/', [MenuTemplateController::class, 'index']);
-            Route::get('/show/{menuTemplate}', [MenuTemplateController::class, 'show']);
-            Route::post('/', [MenuTemplateController::class, 'store']);
-            Route::match(['put', 'patch'], '/{menuTemplate}', [MenuTemplateController::class, 'update']);
-            Route::delete('/{menuTemplate}', [MenuTemplateController::class, 'destroy']);
-        });
-
-        Route::prefix('product-attribute')->name('product-attribute.')->group(function () {
-            Route::get('/', [ProductAttributeController::class, 'index']);
-            Route::get('/show/{productAttribute}', [ProductAttributeController::class, 'show']);
-            Route::post('/', [ProductAttributeController::class, 'store']);
-            Route::match(['put', 'patch'], '/{productAttribute}', [ProductAttributeController::class, 'update']);
-            Route::delete('/{productAttribute}', [ProductAttributeController::class, 'destroy']);
-        });
-
-        Route::prefix('product-attribute-option')->name('product-attribute-option.')->group(function () {
-            Route::get('/{productAttribute}', [ProductAttributeOptionController::class, 'index']);
-            Route::get('/{productAttribute}/show/{productAttributeOption}', [ProductAttributeOptionController::class, 'show']);
-            Route::post('/{productAttribute}', [ProductAttributeOptionController::class, 'store']);
-            Route::match(['put', 'patch'], '/{productAttribute}/{productAttributeOption}', [ProductAttributeOptionController::class, 'update']);
-            Route::delete('/{productAttribute}/{productAttributeOption}', [ProductAttributeOptionController::class, 'destroy']);
-        });
-
-        Route::prefix('unit')->name('unit.')->group(function () {
-            Route::get('/', [UnitController::class, 'index']);
-            Route::get('/show/{unit}', [UnitController::class, 'show']);
-            Route::post('/', [UnitController::class, 'store']);
-            Route::match(['put', 'patch'], '/{unit}', [UnitController::class, 'update']);
-            Route::delete('/{unit}', [UnitController::class, 'destroy']);
-        });
-
-        Route::prefix('barcode')->name('barcode.')->group(function () {
-            Route::get('/', [BarcodeController::class, 'index']);
-        });
-
-        Route::prefix('payment-gateway')->name('payment-gateway.')->group(function () {
-            Route::get('/', [PaymentGatewayController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [PaymentGatewayController::class, 'update']);
-        });
-
-        Route::prefix('notification')->name('notification.')->group(function () {
-            Route::get('/', [NotificationController::class, 'index']);
-            Route::post('/', [NotificationController::class, 'update']);
-        });
-
-        Route::prefix('role')->name('role.')->group(function () {
-            Route::get('/', [RoleController::class, 'index']);
-            Route::post('/', [RoleController::class, 'store']);
-            Route::get('/show/{role}', [RoleController::class, 'show']);
-            Route::match(['put', 'patch'], '/{role}', [RoleController::class, 'update']);
-            Route::delete('/{role}', [RoleController::class, 'destroy']);
-        });
-
-        Route::prefix('permission')->name('permission.')->group(function () {
-            Route::get('/{role}', [PermissionController::class, 'index']);
-            Route::match(['put', 'patch'], '/{role}', [PermissionController::class, 'update']);
-        });
-
-        Route::prefix('benefit')->name('benefit.')->group(function () {
-            Route::get('/', [BenefitController::class, 'index']);
-            Route::get('/show/{benefit}', [BenefitController::class, 'show']);
-            Route::post('/', [BenefitController::class, 'store']);
-            Route::match(['post', 'put', 'patch'], '/{benefit}', [BenefitController::class, 'update']);
-            Route::delete('/{benefit}', [BenefitController::class, 'destroy']);
-        });
-
-        Route::prefix('notification-alert')->name('notification-alert.')->group(function () {
-            Route::get('/', [NotificationAlertController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [NotificationAlertController::class, 'update']);
-        });
-
-        Route::prefix('return-reason')->name('return-reason.')->group(function () {
-            Route::get('/', [ReturnReasonController::class, 'index']);
-            Route::get('/show/{returnReason}', [ReturnReasonController::class, 'show']);
-            Route::post('/', [ReturnReasonController::class, 'store']);
-            Route::match(['put', 'patch'], '/{returnReason}', [ReturnReasonController::class, 'update']);
-            Route::delete('/{returnReason}', [ReturnReasonController::class, 'destroy']);
-        });
-
-        Route::prefix('outlet')->name('outlet.')->group(function () {
-            Route::get('/', [OutletController::class, 'index']);
-            Route::get('/show/{outlet}', [OutletController::class, 'show']);
-            Route::post('/', [OutletController::class, 'store']);
-            Route::match(['put', 'patch'], '/{outlet}', [OutletController::class, 'update']);
-            Route::delete('/{outlet}', [OutletController::class, 'destroy']);
-        });
-
-        Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
-            Route::get('/', [WhatsappController::class, 'index']);
-            Route::match(['put', 'patch'], '/', [WhatsappController::class, 'update']);
+    Route::prefix('delivery-boy')->group(function () {
+        Route::controller(DeliveryBoyController::class)->group(function () {
+            Route::get('earning/{id}', 'earning')->middleware('auth:sanctum');
+            Route::get('collection/{id}', 'collection')->middleware('auth:sanctum');
+            Route::get('cancel-request/{id}', 'cancel_request')->middleware('auth:sanctum');
+            Route::get('earning-summary/{id}', 'earning_summary')->middleware('auth:sanctum');
+            Route::get('dashboard-summary/{id}', 'dashboard_summary')->middleware('auth:sanctum');
+            Route::get('collection-summary/{id}', 'collection_summary')->middleware('auth:sanctum');
+            Route::get('deliveries/assigned/{id}', 'assigned_delivery')->middleware('auth:sanctum');
+            Route::get('deliveries/completed/{id}', 'completed_delivery')->middleware('auth:sanctum');
+            Route::get('deliveries/cancelled/{id}', 'cancelled_delivery')->middleware('auth:sanctum');
+            Route::get('deliveries/picked_up/{id}', 'picked_up_delivery')->middleware('auth:sanctum');
+            Route::post('change-delivery-status', 'change_delivery_status')->middleware('auth:sanctum');
+            Route::get('deliveries/on_the_way/{id}', 'on_the_way_delivery')->middleware('auth:sanctum');
+            //Delivery Boy Order
+            Route::get('purchase-history-details/{id}', [DeliveryBoyController::class, 'details'])->middleware('auth:sanctum');
+            Route::get('purchase-history-items/{id}', [DeliveryBoyController::class, 'items'])->middleware('auth:sanctum');
         });
     });
 
-    Route::prefix('product')->name('product.')->group(function () {
-        Route::get('/', [ProductController::class, 'index']);
-        Route::get('/show/{product}', [ProductController::class, 'show']);
-        Route::get('/pos-product/{product}', [ProductController::class, 'posProduct']);
-        Route::post('/', [ProductController::class, 'store']);
-        Route::match(['post', 'put', 'patch'], '/{product}', [ProductController::class, 'update']);
-        Route::delete('/{product}', [ProductController::class, 'destroy']);
-        Route::post('/upload-image/{product}', [ProductController::class, 'uploadImage']);
-        Route::get('/delete-image/{product}/{index}', [ProductController::class, 'deleteImage']);
-        Route::get('/export', [ProductController::class, 'export']);
-        Route::get('/generate-sku', [ProductController::class, 'generateSku']);
-        Route::post('/shipping-and-return/{product}', [ProductController::class, 'shippingAndReturn']);
-        Route::post('/offer/{product}', [ProductController::class, 'productOffer']);
-        Route::post('/clear-offer/{product}', [ProductController::class, 'clearOffer']);
-        Route::get('/purchasable-product', [ProductController::class, 'purchasableProducts']);
-        Route::get('/simple-product', [ProductController::class, 'simpleProducts']);
-        Route::get('/download-attachment', [ProductController::class, 'downloadAttachment']);
-        Route::post('/import/file', [ProductController::class, 'import']);
-        Route::get('/download-barcode/{product}', [ProductController::class, 'downloadBarcode']);
-        Route::get('/barcode-product/{barcode}', [ProductController::class, 'barcodeProduct']);
+    Route::apiResource('carts', CartController::class)->only('destroy');
+    Route::controller(CartController::class)->group(function () {
+        Route::post('cart-summary', 'summary');
+        Route::post('cart-count', 'count');
+        Route::post('carts/process', 'process');
+        Route::post('carts/add', 'add');
+        Route::post('carts/change-quantity', 'changeQuantity');
+        Route::post('carts', 'getList');
+        Route::post('guest-customer-info-check', 'guestCustomerInfoCheck');
+        Route::post('updateCartStatus', 'updateCartStatus');
+    });
 
-        Route::prefix('variation')->name('variation.')->group(function () {
-            Route::get('/{product}', [ProductVariationController::class, 'index']);
-            Route::get('/{product}/tree', [ProductVariationController::class, 'tree']);
-            Route::get('/{product}/single-tree', [ProductVariationController::class, 'singleTree']);
-            Route::get('/{product}/tree-with-selected', [ProductVariationController::class, 'treeWithSelected']);
-            Route::post('/{product}/store', [ProductVariationController::class, 'store']);
-            Route::match(['post', 'put', 'patch'], '/{product}/update/{productVariation}', [ProductVariationController::class, 'update']);
-            Route::delete('/{product}/destroy/{productVariation}', [ProductVariationController::class, 'destroy']);
-            Route::get('/{product}/show/{productVariation}', [ProductVariationController::class, 'show']);
-            Route::get('/ancestors-and-self/{productVariation}', [ProductVariationController::class, 'ancestorsToString']);
-            Route::get('/barcode-variation-product/{productVariation}', [ProductVariationController::class, 'barcodeVariationProduct']);
-            Route::get('/download-barcode/{productVariation}', [ProductVariationController::class, 'downloadBarcode']);
+    Route::controller(CheckoutController::class)->group(function () {
+        Route::post('coupon-apply', 'apply_coupon_code');
+        Route::post('coupon-remove', 'remove_coupon_code');
+    });
+
+    Route::controller(CouponController::class)->group(function () {
+        Route::get('coupon-list', 'couponList');
+        Route::get('coupon-products/{id}', 'getCouponProducts');
+    });
+
+    Route::controller(ShippingController::class)->group(function () {
+        Route::post('delivery-info', 'getDeliveryInfo');
+        Route::post('shipping_cost', 'shipping_cost');
+    });
+    Route::post('carriers', [CarrierController::class, 'index']);
+
+
+    Route::controller(AddressController::class)->group(function () {
+        Route::post('update-address-in-cart', 'updateAddressInCart');
+        Route::post('update-shipping-type-in-cart', 'updateShippingTypeInCart');
+    });
+
+    Route::get('payment-types', [PaymentTypesController::class, 'getList']);
+
+
+    // un banned users
+    Route::group(['middleware' => ['app_user_unbanned']], function () {
+        // customer downloadable product list
+        Route::get('/digital/purchased-list', 'App\Http\Controllers\Api\V2\PurchaseHistoryController@digital_purchased_list')->middleware('auth:sanctum');
+        Route::get('/purchased-products/download/{id}', 'App\Http\Controllers\Api\V2\DigitalProductController@download')->middleware('auth:sanctum');
+
+        Route::get('wallet/history', [WalletController::class, 'walletRechargeHistory'])->middleware('auth:sanctum');
+
+        Route::controller(ChatController::class)->group(function () {
+            Route::get('chat/conversations', 'conversations')->middleware('auth:sanctum');
+            Route::get('chat/messages/{id}', 'messages')->middleware('auth:sanctum');
+            Route::post('chat/insert-message', 'insert_message')->middleware('auth:sanctum');
+            Route::get('chat/get-new-messages/{conversation_id}/{last_message_id}', 'get_new_messages')->middleware('auth:sanctum');
+            Route::post('chat/create-conversation', 'create_conversation')->middleware('auth:sanctum');
         });
 
-        Route::get('/initial-variation/{product}', [ProductVariationController::class, 'initialVariation']);
-        Route::get('/children-variation/{productVariation}', [ProductVariationController::class, 'childrenVariation']);
-        Route::get('/ancestors-and-self-id/{productVariation}', [ProductVariationController::class, 'ancestorsAndSelfId']);
-
-        Route::prefix('video')->name('video.')->group(function () {
-            Route::get('/{product}', [ProductVideoController::class, 'index']);
-            Route::post('/{product}', [ProductVideoController::class, 'store']);
-            Route::match(['put', 'patch'], '/{product}/{productVideo}', [ProductVideoController::class, 'update']);
-            Route::delete('/{product}/{productVideo}', [ProductVideoController::class, 'destroy']);
+        Route::controller(PurchaseHistoryController::class)->group(function () {
+            Route::get('purchase-history', 'index')->middleware('auth:sanctum');
+            Route::get('purchase-history-details/{id}', 'details')->middleware('auth:sanctum');
+            Route::get('purchase-history-items/{id}', 'items')->middleware('auth:sanctum');
+            Route::get('re-order/{id}', 're_order')->middleware('auth:sanctum');
         });
 
-        Route::prefix('seo')->name('seo.')->group(function () {
-            Route::get('/{product}', [ProductSeoController::class, 'index']);
-            Route::match(['post', 'put', 'patch'], '/{product}/update', [ProductSeoController::class, 'update']);
+        Route::get('invoice/download/{id}', [InvoiceController::class, 'invoice_download'])->middleware('auth:sanctum');
+
+        Route::prefix('classified')->group(function () {
+            Route::controller(CustomerProductController::class)->group(function () {
+                Route::get('/own-products', 'ownProducts')->middleware('auth:sanctum');
+                Route::post('/store', 'store')->middleware('auth:sanctum');
+                Route::post('/update/{id}', 'update')->middleware('auth:sanctum');
+                Route::delete('/delete/{id}', 'delete')->middleware('auth:sanctum');
+                Route::post('/change-status/{id}', 'changeStatus')->middleware('auth:sanctum');
+            });
         });
+
+        Route::get('customer/info', 'App\Http\Controllers\Api\V2\CustomerController@show')->middleware('auth:sanctum');
+        Route::get('get-home-delivery-address', [AddressController::class, 'getShippingInCart'])->middleware('auth:sanctum');
+
+        // review
+        Route::post('reviews/submit', [ReviewController::class, 'submit'])->name('api.reviews.submit')->middleware('auth:sanctum');
+        Route::get('shop/user/{id}', [ShopController::class, 'shopOfUser'])->middleware('auth:sanctum');
+
+        //Follow
+        Route::controller(FollowSellerController::class)->group(function () {
+            Route::get('/followed-seller', 'index')->middleware('auth:sanctum');
+            Route::get('/followed-seller/store/{id}', 'store')->middleware('auth:sanctum');
+            Route::get('/followed-seller/remove/{shopId}', 'remove')->middleware('auth:sanctum');
+            Route::get('/followed-seller/check/{shopId}', 'checkFollow')->middleware('auth:sanctum');
+        });
+
+
+        // Wishlist
+        Route::controller(WishlistController::class)->middleware('auth:sanctum')->group(function () {
+            Route::get('wishlists-check-product/{product_slug}', 'isProductInWishlist');
+            Route::get('wishlists-add-product/{product_slug}', 'add');
+            Route::get('wishlists-remove-product/{product_slug}', 'remove');
+            Route::get('wishlists', 'index');
+        });
+
+        // addresses
+        Route::controller(AddressController::class)->middleware('auth:sanctum')->group(function () {
+            Route::get('user/shipping/address', 'addresses');
+            Route::post('user/shipping/create', 'createShippingAddress');
+            Route::post('user/shipping/update', 'updateShippingAddress');
+            Route::post('user/shipping/update-location', 'updateShippingAddressLocation');
+            Route::post('user/shipping/make_default', 'makeShippingAddressDefault');
+            Route::get('user/shipping/delete/{address_id}', 'deleteShippingAddress');
+        });
+
+
+        Route::get('clubpoint/get-list', 'App\Http\Controllers\Api\V2\ClubpointController@get_list')->middleware('auth:sanctum');
+        Route::post('clubpoint/convert-into-wallet', 'App\Http\Controllers\Api\V2\ClubpointController@convert_into_wallet')->middleware('auth:sanctum');
+
+        Route::get('refund-request/get-list', 'App\Http\Controllers\Api\V2\RefundRequestController@get_list')->middleware('auth:sanctum');
+        Route::post('refund-request/send', 'App\Http\Controllers\Api\V2\RefundRequestController@send')->middleware('auth:sanctum');
+
+        Route::get('bkash/begin', 'App\Http\Controllers\Api\V2\BkashController@begin')->middleware('auth:sanctum');
+        Route::get('nagad/begin', 'App\Http\Controllers\Api\V2\NagadController@begin')->middleware('auth:sanctum');
+        Route::post('payments/pay/wallet', 'App\Http\Controllers\Api\V2\WalletController@processPayment')->middleware('auth:sanctum');
+        Route::post('payments/pay/cod', 'App\Http\Controllers\Api\V2\PaymentController@cashOnDelivery')->middleware('auth:sanctum');
+        Route::post('payments/pay/manual', 'App\Http\Controllers\Api\V2\PaymentController@manualPayment')->middleware('auth:sanctum');
+        Route::post('order/store', [OrderController::class, 'store'])->middleware('auth:sanctum');
+
+        Route::get('order/cancel/{id}', 'App\Http\Controllers\Api\V2\OrderController@order_cancel')->middleware('auth:sanctum');
+
+        Route::get('profile/counters', 'App\Http\Controllers\Api\V2\ProfileController@counters')->middleware('auth:sanctum');
+
+        Route::post('profile/update', 'App\Http\Controllers\Api\V2\ProfileController@update')->middleware('auth:sanctum');
+
+        Route::post('profile/update-device-token', 'App\Http\Controllers\Api\V2\ProfileController@update_device_token')->middleware('auth:sanctum');
+        Route::post('profile/update-image', 'App\Http\Controllers\Api\V2\ProfileController@updateImage')->middleware('auth:sanctum');
+        Route::post('profile/image-upload', 'App\Http\Controllers\Api\V2\ProfileController@imageUpload')->middleware('auth:sanctum');
+        Route::post('profile/check-phone-and-email', 'App\Http\Controllers\Api\V2\ProfileController@checkIfPhoneAndEmailAvailable')->middleware('auth:sanctum');
+
+        Route::post('file/image-upload', 'App\Http\Controllers\Api\V2\FileController@imageUpload')->middleware('auth:sanctum');
+        Route::get('file-all', 'App\Http\Controllers\Api\V2\FileController@index')->middleware('auth:sanctum');
+        Route::post('file/upload', 'App\Http\Controllers\Api\V2\AizUploadController@upload')->middleware('auth:sanctum');
+
+        Route::get('wallet/balance', [WalletController::class, 'balance'])->middleware('auth:sanctum');
+        Route::post('wallet/offline-recharge', [WalletController::class, 'offline_recharge'])->middleware('auth:sanctum');
+
+
+
+
+
+        Route::controller(CustomerPackageController::class)->group(function () {
+            Route::post('offline/packages-payment', 'purchase_package_offline')->middleware('auth:sanctum');
+            Route::post('free/packages-payment', 'purchase_package_free')->middleware('auth:sanctum');
+        });
+
+        // Notification
+        Route::controller(NotificationController::class)->group(function () {
+            Route::get('all-notification', 'allNotification')->middleware('auth:sanctum');
+            Route::get('unread-notifications', 'unreadNotifications')->middleware('auth:sanctum');
+            Route::post('notifications/bulk-delete', 'bulkDelete')->middleware('auth:sanctum');
+            Route::get('notifications/mark-as-read', 'notificationMarkAsRead')->middleware('auth:sanctum');
+        });
+
+        Route::get('products/last-viewed', [ProductController::class, 'lastViewedProducts'])->middleware('auth:sanctum');
     });
 
-    Route::prefix('country-code')->name('country-code.')->group(function () {
-        Route::get('/', [CountryCodeController::class, 'index']);
-        Route::get('/show/{country}', [CountryCodeController::class, 'show']);
-        Route::get('/calling-code/{callingCode}', [CountryCodeController::class, 'callingCode']);
+    //end user bann
+    Route::controller(OnlinePaymentController::class)->group(function () {
+        Route::get('online-pay/init', 'init')->middleware('auth:sanctum');
+        Route::get('online-pay/success', 'paymentSuccess');
+        Route::get('online-pay/done', 'paymentDone');
+        Route::get('online-pay/failed', 'paymentFailed');
     });
 
-    Route::prefix('country')->name('country')->group(function () {
-        Route::get('/', [CountryController::class, 'index']);
-        Route::get('/show/{country}', [CountryController::class, 'show']);
-        Route::post('/', [CountryController::class, 'store']);
-        Route::delete('/{country}', [CountryController::class, 'destroy']);
-        Route::match(['put', 'patch', 'post'], '/{country}', [CountryController::class, 'update']);
+    Route::get('get-search-suggestions', [SearchSuggestionController::class, 'getList']);
+    Route::get('languages', [LanguageController::class, 'getList']);
+
+    Route::controller(CustomerProductController::class)->group(function () {
+        Route::get('classified/all', 'all');
+        Route::get('classified/related-products/{slug}', 'relatedProducts');
+        Route::get('classified/product-details/{slug}', 'productDetails');
     });
 
-    Route::prefix('state')->name('state')->group(function () {
-        Route::get('/', [StateController::class, 'index']);
-        Route::get('/simple-lists', [StateController::class, 'simpleLists']);
-        Route::get('/show/{state}', [StateController::class, 'show']);
-        Route::post('/', [StateController::class, 'store']);
-        Route::delete('/{state}', [StateController::class, 'destroy']);
-        Route::match(['put', 'patch', 'post'], '/{state}', [StateController::class, 'update']);
-        Route::get('/states/{country}', [StateController::class, 'statesByCountry']);
+
+
+    Route::get('seller/top', 'App\Http\Controllers\Api\V2\SellerController@topSellers');
+
+    Route::apiResource('banners', 'App\Http\Controllers\Api\V2\BannerController')->only('index');
+
+    Route::get('brands/top', 'App\Http\Controllers\Api\V2\BrandController@top');
+    Route::get('all-brands', [ProductController::class, 'getBrands'])->name('allBrands');
+    Route::apiResource('brands', 'App\Http\Controllers\Api\V2\BrandController')->only('index');
+
+    Route::apiResource('business-settings', 'App\Http\Controllers\Api\V2\BusinessSettingController')->only('index');
+
+    Route::get('category/info/{slug}', 'App\Http\Controllers\Api\V2\CategoryController@info');
+    Route::get('categories/featured', 'App\Http\Controllers\Api\V2\CategoryController@featured');
+    Route::get('categories/home', 'App\Http\Controllers\Api\V2\CategoryController@home');
+    Route::get('categories/top', 'App\Http\Controllers\Api\V2\CategoryController@top');
+    Route::apiResource('categories', 'App\Http\Controllers\Api\V2\CategoryController')->only('index');
+    Route::get('sub-categories/{id}', 'App\Http\Controllers\Api\V2\SubCategoryController@index')->name('subCategories.index');
+
+    Route::apiResource('colors', 'App\Http\Controllers\Api\V2\ColorController')->only('index');
+
+    Route::apiResource('currencies', 'App\Http\Controllers\Api\V2\CurrencyController')->only('index');
+
+    Route::apiResource('customers', 'App\Http\Controllers\Api\V2\CustomerController')->only('show');
+
+    Route::apiResource('general-settings', 'App\Http\Controllers\Api\V2\GeneralSettingController')->only('index');
+
+    Route::apiResource('home-categories', 'App\Http\Controllers\Api\V2\HomeCategoryController')->only('index');
+
+
+
+    Route::get('filter/categories', 'App\Http\Controllers\Api\V2\FilterController@categories');
+    Route::get('filter/brands', 'App\Http\Controllers\Api\V2\FilterController@brands');
+
+    Route::get('products/inhouse', 'App\Http\Controllers\Api\V2\ProductController@inhouse');
+    Route::get('products/seller/{id}', 'App\Http\Controllers\Api\V2\ProductController@seller');
+    Route::get('products/category/{slug}', 'App\Http\Controllers\Api\V2\ProductController@categoryProducts')->name('api.products.category');
+    Route::get('products/sub-category/{id}', 'App\Http\Controllers\Api\V2\ProductController@subCategory')->name('products.subCategory');
+    Route::get('products/sub-sub-category/{id}', 'App\Http\Controllers\Api\V2\ProductController@subSubCategory')->name('products.subSubCategory');
+    Route::get('products/brand/{slug}', 'App\Http\Controllers\Api\V2\ProductController@brand')->name('api.products.brand');
+    Route::get('products/todays-deal', 'App\Http\Controllers\Api\V2\ProductController@todaysDeal');
+    Route::get('products/featured', 'App\Http\Controllers\Api\V2\ProductController@featured');
+    Route::get('products/best-seller', 'App\Http\Controllers\Api\V2\ProductController@bestSeller');
+    Route::get('products/top-from-seller/{slug}', 'App\Http\Controllers\Api\V2\ProductController@topFromSeller');
+    Route::get('products/frequently-bought/{slug}', 'App\Http\Controllers\Api\V2\ProductController@frequentlyBought')->name('products.frequently_bought');
+
+    Route::get('products/featured-from-seller/{id}', 'App\Http\Controllers\Api\V2\ProductController@newFromSeller')->name('products.featuredromSeller');
+    Route::get('products/search', 'App\Http\Controllers\Api\V2\ProductController@search');
+    Route::post('products/variant/price', 'App\Http\Controllers\Api\V2\ProductController@getPrice');
+    Route::get('products/digital', 'App\Http\Controllers\Api\V2\ProductController@digital')->name('products.digital');
+    Route::apiResource('products', 'App\Http\Controllers\Api\V2\ProductController')->except(['store', 'update', 'destroy']);
+
+    Route::get('products/{slug}/{user_id}',  'App\Http\Controllers\Api\V2\ProductController@product_details');
+
+
+    //Use this route outside of auth because initialy we created outside of auth we do not need auth initialy
+    //We can't change it now because we didn't send token in header from mobile app.
+    //We need the upload update Flutter app then we will write it in auth middleware.
+    Route::controller(CustomerPackageController::class)->group(function () {
+        Route::get("customer-packages", "customer_packages_list");
     });
 
-    Route::prefix('city')->name('city')->group(function () {
-        Route::get('/', [CityController::class, 'index']);
-        Route::get('/show/{city}', [CityController::class, 'show']);
-        Route::post('/', [CityController::class, 'store']);
-        Route::delete('/{city}', [CityController::class, 'destroy']);
-        Route::match(['put', 'patch', 'post'], '/{city}', [CityController::class, 'update']);
-        Route::get('/cities/{state}', [CityController::class, 'citiesByState']);
+
+    Route::get('reviews/product/{id}', 'App\Http\Controllers\Api\V2\ReviewController@index')->name('api.reviews.index');
+
+
+    Route::get('shops/details/{id}', 'App\Http\Controllers\Api\V2\ShopController@info')->name('shops.info');
+    Route::get('shops/products/all/{id}', 'App\Http\Controllers\Api\V2\ShopController@allProducts')->name('shops.allProducts');
+    Route::get('shops/products/top/{id}', 'App\Http\Controllers\Api\V2\ShopController@topSellingProducts')->name('shops.topSellingProducts');
+    Route::get('shops/products/featured/{id}', 'App\Http\Controllers\Api\V2\ShopController@featuredProducts')->name('shops.featuredProducts');
+    Route::get('shops/products/new/{id}', 'App\Http\Controllers\Api\V2\ShopController@newProducts')->name('shops.newProducts');
+    Route::get('shops/brands/{id}', 'App\Http\Controllers\Api\V2\ShopController@brands')->name('shops.brands');
+    Route::apiResource('shops', 'App\Http\Controllers\Api\V2\ShopController')->only('index');
+
+    Route::get('sliders', 'App\Http\Controllers\Api\V2\SliderController@sliders');
+    Route::get('banners-one', 'App\Http\Controllers\Api\V2\SliderController@bannerOne');
+    Route::get('banners-two', 'App\Http\Controllers\Api\V2\SliderController@bannerTwo');
+    Route::get('banners-three', 'App\Http\Controllers\Api\V2\SliderController@bannerThree');
+
+    Route::get('policies/seller', 'App\Http\Controllers\Api\V2\PolicyController@sellerPolicy')->name('policies.seller');
+    Route::get('policies/support', 'App\Http\Controllers\Api\V2\PolicyController@supportPolicy')->name('policies.support');
+    Route::get('policies/return', 'App\Http\Controllers\Api\V2\PolicyController@returnPolicy')->name('policies.return');
+
+    Route::post('get-user-by-access_token', 'App\Http\Controllers\Api\V2\UserController@getUserInfoByAccessToken');
+
+    Route::get('cities', 'App\Http\Controllers\Api\V2\AddressController@getCities');
+    Route::get('states', 'App\Http\Controllers\Api\V2\AddressController@getStates');
+    Route::get('countries', 'App\Http\Controllers\Api\V2\AddressController@getCountries');
+
+    Route::get('areas-by-city/{city_id}', 'App\Http\Controllers\Api\V2\AddressController@getAreasByCity');
+    Route::get('cities-by-state/{state_id}', 'App\Http\Controllers\Api\V2\AddressController@getCitiesByState');
+    Route::get('cities-by-country/{country_id}', 'App\Http\Controllers\Api\V2\AddressController@getCitiesByCountry');
+    Route::get('states-by-country/{country_id}', 'App\Http\Controllers\Api\V2\AddressController@getStatesByCountry');
+
+
+    // Route::post('coupon/apply', 'App\Http\Controllers\Api\V2\CouponController@apply')->middleware('auth:sanctum');
+
+
+    Route::any('stripe', 'App\Http\Controllers\Api\V2\StripeController@stripe');
+    Route::any('stripe/payment/callback', 'App\Http\Controllers\Api\V2\StripeController@callback')->name('api.stripe.callback');
+
+
+    Route::any('paypal/payment/url', 'App\Http\Controllers\Api\V2\PaypalController@getUrl')->name('api.paypal.url');
+    Route::any('amarpay', [AamarpayController::class, 'pay'])->name('api.amarpay.url');
+    Route::any('khalti/payment/pay', 'App\Http\Controllers\Api\V2\KhaltiController@pay')->name('api.khalti.url');
+    Route::any('razorpay/pay-with-razorpay', 'App\Http\Controllers\Api\V2\RazorpayController@payWithRazorpay')->name('api.razorpay.payment');
+    Route::any('razorpay/payment', 'App\Http\Controllers\Api\V2\RazorpayController@payment')->name('api.razorpay.payment');
+    Route::any('paystack/init', 'App\Http\Controllers\Api\V2\PaystackController@init')->name('api.paystack.init');
+    Route::any('iyzico/init', 'App\Http\Controllers\Api\V2\IyzicoController@init')->name('api.iyzico.init');
+
+    Route::get('bkash/api/webpage/{token}/{amount}', 'App\Http\Controllers\Api\V2\BkashController@webpage')->name('api.bkash.webpage');
+
+
+    Route::any('bkash/api/execute/{token}', 'App\Http\Controllers\Api\V2\BkashController@execute')->name('api.bkash.execute');
+    Route::any('bkash/api/fail', 'App\Http\Controllers\Api\V2\BkashController@fail')->name('api.bkash.fail');
+    Route::post('bkash/api/process', 'App\Http\Controllers\Api\V2\BkashController@process')->name('api.bkash.process');
+
+
+    Route::any('nagad/verify/{payment_type}', 'App\Http\Controllers\Api\V2\NagadController@verify')->name('app.nagad.callback_url');
+    Route::post('nagad/process', 'App\Http\Controllers\Api\V2\NagadController@process');
+
+    Route::get('sslcommerz/begin', 'App\Http\Controllers\Api\V2\SslCommerzController@begin');
+
+    Route::any('flutterwave/payment/url', 'App\Http\Controllers\Api\V2\FlutterwaveController@getUrl')->name('api.flutterwave.url');
+
+    Route::any('paytm/payment/pay', 'App\Http\Controllers\Api\V2\PaytmController@pay')->name('api.paytm.pay');
+    Route::get('instamojo/pay', 'App\Http\Controllers\Api\V2\InstamojoController@pay');
+
+    Route::get('payfast/initiate', 'App\Http\Controllers\Api\V2\PayfastController@pay');
+
+    Route::get('/myfatoorah/initiate', 'App\Http\Controllers\Api\V2\MyfatoorahController@pay');
+
+    Route::get('phonepe/payment/pay', 'App\Http\Controllers\Api\V2\PhonepeController@pay');
+    Route::get('/phonepe-credentials', 'App\Http\Controllers\Api\V2\PhonepeController@getPhonePayCredentials')->name('api.phonepe.credentials');
+
+    Route::post('offline/payment/submit', 'App\Http\Controllers\Api\V2\OfflinePaymentController@submit')->name('api.offline.payment.submit');
+
+
+    Route::controller(BlogController::class)->group(function () {
+        Route::get('blog-list', 'blog_list');
+        Route::get('blog-details/{slug}', 'blog_details');
     });
 
-    Route::prefix('administrator')->name('administrator.')->group(function () {
-        Route::get('/', [AdministratorController::class, 'index']);
-        Route::get('/show/{administrator}', [AdministratorController::class, 'show']);
-        Route::post('/', [AdministratorController::class, 'store']);
-        Route::match(['post', 'put', 'patch'], '/{administrator}', [AdministratorController::class, 'update']);
-        Route::delete('/{administrator}', [AdministratorController::class, 'destroy']);
-        Route::get('/export', [AdministratorController::class, 'export']);
-        Route::post('/change-password/{administrator}', [AdministratorController::class, 'changePassword']);
-        Route::post('/change-image/{administrator}', [AdministratorController::class, 'changeImage']);
-        Route::get('/my-order/{administrator}', [AdministratorController::class, 'myOrder']);
-        Route::get('/address/{administrator}', [AdministratorAddressController::class, 'index']);
-        Route::get('/address/show/{administrator}/{address}', [AdministratorAddressController::class, 'show']);
-        Route::post('/address/{administrator}', [AdministratorAddressController::class, 'store']);
-        Route::match(['put', 'patch'], '/address/{administrator}/{address}', [AdministratorAddressController::class, 'update']);
-        Route::delete('/address/{administrator}/{address}', [AdministratorAddressController::class, 'destroy']);
+    // Route::controller(WholesaleProductController::class)->group(function () {
+    //     Route::get('/wholesale/all-products', 'all_wholesale_products')->name('wholesale_products.all');
+    // });
+
+    Route::get('flash-deals', 'App\Http\Controllers\Api\V2\FlashDealController@index');
+    Route::get('flash-deals-banners', 'App\Http\Controllers\Api\V2\FlashDealController@banners');
+    Route::get('flash-deals/info/{slug}', 'App\Http\Controllers\Api\V2\FlashDealController@info');
+    Route::get('flash-deal-products/{id}', 'App\Http\Controllers\Api\V2\FlashDealController@products');
+
+    //Addon list
+    Route::get('addon-list', 'App\Http\Controllers\Api\V2\ConfigController@addon_list');
+    //Activated social login list
+    Route::get('activated-social-login', 'App\Http\Controllers\Api\V2\ConfigController@activated_social_login');
+
+    //Business Sttings list
+    Route::post('business-settings', 'App\Http\Controllers\Api\V2\ConfigController@business_settings');
+    //Pickup Point list
+    Route::get('pickup-list', 'App\Http\Controllers\Api\V2\ShippingController@pickup_list');
+
+
+    Route::withoutMiddleware([EnsureSystemKey::class])->group(function () {
+        Route::controller(WholesaleProductController::class)->group(function () {
+            Route::get('/wholesale/all-products', 'all_wholesale_products')->name('wholesale_products.all');
+            Route::get('/wholesale/product-details/{id}', 'wholesale_product_details')->name('wholesale_products.show');
+        });
+
+        Route::get('google-recaptcha', function () {
+            return view("frontend.google_recaptcha.app_recaptcha");
+        });
+        Route::any('paypal/payment/done', 'App\Http\Controllers\Api\V2\PaypalController@getDone')->name('api.paypal.done');
+        Route::any('paypal/payment/cancel', 'App\Http\Controllers\Api\V2\PaypalController@getCancel')->name('api.paypal.cancel');
+        Route::any('amarpay/success', [AamarpayController::class, 'success'])->name('api.amarpay.success');
+        Route::any('amarpay/cancel', [AamarpayController::class, 'fail'])->name('api.amarpay.cancel');
+        Route::any('khalti/payment/success', 'App\Http\Controllers\Api\V2\KhaltiController@paymentDone')->name('api.khalti.success');
+        Route::any('khalti/payment/cancel', 'App\Http\Controllers\Api\V2\KhaltiController@getCancel')->name('api.khalti.cancel');
+        Route::any('razorpay/success', 'App\Http\Controllers\Api\V2\RazorpayController@payment_success')->name('api.razorpay.success');
+        Route::post('paystack/success', 'App\Http\Controllers\Api\V2\PaystackController@payment_success')->name('api.paystack.success');
+        Route::any('iyzico/callback', 'App\Http\Controllers\Api\V2\IyzicoController@callback')->name('api.iyzico.callback');
+        Route::post('iyzico/success', 'App\Http\Controllers\Api\V2\IyzicoController@payment_success')->name('api.iyzico.success');
+
+        Route::any('bkash/api/callback', 'App\Http\Controllers\Api\V2\BkashController@callback')->name('api.bkash.callback');
+        Route::post('bkash/api/success', 'App\Http\Controllers\Api\V2\BkashController@payment_success')->name('api.bkash.success');
+        Route::any('bkash/api/checkout/{token}/{amount}', 'App\Http\Controllers\Api\V2\BkashController@checkout')->name('api.bkash.checkout');
+
+        Route::any('stripe/create-checkout-session', 'App\Http\Controllers\Api\V2\StripeController@create_checkout_session')->name('api.stripe.get_token');
+        Route::get('stripe/success', 'App\Http\Controllers\Api\V2\StripeController@payment_success');
+        Route::any('stripe/cancel', 'App\Http\Controllers\Api\V2\StripeController@cancel')->name('api.stripe.cancel');
+
+        Route::any('sslcommerz/success', 'App\Http\Controllers\Api\V2\SslCommerzController@payment_success');
+        Route::any('sslcommerz/fail', 'App\Http\Controllers\Api\V2\SslCommerzController@payment_fail');
+        Route::any('sslcommerz/cancel', 'App\Http\Controllers\Api\V2\SslCommerzController@payment_cancel');
+        Route::any('flutterwave/payment/callback', 'App\Http\Controllers\Api\V2\FlutterwaveController@callback')->name('api.flutterwave.callback');
+        Route::any('paytm/payment/callback', 'App\Http\Controllers\Api\V2\PaytmController@callback')->name('api.paytm.callback');
+        Route::get('instamojo/success', 'App\Http\Controllers\Api\V2\InstamojoController@success');
+        Route::get('instamojo/failed', 'App\Http\Controllers\Api\V2\InstamojoController@failed');
+
+        // Cybersource
+        Route::post('cyber-source/payment/pay', 'App\Http\Controllers\Api\V2\CybersourceController@pay')->name('cybersource.pay');
+        Route::any('cyber-source/payment/process', 'App\Http\Controllers\Api\V2\CybersourceController@process')->name('cybersource.process');
+        Route::any('cyber-source/payment/callback', 'App\Http\Controllers\Api\V2\CybersourceController@callback')->name('cybersource.callback');
+        Route::any('cyber-source/payment/webhook', 'App\Http\Controllers\Api\V2\CybersourceController@webhook')->name('cybersource.webhook');
+        
+        //Payfast routes <starts>
+        Route::controller(PayfastController::class)->group(function () {
+            Route::any('/payfast/notify', 'payfast_notify')->name('api.payfast.notify');
+            Route::any('/payfast/return', 'payfast_return')->name('api.payfast.return');
+            Route::any('/payfast/cancel', 'payfast_cancel')->name('api.payfast.cancel');
+        });
+        //Payfast routes <ends>
+
+        Route::get('/myfatoorah/callback', 'App\Http\Controllers\Api\V2\MyfatoorahController@callback')->name('api.myfatoorah.callback');
+
+
+        Route::any('/phonepe/redirecturl', 'App\Http\Controllers\Api\V2\PhonepeController@phonepe_redirecturl')->name('api.phonepe.redirecturl');
+        Route::any('/phonepe/callbackUrl', 'App\Http\Controllers\Api\V2\PhonepeController@phonepe_callbackUrl')->name('api.phonepe.callbackUrl');
     });
 
-    Route::prefix('customer')->name('customer.')->group(function () {
-        Route::get('/', [CustomerController::class, 'index']);
-        Route::post('/', [CustomerController::class, 'store']);
-        Route::get('/show/{customer}', [CustomerController::class, 'show']);
-        Route::match(['post', 'put', 'patch'], '/{customer}', [CustomerController::class, 'update']);
-        Route::delete('/{customer}', [CustomerController::class, 'destroy']);
-        Route::get('/export', [CustomerController::class, 'export']);
-        Route::post('/change-password/{customer}', [CustomerController::class, 'changePassword']);
-        Route::post('/change-image/{customer}', [CustomerController::class, 'changeImage']);
-        Route::get('/my-order/{customer}', [CustomerController::class, 'myOrder']);
-        Route::get('/address/{customer}', [CustomerAddressController::class, 'index']);
-        Route::get('/address/show/{customer}/{address}', [CustomerAddressController::class, 'show']);
-        Route::post('/address/{customer}', [CustomerAddressController::class, 'store']);
-        Route::match(['put', 'patch'], '/address/{customer}/{address}', [CustomerAddressController::class, 'update']);
-        Route::delete('/address/{customer}/{address}', [CustomerAddressController::class, 'destroy']);
-    });
-
-    Route::prefix('employee')->name('employee.')->group(function () {
-        Route::get('/', [EmployeeController::class, 'index']);
-        Route::post('/', [EmployeeController::class, 'store']);
-        Route::get('/show/{employee}', [EmployeeController::class, 'show']);
-        Route::match(['put', 'patch'], '/{employee}', [EmployeeController::class, 'update']);
-        Route::delete('/{employee}', [EmployeeController::class, 'destroy']);
-        Route::get('/export', [EmployeeController::class, 'export']);
-        Route::post('/change-password/{employee}', [EmployeeController::class, 'changePassword']);
-        Route::post('/change-image/{employee}', [EmployeeController::class, 'changeImage']);
-        Route::get('/my-order/{employee}', [EmployeeController::class, 'myOrder']);
-        Route::get('/address/{employee}', [EmployeeAddressController::class, 'index']);
-        Route::get('/address/show/{employee}/{address}', [EmployeeAddressController::class, 'show']);
-        Route::post('/address/{employee}', [EmployeeAddressController::class, 'store']);
-        Route::match(['put', 'patch'], '/address/{employee}/{address}', [EmployeeAddressController::class, 'update']);
-        Route::delete('/address/{employee}/{address}', [EmployeeAddressController::class, 'destroy']);
-    });
-
-    Route::prefix('my-order')->name('my-order.')->group(function () {
-        Route::get('/show/{user}/{order}', [MyOrderDetailsController::class, 'orderDetails']);
-    });
-
-    Route::prefix('promotion')->name('promotion.')->group(function () {
-        Route::get('/', [PromotionController::class, 'index']);
-        Route::get('/show/{promotion}', [PromotionController::class, 'show']);
-        Route::post('/', [PromotionController::class, 'store']);
-        Route::match(['post', 'put', 'patch'], '/{promotion}', [PromotionController::class, 'update']);
-        Route::delete('/{promotion}', [PromotionController::class, 'destroy']);
-        Route::get('/export', [PromotionController::class, 'export']);
-        Route::post('/change-image/{promotion}', [PromotionController::class, 'changeImage']);
-
-        Route::get('/product/{promotion}', [PromotionProductController::class, 'index']);
-        Route::post('/product/{promotion}', [PromotionProductController::class, 'store']);
-        Route::delete('/product/{promotion}/{promotionProduct}', [PromotionProductController::class, 'destroy']);
-    });
-
-    Route::prefix('product-section')->name('product-section.')->group(function () {
-        Route::get('/', [ProductSectionController::class, 'index']);
-        Route::get('/show/{productSection}', [ProductSectionController::class, 'show']);
-        Route::post('/', [ProductSectionController::class, 'store']);
-        Route::match(['post', 'put', 'patch'], '/{productSection}', [ProductSectionController::class, 'update']);
-        Route::delete('/{productSection}', [ProductSectionController::class, 'destroy']);
-        Route::get('/export', [ProductSectionController::class, 'export']);
-
-        Route::get('/product/{productSection}', [ProductSectionProductController::class, 'index']);
-        Route::post('/product/{productSection}', [ProductSectionProductController::class, 'store']);
-        Route::delete('/product/{productSection}/{productSectionProduct}', [ProductSectionProductController::class, 'destroy']);
-    });
-
-    Route::prefix('transaction')->name('transaction.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/', [TransactionController::class, 'index']);
-        Route::get('/export', [TransactionController::class, 'export']);
-    });
-
-    Route::prefix('sales-report')->name('sales-report.')->group(function () {
-        Route::get('/', [SalesReportController::class, 'index']);
-        Route::get('/export', [SalesReportController::class, 'export']);
-        Route::get('/overview', [SalesReportController::class, 'salesReportOverview']);
-        Route::get('/export-pdf', [SalesReportController::class, 'exportPdf']);
-    });
-
-    Route::prefix('credit-balance-report')->name('credit-balance-report.')->group(function () {
-        Route::get('/', [CreditBalanceReportController::class, 'index']);
-        Route::get('/export', [CreditBalanceReportController::class, 'export']);
-        Route::get('/export-pdf', [CreditBalanceReportController::class, 'exportPdf']);
-    });
-
-    Route::prefix('push-notification')->name('push-notification.')->group(function () {
-        Route::get('/', [PushNotificationController::class, 'index']);
-        Route::post('/', [PushNotificationController::class, 'store']);
-        Route::get('/show/{pushNotification}', [PushNotificationController::class, 'show']);
-        Route::delete('/{pushNotification}', [PushNotificationController::class, 'destroy']);
-        Route::get('/export', [PushNotificationController::class, 'export']);
-    });
-
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [SimpleUserController::class, 'index']);
-    });
-    Route::prefix('coupon')->name('coupon.')->group(function () {
-        Route::get('/', [CouponController::class, 'index']);
-        Route::get('/show/{coupon}', [CouponController::class, 'show']);
-        Route::post('/', [CouponController::class, 'store']);
-        Route::match(['post', 'put', 'patch'], '/{coupon}', [CouponController::class, 'update']);
-        Route::delete('/{coupon}', [CouponController::class, 'destroy']);
-        Route::get('/export', [CouponController::class, 'export']);
-    });
-
-    Route::prefix('purchase')->name('purchase.')->group(function () {
-        Route::get('/', [PurchaseController::class, 'index']);
-        Route::post('/', [PurchaseController::class, 'store']);
-        Route::get('/show/{purchase}', [PurchaseController::class, 'show']);
-        Route::get('/edit/{purchase}', [PurchaseController::class, 'edit']);
-        Route::match(['post', 'put', 'patch'], '/update/{purchase}', [PurchaseController::class, 'update']);
-        Route::delete('/{purchase}', [PurchaseController::class, 'destroy']);
-        Route::get('/export', [PurchaseController::class, 'export']);
-        Route::get('/download-attachment/{purchase}', [PurchaseController::class, 'downloadAttachment']);
-        Route::get('/payment/{purchase}', [PurchaseController::class, 'paymentHistory']);
-        Route::post('/payment/{purchase}', [PurchaseController::class, 'payment']);
-        Route::get('/payment/download-attachment/{purchasePayment}', [PurchaseController::class, 'paymentDownloadAttachment']);
-        Route::delete('/payment/{purchase}/{purchasePayment}', [PurchaseController::class, 'paymentDestroy']);
-    });
-
-    Route::prefix('stock')->name('stock.')->group(function () {
-        Route::get('/', [StockController::class, 'index']);
-        Route::get('/export', [StockController::class, 'export']);
-    });
-
-    Route::prefix('reviews')->name('reviews.')->group(function () {
-        Route::get('/', [ReviewController::class, 'index']);
-        Route::get('/show/{productReview}', [ReviewController::class, 'show']);
-        Route::get('/export', [ReviewController::class, 'export']);
-    });
-
-    Route::prefix('return-order')->name('return-order.')->group(function () {
-        Route::get('/', [ReturnOrderController::class, 'index']);
-        Route::post('/', [ReturnOrderController::class, 'store']);
-        Route::get('/show/{returnOrder}', [ReturnOrderController::class, 'show']);
-        Route::get('/edit/{returnOrder}', [ReturnOrderController::class, 'edit']);
-        Route::match(['post', 'put', 'patch'], '/update/{returnOrder}', [ReturnOrderController::class, 'update']);
-        Route::delete('/{returnOrder}', [ReturnOrderController::class, 'destroy']);
-        Route::get('/export', [ReturnOrderController::class, 'export']);
-        Route::get('/download-attachment/{returnOrder}', [ReturnOrderController::class, 'downloadAttachment']);
-    });
-
-    Route::prefix('damage')->name('damage.')->group(function () {
-        Route::get('/', [DamageController::class, 'index']);
-        Route::post('/', [DamageController::class, 'store']);
-        Route::get('/show/{damage}', [DamageController::class, 'show']);
-        Route::get('/edit/{damage}', [DamageController::class, 'edit']);
-        Route::match(['post', 'put', 'patch'], '/update/{damage}', [DamageController::class, 'update']);
-        Route::delete('/{damage}', [DamageController::class, 'destroy']);
-        Route::get('/export', [DamageController::class, 'export']);
-        Route::get('/download-attachment/{damage}', [DamageController::class, 'downloadAttachment']);
-    });
-
-    Route::prefix('online-order')->name('onlineOrder.')->group(function () {
-        Route::get('/', [OnlineOrderController::class, 'index']);
-        Route::get('/show/{order}', [OnlineOrderController::class, 'show']);
-        Route::delete('/{order}', [OnlineOrderController::class, 'destroy']);
-        Route::get('/export', [OnlineOrderController::class, 'export']);
-        Route::post('/change-status/{order}', [OnlineOrderController::class, 'changeStatus']);
-        Route::post('/change-payment-status/{order}', [OnlineOrderController::class, 'changePaymentStatus']);
-    });
-
-    Route::prefix('products-report')->name('products-report.')->group(function () {
-        Route::get('/', [ProductsReportController::class, 'index']);
-        Route::get('/export', [ProductsReportController::class, 'export']);
-        Route::get('/overview', [ProductsReportController::class, 'productsReportOverview']);
-        Route::get('/export-pdf', [ProductsReportController::class, 'exportPdf']);
-    });
-
-    Route::prefix('pos-order')->name('posOrder.')->group(function () {
-        Route::get('/', [PosOrderController::class, 'index']);
-        Route::get('show/{order}', [PosOrderController::class, 'show']);
-        Route::delete('/{order}', [PosOrderController::class, 'destroy']);
-        Route::get('/export', [PosOrderController::class, 'export']);
-        Route::post('/change-status/{order}', [PosOrderController::class, 'changeStatus']);
-        Route::post('/change-payment-status/{order}', [PosOrderController::class, 'changePaymentStatus']);
-    });
-
-    Route::prefix('pos')->name('pos.')->group(function () {
-        Route::post('/customer', [PosController::class, 'storeCustomer']);
-        Route::post('/', [PosController::class, 'store']);
-    });
-
-    Route::prefix('return-and-refund')->name('return-and-refund.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/', [ReturnAndRefundController::class, 'index']);
-        Route::get('/show/{returnAndRefund}', [ReturnAndRefundController::class, 'show']);
-        Route::post('/change-status/{returnAndRefund}', [ReturnAndRefundController::class, 'changeStatus']);
-        Route::get('/export', [ReturnAndRefundController::class, 'export']);
-    });
-
-    Route::prefix('subscriber')->name('subscriber.')->group(function () {
-        Route::get('/', [SubscriberController::class, 'index']);
-        Route::delete('/{subscriber}', [SubscriberController::class, 'destroy']);
-        Route::get('/export', [SubscriberController::class, 'export']);
-        Route::post('/send-email', [SubscriberController::class, 'sendEmail']);
+    // customer file upload
+    Route::controller(CustomerFileUploadController::class)->middleware('auth:sanctum')->group(function () {
+        Route::post('file/upload', 'upload');
+        Route::get('file/all', 'index');
+        Route::get('file/delete/{id}', 'destroy');
     });
 });
 
-Route::prefix('frontend')->name('frontend.')->middleware(['installed', 'apiKey', 'localization'])->group(function () {
-    Route::prefix('setting')->name('setting.')->group(function () {
-        Route::get('/', [FrontendSettingController::class, 'index']);
-    });
-
-    Route::prefix('country-code')->name('country-code.')->group(function () {
-        Route::get('/', [FrontendCountryCodeController::class, 'index']);
-        Route::get('/show/{country}', [FrontendCountryCodeController::class, 'show']);
-        Route::get('/calling-code/{callingCode}', [FrontendCountryCodeController::class, 'callingCode']);
-    });
-
-    Route::prefix('address')->name('address.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/', [FrontendAddressController::class, 'index']);
-        Route::get('/show/{address}', [FrontendAddressController::class, 'show']);
-        Route::post('/', [FrontendAddressController::class, 'store']);
-        Route::match(['put', 'patch'], '/{address}', [FrontendAddressController::class, 'update']);
-        Route::delete('/{address}', [FrontendAddressController::class, 'destroy']);
-    });
-
-    Route::prefix('language')->name('language.')->group(function () {
-        Route::get('/', [FrontendLanguageController::class, 'index']);
-        Route::get('/show/{language}', [FrontendLanguageController::class, 'show']);
-    });
-
-    Route::prefix('slider')->name('slider.')->group(function () {
-        Route::get('/', [FrontendSliderController::class, 'index']);
-    });
-
-    Route::prefix('product-category')->name('product-category.')->group(function () {
-        Route::get('/', [FrontendProductCategoryController::class, 'index']);
-        Route::get('/ancestors-and-self/{productCategory:slug}', [FrontendProductCategoryController::class, 'ancestorsAndSelf']);
-        Route::get('/tree', [FrontendProductCategoryController::class, 'tree']);
-        Route::get('/show/{productCategory:slug}', [FrontendProductCategoryController::class, 'show']);
-    });
-
-    Route::prefix('product')->name('product.')->group(function () {
-        Route::get('/', [FrontendProductController::class, 'index']);
-        Route::get('/show/{product:slug}', [FrontendProductController::class, 'show']);
-        Route::get('/popular-products', [FrontendProductController::class, 'mostPopularProducts']);
-        Route::get('/flash-sale-products', [FrontendProductController::class, 'flashSaleProducts']);
-        Route::post('/category-wise-products', [FrontendProductController::class, 'categoryWiseProducts']);
-        Route::get('/offer-products', [FrontendProductController::class, 'offerProducts']);
-        Route::get('/wishlist-products', [FrontendProductController::class, 'wishlistProducts'])->middleware(['auth:sanctum']);
-        Route::get('/related-products/{product:slug}', [FrontendProductController::class, 'relatedProducts']);
-        Route::get('/initial-variation/{product}', [FrontendProductVariationController::class, 'initialVariation']);
-        Route::get('/children-variation/{productVariation}', [FrontendProductVariationController::class, 'childrenVariation']);
-        Route::get('/variation/ancestors-and-self/{productVariation}', [FrontendProductVariationController::class, 'ancestorsToString']);
-        Route::get('/all-variation/{product:slug}', [FrontendProductVariationController::class, 'allVariation']);
-        Route::get('/show-with-trashed/{product:slug}', [FrontendProductController::class, 'showWithTrashed'])->withTrashed();
-    });
-
-    Route::prefix('page')->name('page.')->group(function () {
-        Route::get('/', [FrontendPageController::class, 'index']);
-        Route::get('/show/{page:slug}', [FrontendPageController::class, 'show']);
-        Route::get('/page-info/{page}', [FrontendPageController::class, 'show']);
-    });
-
-    Route::prefix('promotion')->name('promotion.')->group(function () {
-        Route::get('/', [FrontendPromotionController::class, 'index']);
-        Route::get('/show/{promotion:slug}', [FrontendPromotionController::class, 'show']);
-        Route::get('/products/{promotion:slug}', [FrontendPromotionProductController::class, 'index']);
-    });
-
-    Route::prefix('product-section')->name('productSection.')->group(function () {
-        Route::get('/', [FrontendProductSectionController::class, 'index']);
-        Route::get('/show/{productSection:slug}', [FrontendProductSectionController::class, 'show']);
-        Route::get('/products/{productSection:slug}', [FrontendProductSectionProductController::class, 'index']);
-    });
-
-    Route::prefix('product-brand')->name('product-brand.')->group(function () {
-        Route::get('/', [FrontendProductBrandController::class, 'index']);
-    });
-
-    Route::prefix('benefit')->name('benefit.')->group(function () {
-        Route::get('/', [FrontendBenefitController::class, 'index']);
-    });
-
-    Route::prefix('wishlist')->middleware(['auth:sanctum'])->name('wishlist.')->group(function () {
-        Route::get('/', [FrontendWishlistController::class, 'index']);
-        Route::post('/toggle', [FrontendWishlistController::class, 'toggle']);
-    });
-
-    Route::prefix('coupon')->name('coupon.')->group(function () {
-        Route::get('/', [FrontendCouponController::class, 'index']);
-        Route::post('/coupon-checking', [FrontendCouponController::class, 'couponChecking']);
-    });
-
-    Route::prefix('payment-gateway')->name('payment-gateway.')->group(function () {
-        Route::get('/', [FrontendPaymentGatewayController::class, 'index']);
-    });
-
-    Route::prefix('order-area')->name('order-area.')->group(function () {
-        Route::get('/', [FrontendOrderAreaController::class, 'index']);
-    });
-
-    Route::prefix('order')->name('order.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/', [FrontendOrderController::class, 'index']);
-        Route::get('/show/{frontendOrder}', [FrontendOrderController::class, 'show']);
-        Route::post('/', [FrontendOrderController::class, 'store']);
-        Route::post('/change-status/{frontendOrder}', [FrontendOrderController::class, 'changeStatus']);
-    });
-
-    Route::prefix('device-token')->name('device-token.')->middleware(['auth:sanctum'])->group(function () {
-        Route::post('/web', [TokenStoreController::class, 'webToken']);
-        Route::post('/mobile', [TokenStoreController::class, 'deviceToken']);
-    });
-
-    Route::prefix('subscriber')->name('subscriber.')->group(function () {
-        Route::post('/', [FrontendSubscriberController::class, 'store']);
-    });
-
-    Route::prefix('return-reason')->name('return-reason.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/', [FrontendReturnReasonController::class, 'index']);
-    });
-
-    Route::prefix('return-order')->name('return-order.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/', [FrontendReturnAndRefundController::class, 'index']);
-        Route::post('/request/{order}', [FrontendReturnAndRefundController::class, 'store']);
-        Route::get('/show/{returnAndRefund}', [FrontendReturnAndRefundController::class, 'show']);
-    });
-
-    Route::prefix('overview')->name('overview.')->middleware(['auth:sanctum'])->group(function () {
-        Route::get('/total-orders', [OverviewController::class, 'totalOrders']);
-        Route::get('/total-complete-orders', [OverviewController::class, 'totalCompletedOrders']);
-        Route::get('/total-return-orders', [OverviewController::class, 'totalReturnedOrders']);
-        Route::get('/wallet-balance', [OverviewController::class, 'walletBalance']);
-    });
-
-    Route::prefix('product-review')->name('product-review.')->middleware(['auth:sanctum'])->group(function () {
-        Route::post('/', [ProductReviewController::class, 'store']);
-        Route::get('/show/{productReview}', [ProductReviewController::class, 'show']);
-        Route::match(['post', 'put', 'patch'], '/{productReview}', [ProductReviewController::class, 'update']);
-        Route::post('/upload-image/{productReview}', [ProductReviewController::class, 'uploadImage']);
-        Route::get('/delete-image/{productReview}/{index}', [ProductReviewController::class, 'deleteImage']);
-    });
-
-    Route::prefix('cookies')->name('cookies.')->group(function () {
-        Route::get('/', [FrontendCookiesController::class, 'get']);
-        Route::post('/', [FrontendCookiesController::class, 'set']);
-    });
-
-    Route::prefix('country-state-city')->name('country-state-city')->group(function () {
-        Route::get('/countries', [FrontendCountryStateCityController::class, 'countries']);
-        Route::get('/states/{country}', [FrontendCountryStateCityController::class, 'statesByCountry']);
-        Route::get('/cities/{state}', [FrontendCountryStateCityController::class, 'citiesByState']);
-    });
-
-    Route::prefix('outlet')->name('outlet.')->group(function () {
-        Route::get('/', [FrontendOutletController::class, 'index']);
-    });
+Route::fallback(function () {
+    return response()->json([
+        'data' => [],
+        'success' => false,
+        'status' => 404,
+        'message' => 'Invalid Route'
+    ]);
 });

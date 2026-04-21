@@ -2,68 +2,21 @@
 
 namespace App\Models;
 
-
-use App\Enums\Status;
-use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+use App\Traits\PreventDemoModeChanges;
 
-
-class ProductCategory extends Model implements HasMedia
+class ProductCategory extends Model
 {
-    use InteractsWithMedia;
-    use HasRecursiveRelationships;
+    use HasFactory,PreventDemoModeChanges;
 
-    protected $table = "product_categories";
-    protected $fillable = ['name', 'slug', 'description', 'status', 'parent_id'];
-    protected $casts = [
-        'id'          => 'integer',
-        'name'        => 'string',
-        'slug'        => 'string',
-        'description' => 'string',
-        'status'      => 'integer',
-        'parent_id'   => 'integer',
-    ];
-    protected $appends = array('cover');
-
-    public function getThumbAttribute(): string
+    public function product()
     {
-        if (!empty($this->getFirstMediaUrl('product-category'))) {
-            $category = $this->getMedia('product-category')->last();
-            return $category->getUrl('thumb');
-        }
-        return asset('images/default/category/thumb.png');
+        return $this->belongsTo(Product::class);
     }
 
-    public function getCoverAttribute(): string
+    public function category()
     {
-        if (!empty($this->getFirstMediaUrl('product-category'))) {
-            $category = $this->getMedia('product-category')->last();
-            return $category->getUrl('cover');
-        }
-        return asset('images/default/category/cover.png');
-    }
-
-    public function registerMediaConversions(Media $media = null): void
-    {
-        $this->addMediaConversion('thumb')->crop('crop-center', 252, 183)->keepOriginalImageFormat()->sharpen(10);
-        $this->addMediaConversion('cover')->crop('crop-center', 960, 1440)->keepOriginalImageFormat()->sharpen(10);
-    }
-
-    public function products(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Product::class)->where(['status' => Status::ACTIVE]);
-    }
-
-    public function parent_category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(ProductCategory::class, 'parent_id');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('status', Status::ACTIVE);
+        return $this->belongsTo(Category::class);
     }
 }

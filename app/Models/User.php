@@ -2,130 +2,175 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Models\Cart;
+use App\Notifications\EmailVerificationNotification;
+use App\Traits\PreventDemoModeChanges;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use InteractsWithMedia;
-    use HasApiTokens;
-    use HasFactory;
-    use HasRoles;
-    use Notifiable;
-    use SoftDeletes;
+    use Notifiable, HasApiTokens, HasRoles;
+
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new EmailVerificationNotification());
+    }
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var array
      */
-    protected $table = "users";
-    protected $dates = ["deleted_at"];
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'username',
-        'phone',
-        'country_code',
-        'is_guest',
-        'status',
-        'email_verified_at'
+        'name', 'email', 'password', 'address', 'city', 'postal_code', 'phone', 'country', 'provider_id', 'email_verified_at', 'verification_code', 'verification_status'
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * The attributes that should be hidden for arrays.
      *
-     * @var array<int, string>
+     * @var array
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-
-    protected $casts = [
-        'id'                => 'integer',
-        'name'              => 'string',
-        'email'             => 'string',
-        'password'          => 'hashed',
-        'username'          => 'string',
-        'phone'             => 'string',
-        'country_code'      => 'string',
-        'is_guest'          => 'integer',
-        'status'            => 'integer',
-        'email_verified_at' => 'datetime',
-    ];
-
-    public function getFirstNameAttribute(): string
+    public function wishlists()
     {
-        $name = explode(' ', $this->name, 2);
-        return $name[0];
+        return $this->hasMany(Wishlist::class);
     }
 
-    public function getLastNameAttribute(): string
+    public function customer()
     {
-        $name = explode(' ', $this->name, 2);
-        return !empty($name[1]) ? $name[1] : '';
+        return $this->hasOne(Customer::class);
     }
 
-    public function getImageAttribute(): string
+    public function affiliate_user()
     {
-        if (!empty($this->getFirstMediaUrl('profile'))) {
-            return asset($this->getFirstMediaUrl('profile'));
-        }
-        return asset('images/required/profile.png');
+        return $this->hasOne(AffiliateUser::class);
     }
 
-    public function getThumbAttribute(): string
+    public function affiliate_withdraw_request()
     {
-        if (!empty($this->getFirstMediaUrl('profile'))) {
-            $profile = $this->getMedia('profile')->last();
-            return $profile->getUrl('thumb');
-        }
-        return asset('images/required/profile.png');
+        return $this->hasMany(AffiliateWithdrawRequest::class);
     }
 
-    public function registerMediaConversions(Media $media = null): void
+    public function products()
     {
-        $this->addMediaConversion('thumb')->crop('crop-center', 338, 338)->keepOriginalImageFormat()->sharpen(10);
+        return $this->hasMany(Product::class);
     }
 
-    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function shop()
     {
-        return $this->hasMany(Order::class, 'user_id', 'id');
+        return $this->hasOne(Shop::class);
+    }
+    public function seller()
+    {
+        return $this->hasOne(Seller::class);
     }
 
-    public function addresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+
+    public function staff()
+    {
+        return $this->hasOne(Staff::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function seller_orders()
+    {
+        return $this->hasMany(Order::class, "seller_id");
+    }
+    public function seller_sales()
+    {
+        return $this->hasMany(OrderDetail::class, "seller_id");
+    }
+
+    public function wallets()
+    {
+        return $this->hasMany(Wallet::class)->orderBy('created_at', 'desc');
+    }
+
+    public function club_point()
+    {
+        return $this->hasOne(ClubPoint::class);
+    }
+
+    public function customer_package()
+    {
+        return $this->belongsTo(CustomerPackage::class);
+    }
+
+    public function customer_package_payments()
+    {
+        return $this->hasMany(CustomerPackagePayment::class);
+    }
+
+    public function customer_products()
+    {
+        return $this->hasMany(CustomerProduct::class);
+    }
+
+    public function seller_package_payments()
+    {
+        return $this->hasMany(SellerPackagePayment::class);
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function addresses()
     {
         return $this->hasMany(Address::class);
     }
 
-
-    public function getMyRoleAttribute()
+    public function payment_informations()
     {
-        return $this->roles->pluck('id', 'id')->first();
+        return $this->hasMany(PaymentInformation::class);
     }
 
-    public function getrole(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function affiliate_log()
     {
-        return $this->hasOne(Role::class, 'id', 'myrole');
+        return $this->hasMany(AffiliateLog::class);
     }
-    public function returnOrders()
+
+    public function product_bids()
     {
-        $this->hasMany(ReturnOrder::class, 'user_id', 'id');
+        return $this->hasMany(AuctionProductBid::class);
+    }
+
+    public function product_queries(){
+        return $this->hasMany(ProductQuery::class,'customer_id');
+    }
+
+    public function uploads(){
+        return $this->hasMany(Upload::class);
+    }
+
+    public function userCoupon(){
+        return $this->hasOne(UserCoupon::class);
+    }
+
+    public function preorderProducts()
+    {
+        return $this->hasMany(PreorderProduct::class);
+    }
+    public function preorders()
+    {
+        return $this->hasMany(Preorder::class);
     }
 }

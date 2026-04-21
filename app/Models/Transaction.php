@@ -2,24 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\PreventDemoModeChanges;
 
 class Transaction extends Model
 {
-    protected $table = "transactions";
-    protected $fillable = ['order_id', 'transaction_no', 'amount', 'payment_method', 'type', 'sign'];
-    protected $casts = [
-        'id'             => 'integer',
-        'order_id'       => 'integer',
-        'transaction_no' => 'string',
-        'amount'         => 'decimal:6',
-        'payment_method' => 'string',
-        'type'           => 'string',
-        'sign'           => 'string',
-    ];
+    use HasFactory,PreventDemoModeChanges;
 
-    public function order(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'order_id', 'id');
-    }
 }

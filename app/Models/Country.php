@@ -2,21 +2,36 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\PreventDemoModeChanges;
 
 class Country extends Model
 {
-    use HasFactory;
+    use PreventDemoModeChanges;
 
-    protected $table ="countries";
+    /**
+     * Get the Zone that owns the Country
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
+    }
 
-    protected $fillable = ["name","code","status"];
+    public function scopeIsEnabled($query)
+    {
+        return $query->where('status', '1');
+    }
 
-    protected $casts = [
-        'id'        => 'integer',
-        'name'      => 'string',
-        'code'      => 'string',
-        'status'    => 'integer'
-    ];
+    public function states()
+    {
+        return $this->hasMany(State::class);
+    }
+
+    public function cities()
+    {
+        return $this->hasMany(City::class);
+    }
+        
 }

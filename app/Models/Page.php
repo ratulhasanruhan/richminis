@@ -3,35 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Traits\PreventDemoModeChanges;
+use App;
 
-class Page extends Model implements HasMedia
+class Page extends Model
 {
-    use InteractsWithMedia;
+  use PreventDemoModeChanges;
 
-    protected $table = "pages";
-    protected $fillable = ['title', 'slug', 'description', 'menu_section_id', 'menu_template_id', 'status'];
-    protected $casts = [
-        'id'               => 'integer',
-        'title'            => 'string',
-        'slug'             => 'string',
-        'description'      => 'string',
-        'menu_section_id'  => 'integer',
-        'menu_template_id' => 'integer',
-        'status'           => 'integer',
-    ];
+  public function getTranslation($field = '', $lang = false){
+      $lang = $lang == false ? App::getLocale() : $lang;
+      $page_translation = $this->hasMany(PageTranslation::class)->where('lang', $lang)->first();
+      return $page_translation != null ? $page_translation->$field : $this->$field;
+  }
 
-    public function getImageAttribute(): string
-    {
-        if (!empty($this->getFirstMediaUrl('page-image'))) {
-            return asset($this->getFirstMediaUrl('page-image'));
-        }
-        return '';
-    }
-
-    public function menuSection()
-    {
-        return $this->belongsTo(MenuSection::class, 'menu_section_id', 'id');
-    }
+  public function page_translations(){
+    return $this->hasMany(PageTranslation::class);
+  }
 }

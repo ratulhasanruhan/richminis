@@ -2,33 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\PreventDemoModeChanges;
 
 class Address extends Model
 {
-    use HasFactory;
+    use PreventDemoModeChanges;
 
-    protected $table = "addresses";
-    protected $fillable    = ['full_name', 'email', 'country_code', 'phone', 'country', 'address', 'user_id', 'state', 'city', 'zip_code', 'latitude', 'longitude'];
-    protected $casts = [
-        'id'           => 'integer',
-        'full_name'    => 'string',
-        'email'        => 'string',
-        'country_code' => 'string',
-        'phone'        => 'string',
-        'country'      => 'string',
-        'address'      => 'string',
-        'user_id'      => 'integer',
-        'state'        => 'string',
-        'city'         => 'string',
-        'zip_code'     => 'string',
-        'latitude'     => 'string',
-        'longitude'    => 'string',
-    ];
+    protected $fillable = ['set_default'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+    
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+    
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
     }
 }

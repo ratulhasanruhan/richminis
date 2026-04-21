@@ -2,28 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\PreventDemoModeChanges;
+use App;
 
 class City extends Model
 {
-    use HasFactory;
+    use PreventDemoModeChanges;
 
-    protected $table = "cities";
-    protected $fillable = ["name", "state_id", "status"];
+    public function getTranslation($field = '', $lang = false){
+        $lang = $lang == false ? App::getLocale() : $lang;
+        $city_translation = $this->hasMany(CityTranslation::class)->where('lang', $lang)->first();
+        return $city_translation != null ? $city_translation->$field : $this->$field;
+    }
 
-    protected $casts = [
-        'id'        => 'integer',
-        'name'      => 'string',
-        'state_id'  => 'integer',
-        'status'    => 'integer'
-    ];
+    public function city_translations(){
+       return $this->hasMany(CityTranslation::class);
+    }
 
-    public function country(){
+    public function areas(){
+        return $this->hasMany(Area::class);
+    }
+
+    public function country()
+    {
         return $this->belongsTo(Country::class);
     }
 
-    public function state(){
+    public function state()
+    {
         return $this->belongsTo(State::class);
     }
 }

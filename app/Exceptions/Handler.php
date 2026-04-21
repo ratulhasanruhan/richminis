@@ -2,22 +2,25 @@
 
 namespace App\Exceptions;
 
-use HttpException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
+use App\Utility\NgeniusUtility;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\UnauthorizedException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
     /**
-     * The list of the inputs that are never flashed to the session on validation exceptions.
+     * A list of the exception types that are not reported.
      *
-     * @var array<int, string>
+     * @var array
+     */
+    protected $dontReport = [
+        //
+    ];
+
+    /**
+     * A list of the inputs that are never flashed for validation exceptions.
+     *
+     * @var array
      */
     protected $dontFlash = [
         'current_password',
@@ -27,78 +30,33 @@ class Handler extends ExceptionHandler
 
     /**
      * Register the exception handling callbacks for the application.
+     *
+     * @return void
      */
-    public function register(): void
+    public function register()
     {
         $this->reportable(function (Throwable $e) {
             //
         });
     }
 
-
-    public function render($request, Throwable $e): \Illuminate\Http\Response|JsonResponse|\Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+    public function render($request, Throwable $e)
     {
-
-        if ($e instanceof UnauthorizedException) {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => 'User does not have the right permissions.'
-                ],
-                403
-            );
+        if ($e instanceof Redirectingexception) {
+            return redirect()->back();
         }
 
-        if ($e instanceof ModelNotFoundException) {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => 'No query results for model.'
-                ],
-                404
-            );
+        if($this->isHttpException($e))
+        {
+            if ($request->is('customer-products/admin')) {
+                return NgeniusUtility::initPayment();
+            }
+            
+            return parent::render($request, $e);
         }
-
-        if ($e instanceof MethodNotAllowedHttpException) {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => 'Method not support for the route.'
-                ],
-                405
-            );
+        else
+        {
+            return parent::render($request, $e);
         }
-
-        if ($e instanceof NotFoundHttpException) {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => 'The specified URL cannot be found.'
-                ],
-                404
-            );
-        }
-
-        if ($e instanceof HttpException) {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ],
-                422
-            );
-        }
-
-        if ($e instanceof QueryException) {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ],
-                422
-            );
-        }
-
-        return parent::render($request, $e);
     }
 }

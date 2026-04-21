@@ -2,281 +2,191 @@
 
 namespace App\Models;
 
-use App\Enums\Status;
-use Spatie\MediaLibrary\HasMedia;
-use Illuminate\Support\Facades\Auth;
+use App;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Traits\PreventDemoModeChanges;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
-class Product extends Model implements HasMedia
+
+class Product extends Model
 {
-    use HasFactory, InteractsWithMedia, SoftDeletes;
+    use PreventDemoModeChanges;
+    
+    protected $guarded = ['choice_attributes'];
 
-    protected $table = "products";
-    protected $fillable = [
-        'name',
-        'slug',
-        'sku',
-        'product_category_id',
-        'product_brand_id',
-        'barcode_id',
-        'unit_id',
-        'buying_price',
-        'selling_price',
-        'variation_price',
-        'status',
-        'order',
-        'can_purchasable',
-        'show_stock_out',
-        'maximum_purchase_quantity',
-        'low_stock_quantity_warning',
-        'weight',
-        'warranty',
-        'refundable',
-        'description',
-        'shipping_and_return',
-        'add_to_flash_sale',
-        'discount',
-        'offer_start_date',
-        'offer_end_date',
-        'shipping_type',
-        'shipping_cost',
-        'is_product_quantity_multiply',
+    protected $with = ['product_translations', 'taxes', 'thumbnail'];
 
-    ];
-    protected array $dates = ['deleted_at'];
-    protected $casts = [
-        'id'                           => 'integer',
-        'name'                         => 'string',
-        'slug'                         => 'string',
-        'sku'                          => 'string',
-        'product_category_id'          => 'integer',
-        'product_brand_id'             => 'integer',
-        'barcode_id'                   => 'integer',
-        'unit_id'                      => 'integer',
-        'buying_price'                 => 'decimal:6',
-        'selling_price'                => 'decimal:6',
-        'variation_price'              => 'decimal:6',
-        'status'                       => 'integer',
-        'order'                        => 'integer',
-        'can_purchasable'              => 'integer',
-        'show_stock_out'               => 'integer',
-        'maximum_purchase_quantity'    => 'integer',
-        'low_stock_quantity_warning'   => 'integer',
-        'weight'                       => 'string',
-        'warranty'                     => 'string',
-        'refundable'                   => 'integer',
-        'description'                  => 'string',
-        'shipping_and_return'          => 'string',
-        'add_to_flash_sale'            => 'integer',
-        'discount'                     => 'decimal:6',
-        'offer_start_date'             => 'string',
-        'offer_end_date'               => 'string',
-        'shipping_type'                => 'integer',
-        'shipping_cost'                => 'string',
-        'is_product_quantity_multiply' => 'integer',
-
-    ];
-
-    public function scopeActive($query, $col = 'status')
+    public function getTranslation($field = '', $lang = false)
     {
-        return $query->where($col, Status::ACTIVE);
+        $lang = $lang == false ? App::getLocale() : $lang;
+        $product_translations = $this->product_translations->where('lang', $lang)->first();
+        return $product_translations != null ? $product_translations->$field : $this->$field;
     }
 
-    public function scopeRandAndLimitOrOrderBy($query, $rand = 0, $orderColumn = 'id', $orderType = 'asc')
+    public function product_translations()
     {
-        if ($rand > 0) {
-            return $query->inRandomOrder()->limit($rand);
-        }
-        return $query->orderBy($orderColumn, $orderType);
+        return $this->hasMany(ProductTranslation::class);
     }
 
-    public function getImageAttribute(): string
+    public function main_category()
     {
-        if (!empty($this->getFirstMediaUrl('product'))) {
-            return asset($this->getFirstMediaUrl('product'));
-        }
-        return asset('images/default/product/thumb.png');
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+    
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'product_categories');
     }
 
-    public function getImagesAttribute(): array
+    public function frequently_bought_products()
     {
-        $response = [];
-        if (!empty($this->getFirstMediaUrl('product'))) {
-            $images = $this->getMedia('product');
-            foreach ($images as $image) {
-                $response[] = $image['original_url'];
-            }
-        }
-        return $response;
+        return $this->hasMany(FrequentlyBoughtProduct::class);
     }
 
-    public function getThumbAttribute(): string
+    public function product_categories()
     {
-        if (!empty($this->getFirstMediaUrl('product'))) {
-            $product = $this->getMedia('product')->first();
-            return $product->getUrl('thumb');
-        }
-        return asset('images/default/product/thumb.png');
+        return $this->hasMany(ProductCategory::class);
     }
 
-    public function getCoverAttribute(): string
+    public function brand()
     {
-        if (!empty($this->getFirstMediaUrl('product'))) {
-            $product = $this->getMedia('product')->first();
-            return $product->getUrl('cover');
-        }
-        return asset('images/default/product/cover.png');
+        return $this->belongsTo(Brand::class);
     }
 
-    public function getPreviewAttribute(): string
+    public function user()
     {
-        if (!empty($this->getFirstMediaUrl('product'))) {
-            $product = $this->getMedia('product')->first();
-            return $product->getUrl('preview');
-        }
-        return asset('images/default/product/preview.png');
+        return $this->belongsTo(User::class);
     }
 
-    public function getPreviewsAttribute(): array
+    public function orderDetails()
     {
-        $response = [];
-        if (!empty($this->getFirstMediaUrl('product'))) {
-            $images = $this->getMedia('product');
-            foreach ($images as $image) {
-                $response[] = $image->getUrl('preview');
-            }
-        }
-        return $response;
+        return $this->hasMany(OrderDetail::class);
     }
 
-    public function getBarcodeImageAttribute(): string
+    public function reviews()
     {
-        if (!empty($this->getFirstMediaUrl('product-barcode'))) {
-            return asset($this->getFirstMediaUrl('product-barcode'));
-        }
-        return '';
+        return $this->hasMany(Review::class);
     }
 
-    public function registerMediaConversions(Media $media = null): void
+    public function product_queries()
     {
-        $this->addMediaConversion('thumb')->crop('crop-center', 168, 180)->keepOriginalImageFormat()->sharpen(10);
-        $this->addMediaConversion('cover')->crop('crop-center', 372, 405)->keepOriginalImageFormat()->sharpen(10);
-        $this->addMediaConversion('preview')->crop('crop-center', 1536, 1536)->keepOriginalImageFormat()->sharpen(10);
+        return $this->hasMany(ProductQuery::class);
     }
 
-    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function wishlists()
     {
-        return $this->belongsTo(ProductCategory::class, 'product_category_id', 'id');
+        return $this->hasMany(Wishlist::class);
     }
 
-    public function brand(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function stocks()
     {
-        return $this->belongsTo(ProductBrand::class, 'product_brand_id', 'id');
+        return $this->hasMany(ProductStock::class);
     }
 
-    public function barcode(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Barcode::class, 'barcode_id', 'id');
-    }
-
-    public function unit(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Unit::class, 'unit_id', 'id');
-    }
-
-    public function variations(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(ProductVariation::class)->with('productAttribute');
-    }
-
-    public function orders(): \Illuminate\Database\Eloquent\Relations\MorphMany
-    {
-        return $this->morphMany(Stock::class, 'model');
-    }
-
-    public function orderCountable(): HasMany
-    {
-        return $this->hasMany(Stock::class, 'product_id', 'id');
-    }
-
-    public function tags(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(ProductTag::class, 'product_id', 'id');
-    }
-
-    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(ProductReview::class, 'product_id', 'id');
-    }
-
-    public function videos(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(ProductVideo::class, 'product_id', 'id');
-    }
-
-    public function seo(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(ProductSeo::class, 'product_id', 'id');
-    }
-
-    public function scopeWithReviewRating($query)
-    {
-        $reviewsStar      = ProductReview::selectRaw('sum(star)')->whereColumn('product_id', 'products.id')->getQuery();
-        $reviewsStarCount = ProductReview::selectRaw('count(product_id)')->whereColumn('product_id', 'products.id')->getQuery();
-        $base             = $query->getQuery();
-        if (is_null($base->columns)) {
-            $query->select([$base->from . '.*']);
-        }
-        return $query->selectSub($reviewsStar, 'rating_star')->selectSub($reviewsStarCount, 'rating_star_count');
-    }
-
-    public function wishlist()
-    {
-        return $this->hasOne(Wishlist::class);
-    }
-
-    public function averageRating()
-    {
-        return $this->reviews()->avg('star');
-    }
-
-    public function reviewCount(): int
-    {
-        return $this->reviews()->count();
-    }
-
-    public function stocks(): \Illuminate\Database\Eloquent\Relations\MorphMany
-    {
-        return $this->morphMany(Stock::class, 'item');
-    }
-
-    public function stockItems(): \Illuminate\Database\Eloquent\Relations\MorphMany
-    {
-        return $this->stocks()->where('status', Status::ACTIVE);
-    }
-
-    public function taxes(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(ProductTax::class, 'product_id', 'id');
-    }
-
-    public function productTaxes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function taxes()
     {
         return $this->hasMany(ProductTax::class);
     }
 
-    public function productOrders(): HasMany
+    public function flash_deal_products()
     {
-        return $this->hasMany(Stock::class, 'product_id', 'id')->where('model_type', Order::class);
+        return $this->hasMany(FlashDealProduct::class);
     }
 
-    public function userReview(): \Illuminate\Database\Eloquent\Relations\hasOne
+    public function bids()
     {
-        return $this->hasOne(ProductReview::class, 'product_id', 'id')->where('user_id', Auth::user()->id);
+        return $this->hasMany(AuctionProductBid::class);
     }
+
+    public function thumbnail()
+    {
+        return $this->belongsTo(Upload::class, 'thumbnail_img');
+    }
+
+    public function scopePhysical($query)
+    {
+        return $query->where('digital', 0);
+    }
+
+    public function scopeDigital($query)
+    {
+        return $query->where('digital', 1);
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+    
+    public function scopeIsApprovedPublished($query)
+    {
+        return $query->where('approved', '1')->where('published', 1);
+    }
+
+    public function last_viewed_products()
+    {
+        return $this->hasMany(LastViewedProduct::class);
+    }
+
+    public function warranty()
+    {
+        return $this->belongsTo(Warranty::class);
+    }
+
+    public function warrantyNote()
+    {
+        return $this->belongsTo(Note::class, 'warranty_note_id');
+    }
+
+    public function refundNote()
+    {
+        return $this->belongsTo(Note::class, 'refund_note_id');
+    }
+
+    public function customSaleAlerts()
+    {
+        return $this->hasMany(CustomSaleAlert::class, 'product_id');
+    }
+
+    // add gallery image to thumb
+
+   public function thumbnailImg(): Attribute
+    {
+        return Attribute::get(function ($value, $attributes) {
+            $photos = $attributes['photos'] ?? null;
+
+            if ($photos) {
+                $photosArray = explode(',', $photos);
+                $count = count($photosArray);
+
+                return $value ?: ($count > 0 ? $photosArray[0] : null);
+            }
+
+            return $value;
+        });
+    }
+
+
+    protected function videoLink(): Attribute
+    {
+        return Attribute::make(
+           
+            get: fn($value) => json_decode($value, true), 
+
+         
+             set: function ($value) {
+                if (!is_array($value)) {
+                    return null;
+                }
+            
+                $filtered = array_filter($value, function ($item) {
+                    return trim($item) !== '';
+                });
+
+                return empty($filtered) ? null : json_encode($filtered);
+            },
+        );
+    }
+
+
 }

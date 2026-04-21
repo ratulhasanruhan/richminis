@@ -2,120 +2,74 @@
 
 namespace App\Models;
 
-use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\PreventDemoModeChanges;
 
 class Order extends Model
 {
-    use HasFactory;
-
-    protected $table = "orders";
-    protected $fillable = [
-        'order_serial_no',
-        'user_id',
-        'tax',
-        'discount',
-        'subtotal',
-        'total',
-        'shipping_charge',
-        'order_type',
-        'order_datetime',
-        'payment_method',
-        'payment_status',
-        'status',
-        'reason',
-        'source',
-        'pos_payment_method',
-        'pos_payment_note',
-        'pos_received_amount',
-        'active'
-    ];
-
-    protected $casts = [
-        'id'                  => 'integer',
-        'order_serial_no'     => 'string',
-        'user_id'             => 'integer',
-        'tax'                 => 'decimal:6',
-        'discount'            => 'decimal:6',
-        'subtotal'            => 'decimal:6',
-        'total'               => 'decimal:6',
-        'shipping_charge'     => 'decimal:6',
-        'order_type'          => 'integer',
-        'order_datetime'      => 'datetime',
-        'payment_method'      => 'integer',
-        'payment_status'      => 'integer',
-        'status'              => 'integer',
-        'reason'              => 'string',
-        'source'              => 'integer',
-        'pos_payment_method'  => 'integer',
-        'pos_payment_note'    => 'string',
-        'pos_received_amount' => 'decimal:6',
-        'active'              => 'integer'
-    ];
-
-    public function transaction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    use PreventDemoModeChanges;
+    public function orderDetails()
     {
-        return $this->hasOne(Transaction::class);
+        return $this->hasMany(OrderDetail::class);
     }
 
-    public function orderProducts(): \Illuminate\Database\Eloquent\Relations\morphMany
+    public function refund_requests()
     {
-        return $this->morphMany(Stock::class, 'model');
+        return $this->hasMany(RefundRequest::class);
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class)->withTrashed();
+        return $this->belongsTo(User::class);
     }
 
-    public function address(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function shop()
     {
-        return $this->hasMany(OrderAddress::class);
+        return $this->hasOne(Shop::class, 'user_id', 'seller_id');
     }
 
-    public function outletAddress(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function seller()
     {
-        return $this->hasOne(OrderOutletAddress::class);
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
-    public function paymentMethod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function operatorUser()
     {
-        return $this->belongsTo(PaymentGateway::class, 'payment_method');
+        return $this->belongsTo(User::class, 'operator');
     }
 
-    public function scopePending($query)
+    public function pickup_point()
     {
-        return $query->where('status', OrderStatus::PENDING);
+        return $this->belongsTo(PickupPoint::class);
     }
 
-    public function scopeConfirmed($query)
+    public function carrier()
     {
-        return $query->where('status', OrderStatus::CONFIRMED);
+        return $this->belongsTo(Carrier::class);
     }
 
-    public function scopeOngoing($query)
+    public function affiliate_log()
     {
-        return $query->where('status', OrderStatus::ON_THE_WAY);
+        return $this->hasMany(AffiliateLog::class);
     }
 
-    public function scopeDelivered($query)
+    public function club_point()
     {
-        return $query->where('status', OrderStatus::DELIVERED);
+        return $this->hasMany(ClubPoint::class);
     }
 
-    public function scopeCanceled($query)
+    public function delivery_boy()
     {
-        return $query->where('status', OrderStatus::CANCELED);
+        return $this->belongsTo(User::class, 'assign_delivery_boy', 'id');
     }
 
-    public function scopeRejected($query)
+    public function proxy_cart_reference_id()
     {
-        return $query->where('status', OrderStatus::REJECTED);
+        return $this->hasMany(ProxyPayment::class)->select('reference_id');
     }
 
-    public function returnAndRefund(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function commissionHistory()
     {
-        return $this->hasOne(ReturnAndRefund::class);
+        return $this->hasOne(CommissionHistory::class);
     }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\ProductVariation;
-use App\Rules\IniAmount;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,7 +12,7 @@ class ProductRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize(): bool
+    public function authorize()
     {
         return true;
     }
@@ -24,59 +22,62 @@ class ProductRequest extends FormRequest
      *
      * @return array
      */
-    public function rules(): array
+    public function rules()
     {
-        return [
-            'name'                       => [
-                'required',
-                'string',
-                'max:190',
-                Rule::unique("products", "name")->whereNull('deleted_at')->ignore($this->route('product.id'))
-            ],
-            'sku'                        => [
-                'required',
-                'numeric',
-                'max_digits:7',
-                Rule::unique("products", "sku")->whereNull('deleted_at')->ignore($this->route('product.id'))
-            ],
-            'product_category_id'        => ['required', 'numeric', 'not_in:0'],
-            'barcode_id'                 => ['required', 'numeric', 'not_in:0'],
-            'buying_price'               => ['required', new IniAmount()],
-            'selling_price'              => ['required', new IniAmount()],
-            'tax_id[]'                   => ['nullable', 'numeric', 'max_digits:10'],
-            'product_brand_id'           => ['nullable', 'numeric', 'max_digits:10'],
-            'status'                     => ['required', 'numeric', 'max:24'],
-            'can_purchasable'            => ['required', 'numeric', 'max:24'],
-            'show_stock_out'             => ['required', 'numeric', 'max:24'],
-            'refundable'                 => ['required', 'numeric', 'max:24'],
-            'maximum_purchase_quantity'  => ['required', 'numeric', 'max_digits:10'],
-            'low_stock_quantity_warning' => ['required', 'numeric', 'max_digits:10'],
-            'unit_id'                    => ['required', 'numeric', 'not_in:0'],
-            'weight'                     => ['nullable', 'string', 'max:100'],
-            'warranty'                   => ['nullable', 'string', 'max:100'],
-            'description'                => ['nullable', 'string', 'max:5000'],
-            'tags'                       => ['nullable', 'json'],
-        ];
+        $rules = [];
+
+        $rules['name']          = 'required|max:255';
+        $rules['category_ids']  = 'required';
+        $rules['category_id']   = ['required', Rule::in($this->category_ids)];
+        $rules['unit']         = 'sometimes|required|regex:/^[A-Za-z\s]+$/';
+        $rules['min_qty']      = 'sometimes|required|numeric';
+        $rules['unit_price']    = 'sometimes|required|numeric|gt:0';
+        if ($this->get('discount_type') == 'amount') {
+            $rules['discount'] = 'nullable|numeric|lt:unit_price';
+        } else {
+            $rules['discount'] = 'nullable|numeric|lt:100';
+        }
+        $rules['current_stock'] = 'sometimes|required|numeric';
+        $rules['starting_bid']  = 'sometimes|required|numeric|min:1';
+        $rules['auction_date_range']  = 'sometimes|required';
+
+        return $rules;
     }
 
-    public function attributes(): array
+
+    
+
+    /**
+     * Get the validation messages of rules that apply to the request.
+     *
+     * @return array
+     */
+    public function messages()
     {
-        return [
-            'product_category_id' => strtolower(trans('all.label.product_category_id')),
-            'product_brand_id'    => strtolower(trans('all.label.product_brand_id')),
-            'barcode_id'          => strtolower(trans('all.label.barcode_id')),
-            'unit_id'             => strtolower(trans('all.label.unit_id')),
-            'tax_id'              => strtolower(trans('all.label.tax_id')),
+        $messages = [
+            'name.required'             => translate('Product name is required'),
+            'category_ids.required'     => translate('Product category is required'),
+            'category_id.required'      => translate('Main Category is required'),
+            'category_id.in'            => translate('Main Category must be within selected categories'),
+            'unit.required'             => translate('Product unit is required'),
+            'unit.regex' => 'The unit may only contain letters and spaces.',
+            'min_qty.required'          => translate('Minimum purchase quantity is required'),
+            'min_qty.numeric'           => translate('Minimum purchase must be numeric'),
+            'unit_price.gt'             => translate('The unit price must be greater than 0'),
+            'unit_price.required'       => translate('Unit price is required'),
+            'unit_price.numeric'        => translate('Unit price must be numeric'),
+            'discount.required'         => translate('Discount is required'),
+            'discount.numeric'          => translate('Discount must be numeric'),
+            'discount.lt'               => translate('Discount should be less than unit price'),
+            'current_stock.required'    => translate('Current stock is required'),
+            'current_stock.numeric'     => translate('Current stock must be numeric'),
+            'starting_bid.required'     => translate('Starting Bid is required'),
+            'starting_bid.numeric'      => translate('Starting Bid must be numeric'),
+            'starting_bid.required'     => translate('Minimum Starting Bid is 1'),
+            'auction_date_range.required' => translate('Auction Date Range is required'),
         ];
+
+        return $messages;
     }
 
-    public function withValidator($validator): void
-    {
-        $validator->after(function ($validator) {
-            $sku = ProductVariation::where('sku', $this->sku)->first();
-            if ($sku) {
-                $validator->getMessageBag()->add('sku', trans('all.message.sku_exist'));
-            }
-        });
-    }
 }

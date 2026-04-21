@@ -2,19 +2,14 @@
 
 namespace App\Models;
 
-use App\Enums\Status;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\PreventDemoModeChanges;
 
 class Tax extends Model
 {
-    protected $table = "taxes";
-    protected $fillable = ['name', 'code', 'tax_rate', 'status'];
-    protected $casts = [
-        'id'       => 'integer',
-        'name'     => 'string',
-        'code'     => 'string',
-        'tax_rate' => 'string',
-        'status'   => 'integer',
-    ];
+    use PreventDemoModeChanges;
 
+    public function product_taxes() {
+        return $this->hasMany(ProductTax::class);
+    }
 }

@@ -3,28 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Traits\PreventDemoModeChanges;
+use App;
 
-class Language extends Model implements HasMedia
+class Language extends Model
 {
-    use InteractsWithMedia;
+  use PreventDemoModeChanges;
 
-    protected $table = "languages";
-    protected $fillable = ['name', 'code', 'display_mode', 'status'];
-    protected $casts = [
-        'id'           => 'integer',
-        'name'         => 'string',
-        'code'         => 'string',
-        'display_mode' => 'integer',
-        'status'       => 'integer',
-    ];
-
-    public function getImageAttribute(): string
-    {
-        if (!empty($this->getFirstMediaUrl('language'))) {
-            return asset($this->getFirstMediaUrl('language'));
-        }
-        return asset('images/default/language/language.png');
-    }
+  //
 }
