@@ -328,17 +328,6 @@
                                             class="btn btn-md btn-soft-danger btn-block rounded-2">{{ translate('Pending Sellers') }}</a>
                                     </div>
                                 </div>
-                            @else
-                                <div class="d-flex flex-column align-items-center justify-content-center h-100">
-                                    <div class="h-200px">
-                                        <img src="{{ static_asset('assets/img/multivendor.jpg') }}"
-                                            alt="{{ translate('multivendor') }}" class="h-100 img-fit">
-                                    </div>
-                                    <a href="{{ route('activation.index') }}"
-                                        class="mt-4 fs-13 fw-600 text-info hov-text-primary animate-underline-primary">
-                                        {{ translate('Activate Vendor System') }}
-                                    </a>
-                                </div>
                             @endif
                         </div>
                     </div>
