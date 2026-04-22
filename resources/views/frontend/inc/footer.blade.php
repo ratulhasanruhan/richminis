@@ -47,15 +47,9 @@
             @endphp
             
             <div class="footer-desc-container">
-                <p class="footer-text-control fs-15 fw-700 text-gray-dark text-center mb-0">
+                <p class="fs-15 fw-700 text-gray-dark text-center mb-0">
                         {!! $fullDescription !!}
                 </p>
-                <div class="text-control-btn mt-2 d-xl-none">
-                    
-                    <a class="text-primary cursor-pointer toggle-btn" id="toggle-btn">
-                        Read More
-                    </a>
-                </div>
             </div>
         </div>
     </section>
