@@ -339,6 +339,11 @@
               $showPopup= false;  
             }
         }
+
+        // Never auto-show subscriber popup (subscribe form).
+        if (($dynamic_popup->show_subscribe_form ?? null) === 'on') {
+            $showPopup = false;
+        }
         @endphp
 
         @if($dynamic_popup->id == 1)
@@ -479,47 +484,59 @@
     <script>
         @if (Route::currentRouteName() == 'home' || Route::currentRouteName() == '/')
 
-            $.post('{{ route('home.section.featured') }}', {
-                _token: '{{ csrf_token() }}'
-            }, function(data) {
-                $('#section_featured').html(data);
-                AIZ.plugins.slickCarousel();
-            });
+            if ($('#section_featured').length) {
+                $.post('{{ route('home.section.featured') }}', {
+                    _token: '{{ csrf_token() }}'
+                }, function(data) {
+                    $('#section_featured').html(data);
+                    AIZ.plugins.slickCarousel();
+                });
+            }
 
-            $.post('{{ route('home.section.todays_deal') }}', {
-                _token: '{{ csrf_token() }}'
-            }, function(data) {
-                $('#todays_deal').html(data);
-                AIZ.plugins.slickCarousel();
-            });
+            if ($('#todays_deal').length) {
+                $.post('{{ route('home.section.todays_deal') }}', {
+                    _token: '{{ csrf_token() }}'
+                }, function(data) {
+                    $('#todays_deal').html(data);
+                    AIZ.plugins.slickCarousel();
+                });
+            }
 
-            $.post('{{ route('home.section.best_selling') }}', {
-                _token: '{{ csrf_token() }}'
-            }, function(data) {
-                $('#section_best_selling').html(data);
-                AIZ.plugins.slickCarousel();
-            });
+            if ($('#section_best_selling').length) {
+                $.post('{{ route('home.section.best_selling') }}', {
+                    _token: '{{ csrf_token() }}'
+                }, function(data) {
+                    $('#section_best_selling').html(data);
+                    AIZ.plugins.slickCarousel();
+                });
+            }
 
-            $.post('{{ route('home.section.newest_products') }}', {
-                _token: '{{ csrf_token() }}'
-            }, function(data) {
-                $('#section_newest').html(data);
-                AIZ.plugins.slickCarousel();
-                @if (get_setting('homepage_select') == 'thecore')
-                 toggleViewMoreButton();
-                @endif
-            });
+            if ($('#section_newest').length) {
+                $.post('{{ route('home.section.newest_products') }}', {
+                    _token: '{{ csrf_token() }}'
+                }, function(data) {
+                    $('#section_newest').html(data);
+                    AIZ.plugins.slickCarousel();
+                    @if (get_setting('homepage_select') == 'thecore')
+                        if (typeof toggleViewMoreButton === 'function') {
+                            toggleViewMoreButton();
+                        }
+                    @endif
+                });
+            }
 
-            $.post('{{ route('home.section.auction_products') }}', {
-                _token: '{{ csrf_token() }}'
-            }, function(data) {
-                $('#auction_products').html(data);
-                AIZ.plugins.slickCarousel();
-            });
+            if ($('#auction_products').length) {
+                $.post('{{ route('home.section.auction_products') }}', {
+                    _token: '{{ csrf_token() }}'
+                }, function(data) {
+                    $('#auction_products').html(data);
+                    AIZ.plugins.slickCarousel();
+                });
+            }
 
             var isPreorderEnabled = @json(addon_is_activated('preorder'));
 
-            if (isPreorderEnabled) {
+            if (isPreorderEnabled && $('#section_featured_preorder_products').length) {
                 $.post('{{ route('home.section.preorder_products') }}', {
                     _token: '{{ csrf_token() }}'
                 }, function(data) {
@@ -528,12 +545,14 @@
                 });
             }
 
-            $.post('{{ route('home.section.home_categories') }}', {
-                _token: '{{ csrf_token() }}'
-            }, function(data) {
-                $('#section_home_categories').html(data);
-                AIZ.plugins.slickCarousel();
-            });
+            if ($('#section_home_categories').length) {
+                $.post('{{ route('home.section.home_categories') }}', {
+                    _token: '{{ csrf_token() }}'
+                }, function(data) {
+                    $('#section_home_categories').html(data);
+                    AIZ.plugins.slickCarousel();
+                });
+            }
 
         @endif
 

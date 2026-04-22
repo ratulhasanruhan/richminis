@@ -31,7 +31,7 @@
                 <th class="hide-xxl text-uppercase fs-12 fw-700 text-secondary">{{ translate('Approved') }}</th>
                 @endif
 
-                <th class="hide-xxl text-uppercase fs-12 fw-700 text-secondary">{{ translate('Featured') }}
+                <th class="hide-xxl text-uppercase fs-12 fw-700 text-secondary">{{ translate('Rare Picks') }}
                 </th>
 
                 <th class="hide-xxl text-uppercase fs-12 fw-700 text-secondary"> {{ translate('Todays Deal') }}</th>
@@ -160,7 +160,7 @@
                 </td>
                 @endif
 
-                <td class="hide-xxl align-middle" data-label="Featured">
+                <td class="hide-xxl align-middle" data-label="RarePicks">
                     @if (!$product->draft)
                     <label class="aiz-switch aiz-switch-blue mb-0">
                         <input onchange="update_featured(this)" value="{{ $product->id }}"

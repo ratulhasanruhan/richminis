@@ -3,6 +3,194 @@ $topHeaderTextColor = get_setting('top_header_text_color');
 $bottomHeaderTextColor = get_setting('bottom_header_text_color');
 @endphp
 
+@if (get_setting('homepage_select') == 'thecore')
+    <style>
+        .rm-header { background: #fff; border-bottom: 1px solid #eee; }
+        .rm-header__row { min-height: 64px; }
+        .rm-header__left { min-width: 40px; }
+        .rm-header__center { flex: 1; display: flex; justify-content: center; }
+        .rm-header__right { min-width: 40px; display:flex; justify-content: flex-end; }
+        .rm-logo-text {
+            font-family: "Urbanist", "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
+            letter-spacing: .35em;
+            text-transform: uppercase;
+            font-size: 14px;
+            color: #111;
+            white-space: nowrap;
+        }
+        .rm-header__links a {
+            font-family: "Urbanist", "Helvetica Neue", Arial, sans-serif;
+            font-weight: 600;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #111;
+            opacity: .85;
+            white-space: nowrap;
+        }
+        .rm-header__links a:hover { opacity: 1; }
+        .rm-header__sep { opacity: .25; padding: 0 10px; }
+        .rm-icon-btn { display:inline-flex; align-items:center; justify-content:center; width: 36px; height: 36px; border: 1px solid transparent; border-radius: 999px; }
+        .rm-icon-btn:hover { border-color: rgba(0,0,0,.08); background: rgba(0,0,0,.02); }
+        .rm-searchbar { display:none; border-top: 1px solid #eee; background:#fff; }
+        .rm-searchbar.is-open { display:block; }
+        .rm-searchbar .search-input-box { position: relative; width: 100%; }
+        .rm-searchbar .search-input-box svg { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+        @media (max-width: 991px) {
+            .rm-header__links { display: none !important; }
+        }
+        @media (min-width: 992px) {
+            .rm-header__left { display: none !important; }
+            .rm-header__center { justify-content: flex-start; flex: 0 0 auto; }
+            .rm-header__links { margin-left: auto; }
+            .rm-header__right { display: none !important; }
+        }
+    </style>
+
+    @php
+        $headerMenuLabels = get_setting('header_menu_labels');
+        $headerMenuLinks = get_setting('header_menu_links');
+        $menuItems = [];
+        if ($headerMenuLabels && $headerMenuLinks) {
+            try {
+                $labels = json_decode($headerMenuLabels, true) ?? [];
+                $links = json_decode($headerMenuLinks, true) ?? [];
+                foreach ($labels as $i => $label) {
+                    $href = $links[$i] ?? '#';
+                    $menuItems[] = ['label' => $label, 'href' => $href];
+                }
+            } catch (\Throwable $e) {
+                $menuItems = [];
+            }
+        }
+    @endphp
+
+    <header class="rm-header @if (get_setting('header_stikcy') == 'on') sticky-top @endif z-1020">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between rm-header__row">
+                <!-- Left: drawer (mobile) -->
+                <div class="rm-header__left d-flex align-items-center">
+                    <button type="button" class="btn d-lg-none p-0" data-toggle="class-toggle" data-target=".aiz-top-menu-sidebar" aria-label="Menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
+                            <rect width="16" height="2" y="0" fill="#111" />
+                            <rect width="16" height="2" y="7" fill="#111" />
+                            <rect width="16" height="2" y="14" fill="#111" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Center: logo (always centered on mobile) -->
+                <div class="rm-header__center">
+                    <a href="{{ route('home') }}" class="rm-logo-text text-reset">
+                        RICHMINIS
+                    </a>
+                </div>
+
+                <!-- Right: search + menus + call us (desktop) -->
+                <div class="rm-header__links d-none d-lg-flex align-items-center justify-content-end" style="gap: 14px;">
+                    <button type="button" class="rm-icon-btn btn p-0 text-reset rm-search-open" aria-label="{{ translate('Search') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                            <path d="M8.5 0a8.5 8.5 0 106.3 14.2l4 4a1 1 0 001.4-1.4l-4-4A8.5 8.5 0 008.5 0zm0 2a6.5 6.5 0 110 13 6.5 6.5 0 010-13z" fill="#111"/>
+                        </svg>
+                    </button>
+                    @if (count($menuItems) > 0)
+                        @foreach ($menuItems as $item)
+                            <a class="text-reset" href="{{ $item['href'] }}">{{ $item['label'] }}</a>
+                        @endforeach
+                    @else
+                        <a class="text-reset" href="{{ route('search', ['sort_by' => 'newest']) }}">NEW IN</a>
+                        <a class="text-reset" href="{{ route('search', ['keyword' => 'shoes']) }}">SHOES</a>
+                        <a class="text-reset" href="{{ route('search', ['keyword' => 'toys']) }}">TOYS</a>
+                        <a class="text-reset" href="{{ route('search', ['keyword' => 'moms']) }}">MOMS</a>
+                        <a class="text-reset" href="{{ route('search', ['keyword' => 'minis']) }}">MINIS</a>
+                    @endif
+                    @if (get_setting('helpline_number'))
+                        <a class="text-reset" href="tel:{{ get_setting('helpline_number') }}">CALL US</a>
+                    @endif
+                </div>
+
+                <!-- Right: reserved (keep layout balanced) -->
+                <div class="rm-header__right d-lg-none">
+                    <button type="button" class="rm-icon-btn btn p-0 text-reset rm-search-open" aria-label="{{ translate('Search') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                            <path d="M8.5 0a8.5 8.5 0 106.3 14.2l4 4a1 1 0 001.4-1.4l-4-4A8.5 8.5 0 008.5 0zm0 2a6.5 6.5 0 110 13 6.5 6.5 0 010-13z" fill="#111"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search bar (uses existing live search system) -->
+        <div class="rm-searchbar" id="rm-searchbar">
+            <div class="container py-3">
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <form action="{{ route('search') }}" method="GET" class="stop-propagation flex-grow-1 m-0">
+                        <div class="search-input-box">
+                            <input
+                                type="text"
+                                class="border border-soft-light form-control fs-14"
+                                id="search"
+                                name="keyword"
+                                placeholder="{{ translate('I am shopping for...') }}"
+                                autocomplete="off"
+                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                                <path d="M8.5 0a8.5 8.5 0 106.3 14.2l4 4a1 1 0 001.4-1.4l-4-4A8.5 8.5 0 008.5 0zm0 2a6.5 6.5 0 110 13 6.5 6.5 0 010-13z" fill="#b5b5bf"/>
+                            </svg>
+                        </div>
+
+                        <div class="typed-search-box stop-propagation document-click-d-none d-none bg-white rounded shadow-lg position-relative mt-2"
+                            style="min-height: 200px">
+                            <div class="search-preloader absolute-top-center">
+                                <div class="dot-loader">
+                                    <div></div><div></div><div></div>
+                                </div>
+                            </div>
+                            <div class="search-nothing d-none p-3 text-center fs-16"></div>
+                            <div id="search-content" class="text-left"></div>
+                        </div>
+                    </form>
+
+                    <button type="button" class="btn p-0 rm-icon-btn text-reset" id="rm-search-close" aria-label="{{ translate('Close') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                            <path d="M11.41 10l4.3-4.29a1 1 0 10-1.42-1.42L10 8.59 5.71 4.29A1 1 0 104.29 5.71L8.59 10l-4.3 4.29a1 1 0 101.42 1.42L10 11.41l4.29 4.3a1 1 0 001.42-1.42z" fill="#111"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        (function () {
+            var closeBtn = document.getElementById('rm-search-close');
+            var bar = document.getElementById('rm-searchbar');
+
+            function openSearch() {
+                if (!bar) return;
+                bar.classList.add('is-open');
+                var input = bar.querySelector('#search');
+                if (input) {
+                    setTimeout(function () { input.focus(); }, 50);
+                }
+            }
+
+            function closeSearch() {
+                if (!bar) return;
+                bar.classList.remove('is-open');
+            }
+
+            var openBtns = document.querySelectorAll('.rm-search-open');
+            if (openBtns && openBtns.length) {
+                openBtns.forEach(function (btn) {
+                    btn.addEventListener('click', openSearch);
+                });
+            }
+            if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+        })();
+    </script>
+@else
 <header
     class="@if (get_setting('header_stikcy') == 'on') sticky-top @endif z-1020 top-background-color-visibility stikcy-header-visibility"
     style="background-color: {{ get_setting('top_header_bg_color') }}">
@@ -705,3 +893,4 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
         </div>
     </div>
 </header>
+@endif
