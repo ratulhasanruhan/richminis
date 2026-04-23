@@ -107,17 +107,9 @@
                             <li class="mr-2rem"><a href="#relatedProduct"
                                     class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Related Products')}}</a></li>
                             @endif
-                            <li class="mr-2rem"><a href="#reviewsRatings"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Reviews & Ratings')}}</a></li>
                             @if(get_setting('product_query_activation') == 1)
                             <li class="mr-2rem"><a href="#product_query"
                                     class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Product Queries')}} ({{ count($detailedProduct->product_queries) }})</a></li>
-                            @endif
-                            @if($detailedProduct->auction_product != 1)
-                            <li class="mr-2rem"><a href="#frequentlyBought"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Frequently Bought')}}</a></li>
-                            <li class="mr-2rem"><a href="#fromThisSeller"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('More from this Seller')}}</a></li>
                             @endif
                             <span class="tab-underline"></span>
                         </ul>
@@ -145,10 +137,6 @@
                 <!--RELATED PRODUCTS SECTION END-->
                 @endif
 
-                <!--REVIEWS & RATINGS SECTION START-->
-                @include('frontend.product_details.review_section')
-               <!--REVIEWS & RATINGS SECTION END-->
-
                 @if(get_setting('product_query_activation') == 1)
                 <!--PRODUCT QUERIES START-->
                 <section id="product_query">
@@ -158,19 +146,6 @@
                 @endif
 
 
-                @if($detailedProduct->auction_product != 1)
-                <!--FREQUENT BOUGTH TOGETHER START-->
-                <section id="frequentlyBought">
-                    @include('frontend.product_details.frequently_bought_together')
-                </section>
-                <!--FREQUENT BOUGTH TOGETHER END-->
-
-                <!--FROM THIS SELLER START-->
-                <section id="fromThisSeller">
-                    @include('frontend.product_details.from_this_seller_products')
-                </section>
-                <!--FROM THIS SELLER END-->
-                @endif
             </div>
         </div>
         <!-- ======== PRODUCT DETAILS NAV TAB END ======== -->
@@ -719,6 +694,10 @@
 
 
         function getReviews(seemore= false, rating = null) {
+            // Reviews section removed
+            if (!$('.reviews-area').length) {
+                return;
+            }
             let sortBy = $('#sortBy').val();
             let limit = parseInt($('.see-more-btn').attr('data-limit')) || 0;
             if (seemore) {

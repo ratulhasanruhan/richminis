@@ -86,49 +86,28 @@
     </div>
     <!--Brand Name and Ask about End-->
 
-    <!--Rating & SKU Start-->
-    <div class="d-flex flex-wrap flex-column flex-sm-row align-items-sm-center justify-content-between mt-2">
-        <!--LEFT-->
-        @php
-            $total = 0;
-            $total += $detailedProduct->reviews->where('status', 1)->count();
-        @endphp
-        <div class="d-flex align-items-center mb-2 mb-md-0">
-            <div class="d-flex align-items-center pr-10px">
-                <span class="rating rating-mr-2">{{ renderStarRating($detailedProduct->rating) }}</span>
-            </div>
-            <div class="d-flex align-items-center total-rating-count">
-                <span class="fs-14 text-dark fw-bold">{{ $detailedProduct->rating }}</span>
-                <span class="fs-14 text-gray fw-400">/{{ translate('5.0') }}</span>
-                <span class="pl-5px fs-14 text-gray fw-400">({{ $total }} {{ translate('reviews') }})</span>
-            </div>
-            
+    <!-- SKU only (rating bar removed) -->
+    @if ($detailedProduct->variant_product)
+        <div class="d-flex align-items-center mt-2" id="variant_sku_section">
+            <span class="fs-14 fw-400 text-gray">{{translate('SKU')}}</span>
+            <span class="fs-14 fw-500 text-dark ml-2 mr-2" id="variant_sku"></span>
+            <button type="button" class="border-0 bg-transparent cursor-pointer sku-copy-btn" onclick="SKUCopyToClipboard()" data-url="">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13.6" height="16" viewBox="0 0 13.6 16">
+                    <path id="Path_45213" data-name="Path 45213" d="M124.8-867.2a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-9.6a1.541,1.541,0,0,1,.47-1.13,1.541,1.541,0,0,1,1.13-.47H132a1.541,1.541,0,0,1,1.13.47,1.541,1.541,0,0,1,.47,1.13v9.6a1.541,1.541,0,0,1-.47,1.13,1.541,1.541,0,0,1-1.13.47Zm0-1.6H132v-9.6h-7.2Zm-3.2,4.8a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-11.2h1.6v11.2h8.8v1.6Zm3.2-4.8v0Z" transform="translate(-120 880)" fill="#919199"/>
+                </svg>
+            </button>
         </div>
-        @if ($detailedProduct->variant_product)
-            <!--RIGHT-->
-            <div class="d-flex align-items-center mb-2 mb-md-0" id="variant_sku_section">
-                <span class="fs-14 fw-400 text-gray">{{translate('SKU')}}</span>
-                <span class="fs-14 fw-500 text-dark ml-2 mr-2" id="variant_sku"></span>
-                <button type="button" class="border-0 bg-transparent cursor-pointer sku-copy-btn" onclick="SKUCopyToClipboard()" data-url="">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13.6" height="16" viewBox="0 0 13.6 16">
-                        <path id="Path_45213" data-name="Path 45213" d="M124.8-867.2a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-9.6a1.541,1.541,0,0,1,.47-1.13,1.541,1.541,0,0,1,1.13-.47H132a1.541,1.541,0,0,1,1.13.47,1.541,1.541,0,0,1,.47,1.13v9.6a1.541,1.541,0,0,1-.47,1.13,1.541,1.541,0,0,1-1.13.47Zm0-1.6H132v-9.6h-7.2Zm-3.2,4.8a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-11.2h1.6v11.2h8.8v1.6Zm3.2-4.8v0Z" transform="translate(-120 880)" fill="#919199"/>
-                    </svg>
-                </button>
-            </div>
-        @elseif (($detailedProduct->stocks->first()->sku))
-            <!--RIGHT-->
-            <div class="d-flex align-items-center mb-2 mb-md-0" id="variant_sku_section">
-                <span class="fs-14 fw-400 text-gray">{{translate('SKU')}}</span>
-                <span class="fs-14 fw-500 text-dark ml-2 mr-2" id="variant_sku">{{($detailedProduct->stocks->first()->sku)}}</span>
-                <button type="button" class="border-0 bg-transparent cursor-pointer sku-copy-btn" onclick="SKUCopyToClipboard()" data-url="">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13.6" height="16" viewBox="0 0 13.6 16">
-                        <path id="Path_45213" data-name="Path 45213" d="M124.8-867.2a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-9.6a1.541,1.541,0,0,1,.47-1.13,1.541,1.541,0,0,1,1.13-.47H132a1.541,1.541,0,0,1,1.13.47,1.541,1.541,0,0,1,.47,1.13v9.6a1.541,1.541,0,0,1-.47,1.13,1.541,1.541,0,0,1-1.13.47Zm0-1.6H132v-9.6h-7.2Zm-3.2,4.8a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-11.2h1.6v11.2h8.8v1.6Zm3.2-4.8v0Z" transform="translate(-120 880)" fill="#919199"/>
-                    </svg>
-                </button>
-            </div>
-        @endif
-    </div>
-    <!--Rating & SKU End-->
+    @elseif (($detailedProduct->stocks->first()->sku))
+        <div class="d-flex align-items-center mt-2" id="variant_sku_section">
+            <span class="fs-14 fw-400 text-gray">{{translate('SKU')}}</span>
+            <span class="fs-14 fw-500 text-dark ml-2 mr-2" id="variant_sku">{{($detailedProduct->stocks->first()->sku)}}</span>
+            <button type="button" class="border-0 bg-transparent cursor-pointer sku-copy-btn" onclick="SKUCopyToClipboard()" data-url="">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13.6" height="16" viewBox="0 0 13.6 16">
+                    <path id="Path_45213" data-name="Path 45213" d="M124.8-867.2a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-9.6a1.541,1.541,0,0,1,.47-1.13,1.541,1.541,0,0,1,1.13-.47H132a1.541,1.541,0,0,1,1.13.47,1.541,1.541,0,0,1,.47,1.13v9.6a1.541,1.541,0,0,1-.47,1.13,1.541,1.541,0,0,1-1.13.47Zm0-1.6H132v-9.6h-7.2Zm-3.2,4.8a1.541,1.541,0,0,1-1.13-.47,1.541,1.541,0,0,1-.47-1.13v-11.2h1.6v11.2h8.8v1.6Zm3.2-4.8v0Z" transform="translate(-120 880)" fill="#919199"/>
+                </svg>
+            </button>
+        </div>
+    @endif
 
     <!--Watching Product Start-->
     <div class="d-flex flex-column align-items-start mt-3">
@@ -325,60 +304,7 @@
             @csrf
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
             
-            <!--In Stock Start-->
-            <h5 class="fs-16 fw-600 text-gray">{{ translate('Pricing') }}</h5>
-            <div class="bg-light overflow-hidden px-20px py-20px rounded-2">
-                @if ($detailedProduct->digital == 0)
-                    <div class="d-flex align-items-center justify-content-between mb-md-0">
-                        <div>
-                            <h6 class="m-0 fs-20 fw-600 text-dark">{{ home_discounted_price($detailedProduct) }}
-                                @if ($detailedProduct->unit != null)
-                                    <span class="opacity-70 fs-16 fw-400">/{{ $detailedProduct->getTranslation('unit') }}</span>
-                                @endif
-                            </h6>
-                            @if (home_price($detailedProduct) != home_discounted_price($detailedProduct))
-                                <del class="m-0 fs-14 fw-400 text-gray px-3">{{ home_price($detailedProduct) }}</del>
-                            @endif
-
-                        </div>
-                        <!-- Download Button -->
-                        @if ($detailedProduct->pdf != null)
-                        <a href="{{ uploaded_asset($detailedProduct->pdf) }}" target="_blank" class="fs-14 fw-400 text-blue cursor-pointer"> <i class="las la-download mr-1"></i>
-                            {{ translate('Download product specifation') }}
-                        </a>
-                        @endif
-                        
-                    </div>
-                @else
-                    <input type="hidden" name="quantity" value="1">
-                    <div class="d-flex flex-wrap align-items-center mb-md-0">
-                        <h6 class="m-0 fs-24 fw-bold fw-700 text-dark">{{ home_discounted_price($detailedProduct) }}
-                            @if ($detailedProduct->unit != null)
-                                <span class="opacity-70 fs-16 fw-400">/{{ $detailedProduct->getTranslation('unit') }}</span>
-                            @endif
-                        </h6>
-                        @if (home_price($detailedProduct) != home_discounted_price($detailedProduct))
-                            <del class="m-0 fs-14 fw-400 text-gray px-3">{{ home_price($detailedProduct) }}</del>
-                        @endif
-                    </div>
-                @endif
-
-                @if (discount_in_percentage($detailedProduct) > 0 || (addon_is_activated('club_point') && $detailedProduct->earn_point > 0))
-                <div class="d-flex flex-wrap align-items-center py-5px">
-                    <div class="d-flex flex-wrap align-items-center mb-2 mb-md-0">
-                        <div class="d-flex align-items-center mt-2">
-                            @if (discount_in_percentage($detailedProduct) > 0 && (home_price($detailedProduct) != home_discounted_price($detailedProduct)))
-                                <span class="fs-12 fw-bold text-white py-1 py-md-2 px-10px discount-badge rounded-1">-{{ discount_in_percentage($detailedProduct) }}%</span>
-                            @endif
-                            @if (addon_is_activated('club_point') && $detailedProduct->earn_point > 0)
-                                <span class="fs-12 fw-bold text-orange text-uppercase opacity-80 py-1 py-md-2 px-10px bg-soft-light rounded-1 ml-1">{{ translate('Club Point') }}: {{ $detailedProduct->earn_point }}</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-            <!--In Stock End-->
+            <!-- Pricing card removed per request -->
 
             @if ($detailedProduct->wholesale_product == 1)
                 <!-- Wholesale Start-->
