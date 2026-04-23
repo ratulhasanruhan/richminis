@@ -36,7 +36,19 @@
         font-weight: 700;
         letter-spacing: .14em;
         text-transform: uppercase;
+        border: 1px solid #000;
+        padding: 12px 18px;
+        color: #000 !important;
+        background: transparent;
+        transition: background .15s ease, color .15s ease, transform .15s ease, border-color .15s ease;
     }
+    .rm-see-more-bottom:hover,
+    .rm-see-more-bottom:focus {
+        background: #000;
+        color: #fff !important;
+        transform: translateY(-1px);
+    }
+    .rm-see-more-bottom:active { transform: translateY(0); }
 
     .rm-cat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
     @media (max-width: 991px) { .rm-cat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -44,9 +56,9 @@
 
     .rm-cat-card { display: block; color: inherit; }
     /* Make category blocks feel "full width" */
-    .rm-cat-img { width: 100%; height: clamp(160px, 20vw, 340px); object-fit: cover; display:block; background:#f4f4f4; }
-    @media (max-width: 991px) { .rm-cat-img { height: clamp(140px, 24vw, 290px); } }
-    @media (max-width: 575px) { .rm-cat-img { height: clamp(130px, 38vw, 230px); } }
+    .rm-cat-img { width: 100%; height: clamp(220px, 24vw, 420px); object-fit: cover; display:block; background:#f4f4f4; }
+    @media (max-width: 991px) { .rm-cat-img { height: clamp(180px, 28vw, 340px); } }
+    @media (max-width: 575px) { .rm-cat-img { height: clamp(160px, 48vw, 280px); } }
 
     .rm-cat-label {
         background: #000;
@@ -248,6 +260,9 @@
         <div class="rm-title-strip">RARE PICKS</div>
         <div class="container">
             <div id="section_featured"></div>
+            <div class="text-center">
+                <a class="text-reset animate-underline-primary rm-see-more-bottom" href="{{ route('featured-products') }}">See more</a>
+            </div>
         </div>
     </div>
 </section>

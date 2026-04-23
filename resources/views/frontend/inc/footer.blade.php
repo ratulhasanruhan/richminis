@@ -37,8 +37,8 @@
 
 <!-- footer Description -->
 @if (get_setting('footer_title') != null || get_setting('footer_description') != null)
-    <section class="border-top border-bottom mt-auto">
-        <div class="container py-32px">
+    <section class="mt-auto my-4 my-md-5">
+        <div class="container" style="padding-top: clamp(56px, 9vw, 96px); padding-bottom: clamp(56px, 9vw, 96px);">
             <h1 class="fs-20 fw-700 text-gray-dark mb-3 text-center">
                 {{ get_setting('footer_title', null, $system_language->code) }}
             </h1>
@@ -58,7 +58,7 @@
 {{-- policy bar removed per request --}}
 
 <!-- footer subscription & icons -->
-<section class="py-3 text-light footer-widget border-bottom" style="border-color: #3d3d46 !important; background-color: #000 !important;">
+<section class="py-3 text-light footer-widget" style="background-color: #000 !important;">
     <div class="container">
         <!-- footer logo -->
         <div class="mt-3 mb-4">
@@ -355,213 +355,124 @@
         </div>
     </div>
 
-    <!-- Accordion Fotter widgets -->
-    <div class="d-lg-none bg-transparent">
-        <!-- Quick links -->
-        <div class="aiz-accordion-wrap bg-black">
-            <div class="aiz-accordion-heading container bg-black">
-                <button class="aiz-accordion fs-14 text-white bg-transparent">{{ get_setting('widget_one',null,App::getLocale()) }}</button>
-            </div>
-            <div class="aiz-accordion-panel bg-transparent" style="background-color: #000 !important;">
-                <div class="container">
-                    <ul class="list-unstyled mt-3">
+    <!-- Mobile footer (simple, no accordion) -->
+    <div class="d-lg-none">
+        <div class="container py-4">
+            <div class="row">
+                <!-- Quick links -->
+                <div class="col-12 mb-4">
+                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">
+                        {{ get_setting('widget_one',null,App::getLocale()) }}
+                    </h4>
+                    <ul class="list-unstyled mb-0">
                         @if ( get_setting('widget_one_labels',null,App::getLocale()) !=  null )
                             @foreach (json_decode( get_setting('widget_one_labels',null,App::getLocale()), true) as $key => $value)
-							@php
-								$widget_one_links = '';
-								if(isset(json_decode(get_setting('widget_one_links'), true)[$key])) {
-									$widget_one_links = json_decode(get_setting('widget_one_links'), true)[$key];
-								}
-							@endphp
-                            <li class="mb-2 pb-2 @if (url()->current() == $widget_one_links) active @endif">
-                                <a href="{{ $widget_one_links }}" class="fs-13 text-soft-light text-sm-secondary animate-underline-white">
-                                    {{ $value }}
-                                </a>
-                            </li>
+                                @php
+                                    $widget_one_links = '';
+                                    if(isset(json_decode(get_setting('widget_one_links'), true)[$key])) {
+                                        $widget_one_links = json_decode(get_setting('widget_one_links'), true)[$key];
+                                    }
+                                @endphp
+                                <li class="mb-2">
+                                    <a href="{{ $widget_one_links }}" class="fs-13 text-soft-light animate-underline-white">
+                                        {{ $value }}
+                                    </a>
+                                </li>
                             @endforeach
                         @endif
                     </ul>
                 </div>
-            </div>
-        </div>
 
-        <!-- Contacts -->
-        <div class="aiz-accordion-wrap bg-black">
-            <div class="aiz-accordion-heading container bg-black">
-                <button class="aiz-accordion fs-14 text-white bg-transparent">{{ translate('Contacts') }}</button>
-            </div>
-            <div class="aiz-accordion-panel bg-transparent" style="background-color: #000 !important;">
-                <div class="container">
-                    <ul class="list-unstyled mt-3">
-                        <li class="mb-2">
-                            <p  class="fs-13 text-secondary mb-1">{{ translate('Address') }}</p>
-                            <p  class="fs-13 text-soft-light">{{ get_setting('contact_address',null,App::getLocale()) }}</p>
-                        </li>
-                        <li class="mb-2">
-                            <p  class="fs-13 text-secondary mb-1">{{ translate('Phone') }}</p>
-                            <p  class="fs-13 text-soft-light">{{ get_setting('contact_phone') }}</p>
-                        </li>
-                        <li class="mb-2">
-                            <p  class="fs-13 text-secondary mb-1">{{ translate('Email') }}</p>
-                            <p  class="">
-                                <a href="mailto:{{ get_setting('contact_email') }}" class="fs-13 text-soft-light hov-text-primary">{{ get_setting('contact_email')  }}</a>
-                            </p>
-                        </li>
+                <!-- Store Policy -->
+                <div class="col-12 mb-4">
+                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Store Policy') }}</h4>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('terms') }}">{{ translate('Terms & conditions') }}</a></li>
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('returnpolicy') }}">{{ translate('Return Policy') }}</a></li>
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('supportpolicy') }}">{{ translate('Support Policy') }}</a></li>
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('privacypolicy') }}">{{ translate('Privacy Policy') }}</a></li>
                     </ul>
                 </div>
-            </div>
-        </div>
 
-        <!-- Store Policy -->
-        <div class="aiz-accordion-wrap bg-black">
-            <div class="aiz-accordion-heading container bg-black">
-                <button class="aiz-accordion fs-14 text-white bg-transparent">{{ translate('Store Policy') }}</button>
-            </div>
-            <div class="aiz-accordion-panel bg-transparent" style="background-color: #000 !important;">
-                <div class="container">
-                    <ul class="list-unstyled mt-3">
-                        <li class="mb-2 pb-2">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('terms') }}">
-                                {{ translate('Terms & conditions') }}
-                            </a>
-                        </li>
-                        <li class="mb-2 pb-2">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('returnpolicy') }}">
-                                {{ translate('Return Policy') }}
-                            </a>
-                        </li>
-                        <li class="mb-2 pb-2">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('supportpolicy') }}">
-                                {{ translate('Support Policy') }}
-                            </a>
-                        </li>
-                        <li class="mb-2 pb-2">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('privacypolicy') }}">
-                                {{ translate('Privacy Policy') }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- My Account -->
-        <div class="aiz-accordion-wrap bg-black">
-            <div class="aiz-accordion-heading container bg-black">
-                <button class="aiz-accordion fs-14 text-white bg-transparent">{{ translate('My Account') }}</button>
-            </div>
-            <div class="aiz-accordion-panel bg-transparent" style="background-color: #000 !important;">
-                <div class="container">
-                    <ul class="list-unstyled mt-3">
+                <!-- My Account -->
+                <div class="col-12 mb-4">
+                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('My Account') }}</h4>
+                    <ul class="list-unstyled mb-0">
                         @auth
-                            <li class="mb-2 pb-2">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('logout') }}">
-                                    {{ translate('Logout') }}
-                                </a>
-                            </li>
+                            <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('logout') }}">{{ translate('Logout') }}</a></li>
                         @else
-                            <li class="mb-2 pb-2 {{ areActiveRoutes(['user.login'],' active')}}">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('user.login') }}">
-                                    {{ translate('Login') }}
-                                </a>
-                            </li>
+                            <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('user.login') }}">{{ translate('Login') }}</a></li>
                         @endauth
-                        <li class="mb-2 pb-2 {{ areActiveRoutes(['purchase_history.index'],' active')}}">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('purchase_history.index') }}">
-                                {{ translate('Order History') }}
-                            </a>
-                        </li>
-                        <li class="mb-2 pb-2 {{ areActiveRoutes(['wishlists.index'],' active')}}">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('wishlists.index') }}">
-                                {{ translate('My Wishlist') }}
-                            </a>
-                        </li>
-                        <li class="mb-2 pb-2 {{ areActiveRoutes(['orders.track'],' active')}}">
-                            <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('orders.track') }}">
-                                {{ translate('Track Order') }}
-                            </a>
-                        </li>
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('purchase_history.index') }}">{{ translate('Order History') }}</a></li>
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('wishlists.index') }}">{{ translate('My Wishlist') }}</a></li>
+                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('orders.track') }}">{{ translate('Track Order') }}</a></li>
                         @if (addon_is_activated('affiliate_system'))
-                            <li class="mb-2 pb-2 {{ areActiveRoutes(['affiliate.apply'],' active')}}">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('affiliate.apply') }}">
-                                    {{ translate('Be an affiliate partner')}}
-                                </a>
-                            </li>
+                            <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('affiliate.apply') }}">{{ translate('Be an affiliate partner') }}</a></li>
                         @endif
                     </ul>
                 </div>
-            </div>
-        </div>
 
-        <!-- Seller -->
-        @if (get_setting('vendor_system_activation') == 1)
-        <div class="aiz-accordion-wrap bg-black">
-            <div class="aiz-accordion-heading container bg-black">
-                <button class="aiz-accordion fs-14 text-white bg-transparent">{{ translate('Seller Zone') }}</button>
-            </div>
-            <div class="aiz-accordion-panel bg-transparent" style="background-color: #000 !important;">
-                <div class="container">
-                    <ul class="list-unstyled mt-3">
-                        <li class="mb-2 pb-2 {{ areActiveRoutes(['shops.create'],' active')}}">
-                            <p class="fs-13 text-soft-light text-sm-secondary mb-0">
-                                {{ translate('Become A Seller') }}
-                                <a href="{{ route(get_setting('seller_registration_verify') === '1' ? 'shop-reg.verification' : 'shops.create') }}" class="fs-13 fw-700 text-secondary-base ml-2">{{ translate('Apply Now') }}</a>
-                            </p>
+                <!-- Contacts -->
+                <div class="col-12 mb-4">
+                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Contacts') }}</h4>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <p class="fs-13 text-secondary mb-1">{{ translate('Address') }}</p>
+                            <p class="fs-13 text-soft-light mb-0">{{ get_setting('contact_address',null,App::getLocale()) }}</p>
                         </li>
-                        @guest
-                            <li class="mb-2 pb-2 {{ areActiveRoutes(['deliveryboy.login'],' active')}}">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('seller.login') }}">
-                                    {{ translate('Login to Seller Panel') }}
-                                </a>
-                            </li>
-                        @endguest
-                        @if(get_setting('seller_app_link'))
-                            <li class="mb-2 pb-2">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" target="_blank" href="{{ get_setting('seller_app_link')}}">
-                                    {{ translate('Download Seller App') }}
-                                </a>
-                            </li>
-                        @endif
+                        <li class="mb-2">
+                            <p class="fs-13 text-secondary mb-1">{{ translate('Phone') }}</p>
+                            <p class="fs-13 text-soft-light mb-0">{{ get_setting('contact_phone') }}</p>
+                        </li>
+                        <li class="mb-2">
+                            <p class="fs-13 text-secondary mb-1">{{ translate('Email') }}</p>
+                            <a href="mailto:{{ get_setting('contact_email') }}" class="fs-13 text-soft-light animate-underline-white">{{ get_setting('contact_email') }}</a>
+                        </li>
                     </ul>
                 </div>
-            </div>
-        </div>
-        @endif
 
-        <!-- Delivery Boy -->
-        @if (addon_is_activated('delivery_boy'))
-        <div class="aiz-accordion-wrap bg-black">
-            <div class="aiz-accordion-heading container bg-black">
-                <button class="aiz-accordion fs-14 text-white bg-transparent">{{ translate('Delivery Boy') }}</button>
-            </div>
-            <div class="aiz-accordion-panel bg-transparent" style="background-color: #000 !important;">
-                <div class="container">
-                    <ul class="list-unstyled mt-3">
-                        @guest
-                            <li class="mb-2 pb-2 {{ areActiveRoutes(['deliveryboy.login'],' active')}}">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" href="{{ route('deliveryboy.login') }}">
-                                    {{ translate('Login to Delivery Boy Panel') }}
-                                </a>
-                            </li>
-                        @endguest
-                        @if(get_setting('delivery_boy_app_link'))
-                            <li class="mb-2 pb-2">
-                                <a class="fs-13 text-soft-light text-sm-secondary animate-underline-white" target="_blank" href="{{ get_setting('delivery_boy_app_link')}}">
-                                    {{ translate('Download Delivery Boy App') }}
-                                </a>
-                            </li>
+                @if ($hasSellerOrDelivery)
+                    <div class="col-12">
+                        @if (get_setting('vendor_system_activation') == 1)
+                            <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Seller Zone') }}</h4>
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2">
+                                    <p class="fs-13 text-soft-light mb-0">
+                                        {{ translate('Become A Seller') }}
+                                        <a href="{{ route(get_setting('seller_registration_verify') === '1' ? 'shop-reg.verification' : 'shops.create')  }}" class="fs-13 fw-700 text-secondary-base ml-2">{{ translate('Apply Now') }}</a>
+                                    </p>
+                                </li>
+                                @guest
+                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('seller.login') }}">{{ translate('Login to Seller Panel') }}</a></li>
+                                @endguest
+                                @if(get_setting('seller_app_link'))
+                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" target="_blank" href="{{ get_setting('seller_app_link')}}">{{ translate('Download Seller App') }}</a></li>
+                                @endif
+                            </ul>
                         @endif
-                    </ul>
-                </div>
+
+                        @if (addon_is_activated('delivery_boy'))
+                            <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Delivery Boy') }}</h4>
+                            <ul class="list-unstyled mb-0">
+                                @guest
+                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('deliveryboy.login') }}">{{ translate('Login to Delivery Boy Panel') }}</a></li>
+                                @endguest
+                                @if(get_setting('delivery_boy_app_link'))
+                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" target="_blank" href="{{ get_setting('delivery_boy_app_link')}}">{{ translate('Download Delivery Boy App') }}</a></li>
+                                @endif
+                            </ul>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
-        @endif
     </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="pt-3 pb-7 pb-xl-3 bg-black text-soft-light">
-    <div class="container">
+<footer class="pt-3 pb-7 pb-xl-3 text-soft-light" style="background-color:#000 !important;">
+    <div class="container-fluid px-0" style="background-color:#000 !important;">
+        <div class="container">
         <div class="row align-items-center py-3">
             <!-- Copyright -->
             <div class="col-lg-6 order-1 order-lg-0">
@@ -584,6 +495,7 @@
                     </ul>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </footer>

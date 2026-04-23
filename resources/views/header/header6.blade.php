@@ -5,40 +5,73 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
 
 @if (get_setting('homepage_select') == 'thecore')
     <style>
-        .rm-header { background: #fff; border-bottom: 1px solid #eee; }
-        .rm-header__row { min-height: 64px; }
+        .rm-header { background: #fff; border-bottom: 1px solid rgba(0,0,0,.08); }
+        .rm-header__row { min-height: 72px; }
         .rm-header__left { min-width: 40px; }
         .rm-header__center { flex: 1; display: flex; justify-content: center; }
         .rm-header__right { min-width: 40px; display:flex; justify-content: flex-end; }
         .rm-logo-text {
-            font-family: "Urbanist", "Helvetica Neue", Arial, sans-serif;
+            font-family: "Hammersmith One", "Helvetica Neue", Arial, sans-serif;
             font-weight: 700;
-            letter-spacing: .35em;
+            letter-spacing: .28em;
             text-transform: uppercase;
-            font-size: 14px;
+            font-size: 18px;
             color: #111;
             white-space: nowrap;
         }
         .rm-header__links a {
-            font-family: "Urbanist", "Helvetica Neue", Arial, sans-serif;
-            font-weight: 600;
-            letter-spacing: .18em;
+            font-family: inherit;
+            font-weight: 700;
+            letter-spacing: .14em;
             text-transform: uppercase;
             font-size: 12px;
             color: #111;
-            opacity: .85;
+            opacity: .92;
             white-space: nowrap;
         }
-        .rm-header__links a:hover { opacity: 1; }
+        .rm-header__links a:hover,
+        .rm-header__links a:focus {
+            color: #000 !important;
+            opacity: 1;
+        }
         .rm-header__sep { opacity: .25; padding: 0 10px; }
-        .rm-icon-btn { display:inline-flex; align-items:center; justify-content:center; width: 36px; height: 36px; border: 1px solid transparent; border-radius: 999px; }
-        .rm-icon-btn:hover { border-color: rgba(0,0,0,.08); background: rgba(0,0,0,.02); }
+        .rm-icon-btn { display:inline-flex; align-items:center; justify-content:center; width: 38px; height: 38px; border: 1px solid rgba(0,0,0,.08); border-radius: 999px; background: #fff; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
+        .rm-icon-btn:hover { border-color: rgba(0,0,0,.14); background: rgba(0,0,0,.02); transform: translateY(-1px); }
+        .rm-icon-btn:active { transform: translateY(0); }
+
+        .rm-header__links { gap: 16px !important; }
+
+        /* User icon dropdown */
+        #rm-user-menu.dropdown-toggle::after { display: none; }
+        #rm-user-menu:focus { box-shadow: none; }
+        .rm-user-menu .dropdown-menu {
+            min-width: 190px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.08);
+            box-shadow: 0 14px 30px rgba(0,0,0,.12);
+            padding: 8px;
+        }
+        .rm-user-menu .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .rm-user-menu .dropdown-item:hover,
+        .rm-user-menu .dropdown-item:focus {
+            color: #000 !important;
+            background: rgba(0,0,0,.04);
+        }
         .rm-searchbar { display:none; border-top: 1px solid #eee; background:#fff; }
         .rm-searchbar.is-open { display:block; }
         .rm-searchbar .search-input-box { position: relative; width: 100%; }
         .rm-searchbar .search-input-box svg { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
         @media (max-width: 991px) {
             .rm-header__links { display: none !important; }
+            .rm-logo-text { font-size: 16px; letter-spacing: .24em; }
         }
         @media (min-width: 992px) {
             .rm-header__left { display: none !important; }
@@ -108,6 +141,23 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                     @if (get_setting('helpline_number'))
                         <a class="text-reset" href="tel:{{ get_setting('helpline_number') }}">CALL US</a>
                     @endif
+                    <div class="dropdown rm-user-menu">
+                        <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                                <path d="M10 10a4.5 4.5 0 1 0-4.5-4.5A4.51 4.51 0 0 0 10 10zm0-7a2.5 2.5 0 1 1-2.5 2.5A2.5 2.5 0 0 1 10 3zM10 12c-4.3 0-8 2.3-8 5a1 1 0 0 0 2 0c0-1.3 2.6-3 6-3s6 1.7 6 3a1 1 0 0 0 2 0c0-2.7-3.7-5-8-5z" fill="#111"/>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            @guest
+                                <a class="dropdown-item" href="{{ route('user.login') }}">{{ translate('Login') }}</a>
+                                <a class="dropdown-item" href="{{ route('user.registration') }}">{{ translate('Registration') }}</a>
+                            @endguest
+                            @auth
+                                <a class="dropdown-item" href="{{ route('dashboard') }}">{{ translate('Dashboard') }}</a>
+                                <a class="dropdown-item" href="{{ route('logout') }}">{{ translate('Logout') }}</a>
+                            @endauth
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Right: reserved (keep layout balanced) -->
