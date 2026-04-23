@@ -64,7 +64,7 @@
                                 @if ( (is_array($colors) && count($colors) > 0) || (is_array($attributes) && count($attributes) > 0) )
                                     <a href="javascript:void(0)"
                                     class="btn py-1 py-sm-2 px-2 px-sm-4 mr-2 add-to-cart fw-600 rounded-0" style="background-color: {{ $button_color }}; color: {{ $button_text_color }};"
-                                    @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="scrollToTopSection()" @else onclick="showLoginModal()" @endif>
+                                    onclick="scrollToTopSection()">
                                         
                                         <span class="d-none d-sm-inline">{{ translate('Select Variant') }}</span>
                                         <i class="las la-sliders-h d-sm-none" style="font-size: 1.4rem;"></i>
@@ -72,7 +72,7 @@
                                 @else
                                     <button type="button"
                                             class="btn py-1 py-sm-2 px-2 px-sm-4 mr-2 add-to-cart fw-600 rounded-0" style="background-color: {{ $button_color }}; color: {{ $button_text_color }};"
-                                            @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
+                                            onclick="addToCart()">
                                        
                                         <span class="d-none d-sm-inline">{{ translate('Add to cart') }}</span>
                                         <i class="las la-shopping-bag d-sm-none"></i>
@@ -88,7 +88,7 @@
                         @elseif ($detailedProduct->digital == 1)
                             <button type="button"
                                     class="btn py-1 py-sm-2 px-2 px-sm-4 mr-2 add-to-cart fw-600 rounded-0" style="background-color: {{ $button_color }}; color: {{ $button_text_color }};"
-                                    @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
+                                    onclick="addToCart()">
                                 
                                 <span class="d-none d-sm-inline">{{ translate('Add to cart') }}</span>
                                 <i class="las la-shopping-bag d-sm-none"></i>

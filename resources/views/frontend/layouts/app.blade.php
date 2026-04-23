@@ -887,6 +887,7 @@
         }
 
         function addToCart(){
+            // Guests can add to cart; only restrict non-customer logged-in users
             @if (Auth::check() && Auth::user()->user_type != 'customer')
                 AIZ.plugins.notify('warning', "{{ translate('Please Login as a customer to add products to the Cart.') }}");
                 return false;
@@ -925,6 +926,7 @@
         }
 
         function addToCartSingleProduct(productId = null){
+            // Guests can add to cart; only restrict non-customer logged-in users
             @if (Auth::check() && Auth::user()->user_type != 'customer')
                 AIZ.plugins.notify('warning', "{{ translate('Please Login as a customer to add products to the Cart.') }}");
                 return false;

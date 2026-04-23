@@ -309,8 +309,8 @@
 
 <div class="w-100 px-30px  position-absolute bottom-0 bg-white right-offcavas-footer pt-20px pb-20px border-top border-soft-light" style="box-shadow: none!important;">
     <div class="d-flex flex-wrap flex-md-nowrap align-items-center mb-2">
-        <button type="button" @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="buyNow()" @else onclick="showLoginModal()" @endif class="text-white border-0 rounded-1 fs-14 fw-bold bg-black hov-opacity-70 has-transition py-15px px-20px w-100 mb-2 mb-md-0 mr-0 mr-md-2 buy-now">{{ translate('Buy Now') }}</button>
-        <button id="added_to_cart_btn" type="button" @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif class="text-blue border-0 rounded-1 fs-14 fw-bold bg-soft-blue hov-bg-blue hov-text-white py-15px px-20px w-100 add-to-cart">{{ translate('Add to cart') }} <span id="add_to_cart_count"></span></button>
+        <button type="button" onclick="buyNow()" class="text-white border-0 rounded-1 fs-14 fw-bold bg-black hov-opacity-70 has-transition py-15px px-20px w-100 mb-2 mb-md-0 mr-0 mr-md-2 buy-now">{{ translate('Buy Now') }}</button>
+        <button id="added_to_cart_btn" type="button" onclick="addToCart()" class="text-blue border-0 rounded-1 fs-14 fw-bold bg-soft-blue hov-bg-blue hov-text-white py-15px px-20px w-100 add-to-cart">{{ translate('Add to cart') }} <span id="add_to_cart_count"></span></button>
     </div>
     <div class="">
         <button type="button" class="out-of-stock fw-600 d-none text-white bg-light bg-soft-white border-0 rounded-1 fs-14 fw-bold hov-opacity-70 has-transition py-15px px-20px w-100" disabled>

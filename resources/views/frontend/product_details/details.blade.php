@@ -526,10 +526,10 @@
                     @endif
                     <!--Buttons Start-->
                     <div class="d-flex flex-wrap flex-md-nowrap align-items-center">
-                        <button type="button" @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="buyNow()" @else onclick="showLoginModal()" @endif
+                        <button type="button" onclick="buyNow()"
                             class="text-white border-0 rounded-1 fs-14 fw-bold bg-black hov-opacity-70 has-transition py-20px px-20px w-100 mb-2 mb-md-0 mr-0 mr-md-2 buy-now">{{ translate('Buy Now') }}
                         </button>
-                        <button type="button" id="added_to_cart_btn" @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="addToCart()" @else onclick="showLoginModal()" @endif
+                        <button type="button" id="added_to_cart_btn" onclick="addToCart()"
                             class="text-blue border-0 rounded-1 fs-14 fw-bold bg-soft-blue hov-bg-blue hov-text-white py-20px px-20px w-100 add-to-cart">{{translate('Add to Cart')}} <span id="add_to_cart_count">(01)</span>
                         </button>
                         

@@ -239,7 +239,7 @@
                 <div class="mt-3">
                     @if ($product->digital == 1)
                         <button type="button" class="btn btn-primary rounded-0 buy-now fw-600 add-to-cart" 
-                            @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif
+                            onclick="addToCart()"
                         >
                             <i class="la la-shopping-cart"></i>
                             <span class="d-none d-md-inline-block">{{ translate('Add to cart')}}</span>
@@ -252,7 +252,7 @@
                             </a>
                         @else
                             <button type="button" class="btn btn-primary rounded-0 buy-now fw-600 add-to-cart" 
-                                @if (Auth::check() || get_Setting('guest_checkout_activation') == 1) onclick="addToCart()" @else onclick="showLoginModal()" @endif
+                                onclick="addToCart()"
                             >
                                 <i class="la la-shopping-cart"></i>
                                 <span class="d-none d-md-inline-block">{{ translate('Add to cart')}}</span>
