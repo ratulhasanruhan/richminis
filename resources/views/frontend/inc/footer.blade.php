@@ -57,445 +57,143 @@
 
 {{-- policy bar removed per request --}}
 
-<!-- footer subscription & icons -->
-<section class="py-3 text-light footer-widget" style="background-color: #000 !important;">
-    <div class="container">
-        <!-- footer logo -->
-        <div class="mt-3 mb-4">
-            <a href="{{ route('home') }}" class="d-block">
-                @if(get_setting('footer_logo') != null)
-                    <img class="lazyload h-45px" src="{{ static_asset('assets/img/placeholder-rect.jpg') }}" data-src="{{ uploaded_asset(get_setting('footer_logo')) }}" alt="{{ env('APP_NAME') }}" height="45">
-                @else
-                    <img class="lazyload h-45px" src="{{ static_asset('assets/img/placeholder-rect.jpg') }}" data-src="{{ static_asset('assets/img/logo.png') }}" alt="{{ env('APP_NAME') }}" height="45">
-                @endif
-            </a>
-        </div>
-        <div class="row">
-            <!-- about & subscription -->
-            
-            <div class="col-xl-6 col-lg-7">
-                <div class="mb-4 text-secondary text-justify">
-                    {!! get_setting('about_us_description',null,App::getLocale()) !!}
-                </div>
-                @if(get_setting('newsletter_activation'))
-                    <h5 class="fs-14 fw-700 text-soft-light mt-1 mb-3">{{ translate('Subscribe to our newsletter for regular updates about Offers, Coupons & more') }}</h5>
-                    <div class="mb-3">
-                        <form method="POST" action="{{ route('subscribers.store') }}">
-                            @csrf
-                            <div class="row gutters-10">
-                                <div class="col-8">
-                                    <input type="email" class="form-control border-secondary rounded-0 text-white w-100 bg-transparent" placeholder="{{ translate('Your Email Address') }}" name="email" required>
-                                </div>
-                                <div class="col-4">
-                                    <button type="submit" class="btn btn-primary rounded-0 w-100">{{ translate('Subscribe') }}</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                @endif
-            </div>
-
-            <div class="col d-none d-lg-block"></div>
-
-            <!-- Follow & Apps -->
-            <div class="col-xxl-3 col-xl-4 col-lg-4">
-                <!-- Social -->
-                @if ( get_setting('show_social_links') )
-                    <h5 class="fs-14 fw-700 text-secondary text-uppercase mt-3 mt-lg-0">{{ translate('Follow Us') }}</h5>
-                    <ul class="list-inline social colored mb-4">
-                        @if (!empty(get_setting('facebook_link')))
-                            <li class="list-inline-item ml-2 mr-2">
-                                <a href="{{ get_setting('facebook_link') }}" target="_blank"
-                                    class="facebook"><i class="lab la-facebook-f"></i></a>
-                            </li>
-                        @endif
-                        @if (!empty(get_setting('twitter_link')))
-                            <li class="list-inline-item ml-2 mr-2">
-                                <a href="{{ get_setting('twitter_link') }}" target="_blank"
-                                    class="x-twitter">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#ffffff" viewBox="0 0 16 16" class="mb-2 pb-1">
-                                        <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 
-                                        .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/>
-                                    </svg>
-                                </a>
-                            </li>
-                        @endif
-                        @if (!empty(get_setting('instagram_link')))
-                            <li class="list-inline-item ml-2 mr-2">
-                                <a href="{{ get_setting('instagram_link') }}" target="_blank"
-                                    class="instagram"><i class="lab la-instagram"></i></a>
-                            </li>
-                        @endif
-                        @if (!empty(get_setting('youtube_link')))
-                            <li class="list-inline-item ml-2 mr-2">
-                                <a href="{{ get_setting('youtube_link') }}" target="_blank"
-                                    class="youtube"><i class="lab la-youtube"></i></a>
-                            </li>
-                        @endif
-                        @if (!empty(get_setting('linkedin_link')))
-                            <li class="list-inline-item ml-2 mr-2">
-                                <a href="{{ get_setting('linkedin_link') }}" target="_blank"
-                                    class="linkedin"><i class="lab la-linkedin-in"></i></a>
-                            </li>
-                        @endif
-                    </ul>
-                @endif
-
-                <!-- Apps link -->
-                @if((get_setting('play_store_link') != null) || (get_setting('app_store_link') != null))
-                    <h5 class="fs-14 fw-700 text-secondary text-uppercase mt-3">{{ translate('Mobile Apps') }}</h5>
-                    <div class="d-flex mt-3">
-                        <div class="">
-                            <a href="{{ get_setting('play_store_link') }}" target="_blank" class="mr-2 mb-2 overflow-hidden hov-scale-img">
-                                <img class="lazyload has-transition" src="{{ static_asset('assets/img/placeholder-rect.jpg') }}" data-src="{{ static_asset('assets/img/play.png') }}" alt="{{ env('APP_NAME') }}" height="44">
-                            </a>
-                        </div>
-                        <div class="">
-                            <a href="{{ get_setting('app_store_link') }}" target="_blank" class="overflow-hidden hov-scale-img">
-                                <img class="lazyload has-transition" src="{{ static_asset('assets/img/placeholder-rect.jpg') }}" data-src="{{ static_asset('assets/img/app.png') }}" alt="{{ env('APP_NAME') }}" height="44">
-                            </a>
-                        </div>
-                    </div>
-                @endif
-
-            </div>
-        </div>
-    </div>
-</section>
-
 @php
-    $hasSellerOrDelivery = (get_setting('vendor_system_activation') == 1) || addon_is_activated('delivery_boy');
-    // We now have 4 fixed columns (Quick links, Contacts, Store Policy, My Account).
-    // If Seller/Delivery is enabled it becomes a 5th column; size columns so nothing wraps.
-    $col_values = $hasSellerOrDelivery ? "col-lg-2 col-md-6 col-sm-6" : "col-lg-3 col-md-6 col-sm-6";
-    $seller_col_values = "col-lg-4 col-md-6 col-sm-6";
+    $footerPhone = get_setting('contact_phone') ?: get_setting('helpline_number');
+    $footerEmail = get_setting('contact_email');
 @endphp
-<section class="py-lg-3 text-light footer-widget" style="background-color: #000 !important;">
-    <!-- footer widgets ========== [Accordion Fotter widgets are bellow from this]-->
-    <div class="container d-none d-lg-block">
-        <div class="row">
-            <!-- Quick links -->
-            <div class="{{ $col_values }}">
-                <div class="text-center text-sm-left mt-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">
-                        {{ get_setting('widget_one',null,App::getLocale()) }}
-                    </h4>
-                    <ul class="list-unstyled">
-                        @if ( get_setting('widget_one_labels',null,App::getLocale()) !=  null )
-                            @foreach (json_decode( get_setting('widget_one_labels',null,App::getLocale()), true) as $key => $value)
-                            @php
-								$widget_one_links = '';
-								if(isset(json_decode(get_setting('widget_one_links'), true)[$key])) {
-									$widget_one_links = json_decode(get_setting('widget_one_links'), true)[$key];
-								}
-							@endphp
-                            <li class="mb-2">
-                                <a href="{{ $widget_one_links }}" class="fs-13 text-soft-light animate-underline-white">
-                                    {{ $value }}
-                                </a>
-                            </li>
-                            @endforeach
-                        @endif
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Contacts -->
-            <div class="{{ $col_values }}">
-                <div class="text-center text-sm-left mt-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Contacts') }}</h4>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <p  class="fs-13 text-secondary mb-1">{{ translate('Address') }}</p>
-                            <p  class="fs-13 text-soft-light">{{ get_setting('contact_address',null,App::getLocale()) }}</p>
-                        </li>
-                        <li class="mb-2">
-                            <p  class="fs-13 text-secondary mb-1">{{ translate('Phone') }}</p>
-                            <p  class="fs-13 text-soft-light">{{ get_setting('contact_phone') }}</p>
-                        </li>
-                        <li class="mb-2">
-                            <p  class="fs-13 text-secondary mb-1">{{ translate('Email') }}</p>
-                            <p  class="">
-                                <a href="mailto:{{ get_setting('contact_email') }}" class="fs-13 text-soft-light hov-text-primary">{{ get_setting('contact_email')  }}</a>
-                            </p>
-                        </li>
-                    </ul>
+<footer class="rm-footer" style="background:#000; color:#fff;">
+    <style>
+        .rm-footer { background:#000; }
+        .rm-footer__inner { padding: 56px 0 22px; }
+        .rm-footer__title {
+            margin: 0 0 12px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.86);
+        }
+        .rm-footer__text {
+            color: rgba(255,255,255,.72);
+            font-size: 14px;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+        .rm-footer__link {
+            display: inline-block;
+            color: rgba(255,255,255,.82);
+            font-size: 14px;
+            line-height: 1.9;
+            font-weight: 600;
+            letter-spacing: .02em;
+        }
+        .rm-footer__link:hover,
+        .rm-footer__link:focus { color: #fff !important; }
+        .rm-footer__social {
+            display:flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .rm-footer__social a{
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border: 1px solid rgba(255,255,255,.18);
+            color: rgba(255,255,255,.92);
+            transition: transform .15s ease, background .15s ease, border-color .15s ease;
+        }
+        .rm-footer__social a:hover{
+            transform: translateY(-1px);
+            background: rgba(255,255,255,.06);
+            border-color: rgba(255,255,255,.28);
+            color: #fff;
+        }
+        .rm-footer__copyright{
+            padding: 16px 0 30px;
+            color: rgba(255,255,255,.70);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            text-align: left;
+        }
+        @media (max-width: 991px){
+            .rm-footer__inner { padding: 44px 16px 18px; }
+            .rm-footer__copyright { padding-left: 16px; padding-right: 16px; }
+            .rm-footer__copyright { text-align: center; }
+        }
+    </style>
+
+    <div class="container rm-footer__inner">
+        <div class="row">
+            <!-- About Us -->
+            <div class="col-lg-4 mb-4">
+                <div class="rm-footer__title">{{ translate('About Us') }}</div>
+                <div class="rm-footer__text">
+                    {!! get_setting('about_us_description', null, App::getLocale()) !!}
                 </div>
             </div>
 
             <!-- Store Policy -->
-            <div class="{{ $col_values }}">
-                <div class="text-center text-sm-left mt-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Store Policy') }}</h4>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('terms') }}">
-                                {{ translate('Terms & conditions') }}
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('returnpolicy') }}">
-                                {{ translate('Return Policy') }}
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('supportpolicy') }}">
-                                {{ translate('Support Policy') }}
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('privacypolicy') }}">
-                                {{ translate('Privacy Policy') }}
-                            </a>
-                        </li>
-                    </ul>
+            <div class="col-lg-4 mb-4">
+                <div class="rm-footer__title">{{ translate('Store Policy') }}</div>
+                <div class="d-flex flex-column">
+                    <a class="rm-footer__link" href="{{ route('returnpolicy') }}">{{ translate('Return and refund') }}</a>
+                    <a class="rm-footer__link" href="{{ route('privacypolicy') }}">{{ translate('Privacy policy') }}</a>
+                    <a class="rm-footer__link" href="{{ route('terms') }}">{{ translate('Terms of service') }}</a>
                 </div>
             </div>
 
-            <!-- My Account -->
-            <div class="{{ $col_values }}">
-                <div class="text-center text-sm-left mt-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('My Account') }}</h4>
-                    <ul class="list-unstyled">
-                        @if (Auth::check())
-                            <li class="mb-2">
-                                <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('logout') }}">
-                                    {{ translate('Logout') }}
-                                </a>
-                            </li>
-                        @else
-                            <li class="mb-2">
-                                <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('user.login') }}">
-                                    {{ translate('Login') }}
-                                </a>
-                            </li>
-                        @endif
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('purchase_history.index') }}">
-                                {{ translate('Order History') }}
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('wishlists.index') }}">
-                                {{ translate('My Wishlist') }}
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('orders.track') }}">
-                                {{ translate('Track Order') }}
-                            </a>
-                        </li>
-                        @if (addon_is_activated('affiliate_system'))
-                            <li class="mb-2">
-                                <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('affiliate.apply') }}">
-                                    {{ translate('Be an affiliate partner')}}
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Seller & Delivery Boy -->
-            @if ($hasSellerOrDelivery)
-            <div class="{{ $seller_col_values }}">
-                <div class="text-center text-sm-left mt-4">
-                    <!-- Seller -->
-                    @if (get_setting('vendor_system_activation') == 1)
-                        <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Seller Zone') }}</h4>
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <p class="fs-13 text-soft-light mb-0">
-                                    {{ translate('Become A Seller') }}
-                                    <a href="{{ route(get_setting('seller_registration_verify') === '1' ? 'shop-reg.verification' : 'shops.create')  }}" class="fs-13 fw-700 text-secondary-base ml-2">{{ translate('Apply Now') }}</a>
-                                    {{-- <a href="{{ route('shops.create') }}" class="fs-13 fw-700 text-secondary-base ml-2">{{ translate('Apply Now') }}</a> --}}
-                                </p>
-                            </li>
-                            @guest
-                                <li class="mb-2">
-                                    <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('seller.login') }}">
-                                        {{ translate('Login to Seller Panel') }}
-                                    </a>
-                                </li>
-                            @endguest
-                            @if(get_setting('seller_app_link'))
-                                <li class="mb-2">
-                                    <a class="fs-13 text-soft-light animate-underline-white" target="_blank" href="{{ get_setting('seller_app_link')}}">
-                                        {{ translate('Download Seller App') }}
-                                    </a>
-                                </li>
-                            @endif
-                        </ul>
+            <!-- Connect -->
+            <div class="col-lg-4 mb-4">
+                <div class="rm-footer__title">{{ translate('Connect With Us') }}</div>
+                <div class="rm-footer__text">
+                    @if(!empty($footerPhone))
+                        <div>{{ translate('Care') }}: <a class="rm-footer__link" href="tel:{{ $footerPhone }}">{{ $footerPhone }}</a></div>
                     @endif
-
-                    <!-- Delivery Boy -->
-                    @if (addon_is_activated('delivery_boy'))
-                        <h4 class="fs-14 text-secondary text-uppercase fw-700 mt-4 mb-3">{{ translate('Delivery Boy') }}</h4>
-                        <ul class="list-unstyled">
-                            @guest
-                                <li class="mb-2">
-                                    <a class="fs-13 text-soft-light animate-underline-white" href="{{ route('deliveryboy.login') }}">
-                                        {{ translate('Login to Delivery Boy Panel') }}
-                                    </a>
-                                </li>
-                            @endguest
-
-                            @if(get_setting('delivery_boy_app_link'))
-                                <li class="mb-2">
-                                    <a class="fs-13 text-soft-light animate-underline-white" target="_blank" href="{{ get_setting('delivery_boy_app_link')}}">
-                                        {{ translate('Download Delivery Boy App') }}
-                                    </a>
-                                </li>
-                            @endif
-                        </ul>
+                    @if(!empty($footerEmail))
+                        <div>{{ translate('Email') }}: <a class="rm-footer__link" href="mailto:{{ $footerEmail }}">{{ $footerEmail }}</a></div>
                     @endif
                 </div>
-            </div>
-            @endif
-        </div>
-    </div>
 
-    <!-- Mobile footer (simple, no accordion) -->
-    <div class="d-lg-none">
-        <div class="container py-4">
-            <div class="row">
-                <!-- Quick links -->
-                <div class="col-12 mb-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">
-                        {{ get_setting('widget_one',null,App::getLocale()) }}
-                    </h4>
-                    <ul class="list-unstyled mb-0">
-                        @if ( get_setting('widget_one_labels',null,App::getLocale()) !=  null )
-                            @foreach (json_decode( get_setting('widget_one_labels',null,App::getLocale()), true) as $key => $value)
-                                @php
-                                    $widget_one_links = '';
-                                    if(isset(json_decode(get_setting('widget_one_links'), true)[$key])) {
-                                        $widget_one_links = json_decode(get_setting('widget_one_links'), true)[$key];
-                                    }
-                                @endphp
-                                <li class="mb-2">
-                                    <a href="{{ $widget_one_links }}" class="fs-13 text-soft-light animate-underline-white">
-                                        {{ $value }}
-                                    </a>
-                                </li>
-                            @endforeach
+                <div class="rm-footer__text" style="margin-top: 14px;">
+                    {{ translate('Follow us to get first dibs on new arrivals, sales, exclusive content, events and more!') }}
+                </div>
+
+                @if (get_setting('show_social_links'))
+                    <div class="rm-footer__social" aria-label="{{ translate('Social links') }}">
+                        @if (!empty(get_setting('facebook_link')))
+                            <a href="{{ get_setting('facebook_link') }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="lab la-facebook-f"></i></a>
                         @endif
-                    </ul>
-                </div>
-
-                <!-- Store Policy -->
-                <div class="col-12 mb-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Store Policy') }}</h4>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('terms') }}">{{ translate('Terms & conditions') }}</a></li>
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('returnpolicy') }}">{{ translate('Return Policy') }}</a></li>
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('supportpolicy') }}">{{ translate('Support Policy') }}</a></li>
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('privacypolicy') }}">{{ translate('Privacy Policy') }}</a></li>
-                    </ul>
-                </div>
-
-                <!-- My Account -->
-                <div class="col-12 mb-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('My Account') }}</h4>
-                    <ul class="list-unstyled mb-0">
-                        @auth
-                            <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('logout') }}">{{ translate('Logout') }}</a></li>
-                        @else
-                            <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('user.login') }}">{{ translate('Login') }}</a></li>
-                        @endauth
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('purchase_history.index') }}">{{ translate('Order History') }}</a></li>
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('wishlists.index') }}">{{ translate('My Wishlist') }}</a></li>
-                        <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('orders.track') }}">{{ translate('Track Order') }}</a></li>
-                        @if (addon_is_activated('affiliate_system'))
-                            <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('affiliate.apply') }}">{{ translate('Be an affiliate partner') }}</a></li>
+                        @if (!empty(get_setting('instagram_link')))
+                            <a href="{{ get_setting('instagram_link') }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="lab la-instagram"></i></a>
                         @endif
-                    </ul>
-                </div>
-
-                <!-- Contacts -->
-                <div class="col-12 mb-4">
-                    <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Contacts') }}</h4>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2">
-                            <p class="fs-13 text-secondary mb-1">{{ translate('Address') }}</p>
-                            <p class="fs-13 text-soft-light mb-0">{{ get_setting('contact_address',null,App::getLocale()) }}</p>
-                        </li>
-                        <li class="mb-2">
-                            <p class="fs-13 text-secondary mb-1">{{ translate('Phone') }}</p>
-                            <p class="fs-13 text-soft-light mb-0">{{ get_setting('contact_phone') }}</p>
-                        </li>
-                        <li class="mb-2">
-                            <p class="fs-13 text-secondary mb-1">{{ translate('Email') }}</p>
-                            <a href="mailto:{{ get_setting('contact_email') }}" class="fs-13 text-soft-light animate-underline-white">{{ get_setting('contact_email') }}</a>
-                        </li>
-                    </ul>
-                </div>
-
-                @if ($hasSellerOrDelivery)
-                    <div class="col-12">
-                        @if (get_setting('vendor_system_activation') == 1)
-                            <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Seller Zone') }}</h4>
-                            <ul class="list-unstyled mb-4">
-                                <li class="mb-2">
-                                    <p class="fs-13 text-soft-light mb-0">
-                                        {{ translate('Become A Seller') }}
-                                        <a href="{{ route(get_setting('seller_registration_verify') === '1' ? 'shop-reg.verification' : 'shops.create')  }}" class="fs-13 fw-700 text-secondary-base ml-2">{{ translate('Apply Now') }}</a>
-                                    </p>
-                                </li>
-                                @guest
-                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('seller.login') }}">{{ translate('Login to Seller Panel') }}</a></li>
-                                @endguest
-                                @if(get_setting('seller_app_link'))
-                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" target="_blank" href="{{ get_setting('seller_app_link')}}">{{ translate('Download Seller App') }}</a></li>
-                                @endif
-                            </ul>
+                        @if (!empty(get_setting('youtube_link')))
+                            <a href="{{ get_setting('youtube_link') }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="lab la-youtube"></i></a>
                         @endif
-
-                        @if (addon_is_activated('delivery_boy'))
-                            <h4 class="fs-14 text-secondary text-uppercase fw-700 mb-3">{{ translate('Delivery Boy') }}</h4>
-                            <ul class="list-unstyled mb-0">
-                                @guest
-                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" href="{{ route('deliveryboy.login') }}">{{ translate('Login to Delivery Boy Panel') }}</a></li>
-                                @endguest
-                                @if(get_setting('delivery_boy_app_link'))
-                                    <li class="mb-2"><a class="fs-13 text-soft-light animate-underline-white" target="_blank" href="{{ get_setting('delivery_boy_app_link')}}">{{ translate('Download Delivery Boy App') }}</a></li>
-                                @endif
-                            </ul>
+                        @if (!empty(get_setting('linkedin_link')))
+                            <a href="{{ get_setting('linkedin_link') }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="lab la-linkedin-in"></i></a>
+                        @endif
+                        @if (!empty(env('WHATSAPP_NUMBER')))
+                            @php $wa = preg_replace('/[^0-9]/', '', env('WHATSAPP_NUMBER')); @endphp
+                            @if(!empty($wa))
+                                <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="lab la-whatsapp"></i></a>
+                            @endif
                         @endif
                     </div>
                 @endif
             </div>
         </div>
     </div>
-</section>
 
-<!-- FOOTER -->
-<footer class="pt-3 pb-7 pb-xl-3 text-soft-light" style="background-color:#000 !important;">
-    <div class="container-fluid px-0" style="background-color:#000 !important;">
-        <div class="container">
-        <div class="row align-items-center py-3">
-            <!-- Copyright -->
-            <div class="col-lg-6 order-1 order-lg-0">
-                <div class="text-center text-lg-left fs-14" current-verison="{{get_setting("current_version")}}">
-                    {!! get_setting('frontend_copyright_text', null, App::getLocale()) !!}
-                </div>
-            </div>
-
-            <!-- Payment Method Images -->
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="text-center text-lg-right">
-                    <ul class="list-inline mb-0">
-                        @if ( get_setting('payment_method_images') !=  null )
-                            @foreach (explode(',', get_setting('payment_method_images')) as $key => $value)
-                                <li class="list-inline-item mr-3">
-                                    <img src="{{ uploaded_asset($value) }}" height="20" class="mw-100 h-auto" style="max-height: 20px" alt="{{ translate('payment_method') }}">
-                                </li>
-                            @endforeach
-                        @endif
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <div class="container">
+        <div class="rm-footer__copyright">
+            {!! get_setting('frontend_copyright_text', null, App::getLocale()) !!}
         </div>
     </div>
 </footer>
