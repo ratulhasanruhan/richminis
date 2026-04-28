@@ -33,8 +33,22 @@
                 </div>
             </div>
 
+            @php
+                $activeCountries = get_active_countries();
+                $bdCountry = null;
+                try {
+                    $bdCountry = $activeCountries->where('code', 'BD')->first();
+                    if (!$bdCountry) {
+                        $bdCountry = $activeCountries->where('name', 'Bangladesh')->first();
+                    }
+                } catch (\Throwable $e) {
+                    $bdCountry = null;
+                }
+                $defaultCountryId = $bdCountry?->id ?? ($activeCountries->first()->id ?? null);
+            @endphp
+
             <!-- Country -->
-            @if (get_active_countries()->count() > 1)
+            @if ($activeCountries->count() > 1)
             <div class="row">
                 <div class="col-md-2 mt-md-2">
                     <label>{{ translate('Country')}} <span class="text-danger">*</span></label>
@@ -44,18 +58,17 @@
                         <select class="form-control aiz-selectpicker rounded-0" @if (get_setting('shipping_type') == 'carrier_wise_shipping') onchange="updateDeliveryAddress(this.value)" @endif
                             data-live-search="true" data-placeholder="{{ translate('Select your country') }}" name="country_id" required>
                             <option value="">{{ translate('Select your country') }}</option>
-                            @foreach (get_active_countries() as $key => $country)
-                                <option value="{{ $country->id }}">{{ $country->name }}</option>
+                            @foreach ($activeCountries as $key => $country)
+                                <option value="{{ $country->id }}" @if($defaultCountryId && (int)$country->id === (int)$defaultCountryId) selected @endif>{{ $country->name }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
             </div>
-            @elseif(get_active_countries()->count() == 1)
-            <input type="hidden" name="country_id" value="{{get_active_countries()[0]->id }}">
+            @elseif($activeCountries->count() == 1)
+            <input type="hidden" name="country_id" value="{{ $defaultCountryId }}">
             @endif
 
-            @if(get_setting('has_state') == 1)
             <!-- State -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
@@ -67,7 +80,6 @@
                     </select>
                 </div>
             </div>
-            @endif
 
             <!-- City -->
             <div class="row">
@@ -147,20 +159,7 @@
                 </div>
             </div>
 
-            <div class="row mt-2">
-                <div class="col-md-2 mt-md-2">
-                    
-                </div>
-                <div class="col-md-10">
-                    <div class="form-group form-check px-0 py-1 m-0">
-                        <label class="aiz-checkbox m-0">
-                            <input type="checkbox" id="sameAsShipping" name="same_as_shipping" value="1">
-                            <span class="fs-14 fw-300 text-reset">{{ translate('Use this as billing address') }}</span>
-                            <span class="aiz-square-check"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
+            <input type="checkbox" id="sameAsShipping" name="same_as_shipping" value="1" checked style="display:none;">
         </div>
     </div>
 
@@ -277,9 +276,7 @@
     <div class="col-md-2 mt-md-2"></div>
     <div class="col-md-10">
         <div class="bg-soft-info p-2">
-            {{ translate('If you have already used the same mail address or phone number before, please ') }}
-            <a href="javascript:void(0);" data-toggle="modal" data-target="#login_modal" class="fw-700 animate-underline-primary">{{ translate('Login') }}</a>
-            {{ translate(' first to continue') }}
+            {{ translate('We will send an OTP to your email to confirm your order.') }}
         </div>
     </div>
 </div>

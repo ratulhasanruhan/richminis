@@ -268,6 +268,8 @@
         }
     @endphp
 
+    {{-- Cookie/custom alerts disabled per requirement --}}
+    @if(false)
     <div class="aiz-custom-alert {{ get_setting('custom_alert_location') }}" id="aiz-custom-sale-alert">
         @foreach ($custom_alerts as $custom_alert)
             @if($custom_alert->id == 1)
@@ -324,6 +326,7 @@
             @endif
         @endforeach
     </div>
+    @endif
 
     <!-- website popup -->
     @php

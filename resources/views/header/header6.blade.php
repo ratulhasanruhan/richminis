@@ -41,6 +41,24 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
 
         .rm-header__links { gap: 16px !important; }
 
+        /* Cart badge */
+        .rm-cart-btn { position: relative; }
+        .rm-cart-badge{
+            position:absolute;
+            top:-4px;
+            right:-4px;
+            min-width:18px;
+            height:18px;
+            padding:0 5px;
+            border-radius:999px;
+            background:#111;
+            color:#fff;
+            font-size:11px;
+            font-weight:800;
+            line-height:18px;
+            text-align:center;
+        }
+
         /* User icon dropdown */
         #rm-user-menu.dropdown-toggle::after { display: none; }
         #rm-user-menu:focus { box-shadow: none; }
@@ -141,6 +159,17 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                     @if (get_setting('helpline_number'))
                         <a class="text-reset" href="tel:{{ get_setting('helpline_number') }}">CALL US</a>
                     @endif
+
+                    @php $rmCartCount = count(get_user_cart()); @endphp
+                    <a href="{{ route('cart') }}" class="rm-icon-btn btn p-0 text-reset rm-cart-btn" aria-label="{{ translate('Cart') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                            <path d="M7.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM6.6 5h12.5a1 1 0 0 1 1 1.2l-1.2 6a2 2 0 0 1-2 1.6H8a2 2 0 0 1-2-1.6L4.4 2.3A1 1 0 0 0 3.4 1.5H1.5a1 1 0 1 1 0-2h1.9a3 3 0 0 1 3 2.4L6.6 5z" fill="#111"/>
+                        </svg>
+                        @if($rmCartCount > 0)
+                            <span class="rm-cart-badge">{{ $rmCartCount }}</span>
+                        @endif
+                    </a>
+
                     <div class="dropdown rm-user-menu">
                         <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">

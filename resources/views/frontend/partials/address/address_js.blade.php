@@ -1,28 +1,9 @@
 <script type="text/javascript">
 
     function submitShippingInfoForm(el) {
-        var email = $("input[name='email']").val();
-        var phone = $("input[name='country_code']").val()+$("input[name='phone']").val();
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            url: "{{route('guest_customer_info_check')}}",
-            type: 'POST',
-            data: {
-                email : email,
-                phone : phone
-            },
-            success: function (response) {
-                if(response ==  1){
-                    $('#login_modal').modal();
-                    AIZ.plugins.notify('warning', '{{ translate('You already have an account with this information. Please Login first.') }}');
-                }
-                else{
-                    $('#shipping_info_form').submit();
-                }
-            }
-        });
+        // Guest checkout should work for both new and existing users.
+        // If the email/phone already exists, OTP will be used to authenticate on order submit.
+        $('#shipping_info_form').submit();
     }
 
     function add_new_address(){
@@ -105,11 +86,12 @@
 
     $(document).on('change', '[name=country_id]', function() {
         var country_id = $(this).val();
-        @if(get_setting('has_state') == 1)
+        // Always prefer state -> city flow if state selector exists (even if has_state setting is off)
+        if ($('[name="state_id"]').length) {
             get_states(country_id);
-        @else
+        } else {
             get_city_by_country(country_id);
-        @endif
+        }
     });
 
     $(document).on('change', '[name=state_id]', function() {
@@ -158,6 +140,18 @@
                 if(obj != '') {
                     $('[name="state_id"]').html(obj);
                     AIZ.plugins.bootstrapSelect('refresh');
+                    // Auto-select first real option and load cities
+                    var $state = $('[name="state_id"]');
+                    if ($state.find('option').length > 1 && (!$state.val() || $state.val() === '')) {
+                        var firstVal = $state.find('option').filter(function () {
+                            return $(this).val() !== '';
+                        }).first().val();
+                        if (firstVal) {
+                            $state.val(firstVal);
+                            AIZ.plugins.bootstrapSelect('refresh');
+                            $state.trigger('change');
+                        }
+                    }
                 }
             }
         });
@@ -387,6 +381,26 @@
             });
             billingPane.show();
         }
+    });
+
+    // Guest checkout: auto-load state/city for default country and auto-use shipping as billing
+    $(document).ready(function () {
+        try {
+            if ($('#sameAsShipping').length) {
+                $('#sameAsShipping').prop('checked', true).trigger('change');
+            }
+        } catch (e) {}
+
+        try {
+            var $country = $('[name="country_id"]');
+            if ($country.length && $country.val()) {
+                if ($('[name="state_id"]').length) {
+                    get_states($country.val());
+                } else {
+                    get_city_by_country($country.val());
+                }
+            }
+        } catch (e) {}
     });
 
 

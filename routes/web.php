@@ -307,7 +307,9 @@ Route::group(['prefix' => 'checkout'], function () {
         Route::get('/', 'index')->name('checkout');
         Route::any('/delivery-info', 'store_shipping_info')->name('checkout.store_shipping_infostore');
         Route::post('/payment-select', 'store_delivery_info')->name('checkout.store_delivery_info');
+        Route::post('/request-otp', 'requestCheckoutOtp')->name('checkout.request_otp');
         Route::post('/payment', 'checkout')->name('payment.checkout');
+        Route::post('/verify-otp', 'verifyCheckoutOtp')->name('checkout.verify_otp');
         Route::get('/order-confirmed', 'order_confirmed')->name('order_confirmed');
         Route::post('/apply-coupon-code', 'apply_coupon_code')->name('checkout.apply_coupon_code');
         Route::post('/remove-coupon-code', 'remove_coupon_code')->name('checkout.remove_coupon_code');

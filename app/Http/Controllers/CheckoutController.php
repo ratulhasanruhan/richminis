@@ -21,6 +21,7 @@ use Auth;
 use Hash;
 use Illuminate\Support\Facades\Validator;
 use Mail;
+use App\Mail\MailManager;
 
 class CheckoutController extends Controller
 {
@@ -32,13 +33,8 @@ class CheckoutController extends Controller
 
     public function index(Request $request)
     {
-        if(get_setting('guest_checkout_activation') == 0 && auth()->user() == null){
-            return redirect()->route('user.login');
-        }
-
-        if(auth()->check() && !$request->user()->hasVerifiedEmail()){
-            return redirect()->route('verification.notice');
-        }
+        // Allow checkout without forcing login/verification.
+        // (Guests already use temp_user_id cart; authenticated users may not be verified yet.)
 
         $country_id = 0;
         $city_id = 0;
@@ -130,17 +126,11 @@ class CheckoutController extends Controller
     //check the selected payment gateway and redirect to that controller accordingly
     public function checkout(Request $request)
     {
-        // if guest checkout, create user
-        if(auth()->user() == null){
-            $guest_user = $this->createUser($request->except('_token', 'payment_option'));
-            if(gettype($guest_user) == "object"){
-                $errors = $guest_user;
-                return redirect()->route('checkout')->withErrors($errors);
-            }
-
-            if($guest_user == 0){
-                flash(translate('Please try again later.'))->warning();
-                return redirect()->route('checkout');
+        // Guest checkout: create/find user and verify via OTP before placing order
+        if (auth()->user() == null) {
+            $gate = $this->ensureCheckoutOtpVerified($request);
+            if ($gate !== true) {
+                return $gate;
             }
         }
 
@@ -200,6 +190,287 @@ class CheckoutController extends Controller
                 return redirect()->route('order_confirmed');
             }
         }
+    }
+
+    public function verifyCheckoutOtp(Request $request)
+    {
+        $request->validate([
+            'verification_code' => 'required|digits:6',
+        ]);
+
+        $userId = $request->session()->get('checkout_otp_user_id');
+        if (!$userId) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'result' => false,
+                    'message' => translate('Your session expired. Please try again.'),
+                ], 422);
+            }
+            flash(translate('Your session expired. Please try again.'))->warning();
+            return redirect()->route('checkout');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            $request->session()->forget(['checkout_otp_user_id', 'checkout_otp_verified']);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'result' => false,
+                    'message' => translate('User not found. Please try again.'),
+                ], 422);
+            }
+            flash(translate('User not found. Please try again.'))->warning();
+            return redirect()->route('checkout');
+        }
+
+        if ((string) $user->verification_code !== (string) $request->verification_code) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'result' => false,
+                    'message' => translate('OTP does not match. Please try again.'),
+                ], 422);
+            }
+            return redirect()->route('checkout')->withErrors([
+                'verification_code' => translate('OTP does not match. Please try again.'),
+            ]);
+        }
+
+        $user->email_verified_at = $user->email_verified_at ?? date('Y-m-d H:i:s');
+        $user->verification_code = null;
+        $user->save();
+
+        auth()->login($user, true);
+
+        // Move guest cart to user cart (if any)
+        $temp_user_id = $request->session()->get('temp_user_id');
+        if ($temp_user_id) {
+            Cart::where('temp_user_id', $temp_user_id)->update([
+                'user_id' => $user->id,
+                'temp_user_id' => null,
+            ]);
+            $request->session()->forget('temp_user_id');
+        }
+
+        // Persist guest shipping/billing into Address records so OrderController uses correct data.
+        $guest = $request->session()->get('checkout_guest_shipping_info');
+        if (is_array($guest) && !empty($guest)) {
+            $sameAsShipping = ($guest['same_as_shipping'] ?? 0) == 1;
+
+            $address = new Address;
+            $address->user_id       = $user->id;
+            $address->address       = $guest['address'] ?? null;
+            $address->country_id    = $guest['country_id'] ?? null;
+            $address->state_id      = $guest['state_id'] ?? null;
+            $address->city_id       = $guest['city_id'] ?? null;
+            $address->postal_code   = $guest['postal_code'] ?? null;
+            $address->area_id       = $guest['area_id'] ?? null;
+            $address->phone         = ($guest['country_code'] ?? '') !== '' ? ('+' . ltrim($guest['country_code'], '+') . ($guest['phone'] ?? '')) : ($guest['phone'] ?? null);
+            $address->longitude     = $guest['longitude'] ?? null;
+            $address->latitude      = $guest['latitude'] ?? null;
+            if (!get_setting('billing_address_required') || $sameAsShipping) {
+                $address->set_billing = 1;
+            }
+            $address->save();
+
+            $billingId = $address->id;
+            if (get_setting('billing_address_required') && !$sameAsShipping) {
+                $billing = new Address;
+                $billing->user_id       = $user->id;
+                $billing->address       = $guest['billing_address'] ?? null;
+                $billing->country_id    = $guest['billing_country_id'] ?? null;
+                $billing->state_id      = $guest['billing_state_id'] ?? null;
+                $billing->city_id       = $guest['billing_city_id'] ?? null;
+                $billing->postal_code   = $guest['billing_postal_code'] ?? null;
+                $billing->area_id       = $guest['billing_area_id'] ?? null;
+                $billing->phone         = $guest['billing_phone'] ?? null;
+                $billing->save();
+                $billingId = $billing->id;
+            }
+
+            Cart::where('user_id', $user->id)->active()->update([
+                'address_id' => $address->id,
+                'billing_address' => $billingId,
+            ]);
+
+            $request->session()->forget('checkout_guest_shipping_info');
+        }
+
+        $request->session()->put('checkout_otp_verified', $user->id);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'result' => true,
+                'message' => translate('OTP verified'),
+            ]);
+        }
+        flash(translate('OTP verified. You can place your order now.'))->success();
+        return redirect()->route('checkout');
+    }
+
+    public function requestCheckoutOtp(Request $request)
+    {
+        // Already verified in this session
+        $sessionVerified = $request->session()->get('checkout_otp_verified');
+        $sessionUserId = $request->session()->get('checkout_otp_user_id');
+        if ($sessionVerified && $sessionUserId && (int) $sessionVerified === (int) $sessionUserId) {
+            return response()->json([
+                'result' => true,
+                'already_verified' => true,
+                'message' => translate('Already verified'),
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|max:20',
+            'country_code' => 'nullable|string|max:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'result' => false,
+                'message' => $validator->errors()->all(),
+            ], 422);
+        }
+
+        $email = trim((string) $request->email);
+        $rawPhone = preg_replace('/\s+/', '', (string) $request->phone);
+        $countryCode = trim((string) ($request->country_code ?? ''));
+        $phoneE164 = $countryCode !== '' ? ('+' . ltrim($countryCode, '+') . $rawPhone) : $rawPhone;
+
+        $user = User::where('user_type', 'customer')
+            ->where(function ($q) use ($email, $phoneE164) {
+                $q->where('email', $email);
+                if ($phoneE164 !== '') {
+                    $q->orWhere('phone', $phoneE164);
+                }
+            })
+            ->first();
+
+        if (!$user) {
+            $password = substr(hash('sha512', rand()), 0, 12);
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $email;
+            $user->phone = $phoneE164 ?: null;
+            $user->password = Hash::make($password);
+            $user->user_type = 'customer';
+        }
+
+        $user->verification_code = rand(100000, 999999);
+        $user->save();
+
+        // Store guest shipping/billing info for later Address creation after OTP verification
+        $guest = [
+            'same_as_shipping' => (int) (($request->same_as_shipping ?? 0) == 1),
+            'name' => $request->name,
+            'email' => $request->email,
+            'address' => $request->address,
+            'country_id' => $request->country_id,
+            'state_id' => $request->state_id,
+            'city_id' => $request->city_id,
+            'area_id' => $request->area_id,
+            'postal_code' => $request->postal_code,
+            'country_code' => $request->country_code,
+            'phone' => $request->phone,
+            'longitude' => $request->longitude,
+            'latitude' => $request->latitude,
+            'billing_address' => $request->billing_address,
+            'billing_country_id' => $request->billing_country_id,
+            'billing_state_id' => $request->billing_state_id,
+            'billing_city_id' => $request->billing_city_id,
+            'billing_area_id' => $request->billing_area_id,
+            'billing_postal_code' => $request->billing_postal_code,
+            'billing_phone' => $request->billing_phone,
+        ];
+        $request->session()->put('checkout_guest_shipping_info', $guest);
+
+        try {
+            $site = get_setting('site_name') ?: config('app.name');
+            $array = [
+                'subject' => $site . ' - ' . translate('Your OTP Code'),
+                'content' => translate('Your OTP code is') . ': <b>' . $user->verification_code . '</b>',
+            ];
+            Mail::to($user->email)->queue(new MailManager($array));
+        } catch (\Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => translate('Could not send OTP. Please try again later.'),
+            ], 500);
+        }
+
+        $request->session()->put('checkout_otp_user_id', $user->id);
+        $request->session()->forget('checkout_otp_verified');
+
+        return response()->json([
+            'result' => true,
+            'message' => translate('OTP sent to your email'),
+        ]);
+    }
+
+    private function ensureCheckoutOtpVerified(Request $request)
+    {
+        $sessionVerified = $request->session()->get('checkout_otp_verified');
+        $sessionUserId = $request->session()->get('checkout_otp_user_id');
+        if ($sessionVerified && $sessionUserId && (int) $sessionVerified === (int) $sessionUserId) {
+            return true;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|max:20',
+            'country_code' => 'nullable|string|max:8',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('checkout')->withErrors($validator->errors());
+        }
+
+        $email = trim((string) $request->email);
+        $rawPhone = preg_replace('/\s+/', '', (string) $request->phone);
+        $countryCode = trim((string) ($request->country_code ?? ''));
+        $phoneE164 = $countryCode !== '' ? ('+' . ltrim($countryCode, '+') . $rawPhone) : $rawPhone;
+
+        $user = User::where('user_type', 'customer')
+            ->where(function ($q) use ($email, $phoneE164) {
+                $q->where('email', $email);
+                if ($phoneE164 !== '') {
+                    $q->orWhere('phone', $phoneE164);
+                }
+            })
+            ->first();
+
+        if (!$user) {
+            $password = substr(hash('sha512', rand()), 0, 12);
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $email;
+            $user->phone = $phoneE164 ?: null;
+            $user->password = Hash::make($password);
+            $user->user_type = 'customer';
+        }
+
+        $user->verification_code = rand(100000, 999999);
+        $user->save();
+
+        // Send OTP via email (SMTP)
+        try {
+            $site = get_setting('site_name') ?: config('app.name');
+            $array = [
+                'subject' => $site . ' - ' . translate('Your OTP Code'),
+                'content' => translate('Your OTP code is') . ': <b>' . $user->verification_code . '</b>',
+            ];
+            Mail::to($user->email)->queue(new MailManager($array));
+        } catch (\Exception $e) {
+            flash(translate('Could not send OTP. Please try again later.'))->warning();
+            return redirect()->route('checkout');
+        }
+
+        $request->session()->put('checkout_otp_user_id', $user->id);
+        $request->session()->forget('checkout_otp_verified');
+        flash(translate('We sent an OTP to your email. Please enter it to continue.'))->info();
+        return redirect()->route('checkout');
     }
 
     public function createUser($guest_shipping_info)

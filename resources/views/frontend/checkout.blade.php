@@ -89,7 +89,10 @@
                                             <!-- Complete Ordert -->
                                             <div class="col-6 text-right">
                                                 <button type="button" onclick="submitOrder(this)" id="submitOrderBtn"
-                                                    class="btn btn-primary fs-14 fw-700 rounded-0 px-4">{{ translate('Complete Order') }}</button>
+                                                    class="btn btn-primary fs-14 fw-700 rounded-0 px-4">
+                                                    <span class="rm-complete-order-text">{{ translate('Complete Order') }}</span>
+                                                    <span class="rm-complete-order-spinner d-none" aria-hidden="true"></span>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -115,16 +118,134 @@
         @include('frontend.partials.address.address_modal')
          @include('frontend.partials.address.billing_address_modal')
     @endif
+
+    <!-- Checkout OTP Modal (guest) -->
+    <div class="modal fade" id="rm-checkout-otp-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content rounded-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ translate('Verify OTP') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ translate('Close') }}">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2 text-muted">{{ translate('We sent an OTP to your email. Enter it to continue.') }}</div>
+                    <div class="form-group mb-2">
+                        <input type="text" id="rm-checkout-otp-code" class="form-control rounded-0"
+                            inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                            placeholder="{{ translate('Enter 6 digit OTP') }}">
+                        <small class="text-danger d-none" id="rm-checkout-otp-error"></small>
+                    </div>
+                    <button type="button" class="btn btn-dark rounded-0 px-4" id="rm-checkout-otp-verify-btn">
+                        <span class="rm-btn-text">{{ translate('Verify and Complete Order') }}</span>
+                        <span class="rm-spinner d-none" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
     <script type="text/javascript">
        var carrierCount=0;
+        var rmCheckout = {
+            isGuest: {{ Auth::check() ? 'false' : 'true' }},
+            otpVerified: {{ (session()->has('checkout_otp_user_id') && session('checkout_otp_verified') == session('checkout_otp_user_id')) ? 'true' : 'false' }},
+            requestOtpUrl: "{{ route('checkout.request_otp') }}",
+            verifyOtpUrl: "{{ route('checkout.verify_otp') }}"
+        };
+
+        function rmSetBtnLoading($btn, isLoading, loadingText) {
+            if (!$btn || !$btn.length) return;
+            $btn.prop('disabled', !!isLoading);
+            $btn.toggleClass('disabled', !!isLoading);
+            // Prefer inline label + spinner (for Complete Order button)
+            var $label = $btn.find('.rm-complete-order-text');
+            var $spinner = $btn.find('.rm-complete-order-spinner');
+            if ($label.length && $spinner.length) {
+                if (!$btn.data('rm-original-html')) {
+                    $btn.data('rm-original-label', $label.text().trim());
+                }
+                if (isLoading) {
+                    $label.text(loadingText || $btn.data('rm-original-label') || 'Please wait...');
+                    $spinner.removeClass('d-none');
+                } else {
+                    $label.text($btn.data('rm-original-label') || 'Complete Order');
+                    $spinner.addClass('d-none');
+                }
+                return;
+            }
+
+            // Fallback for other buttons
+            var original = $btn.data('rm-original-text');
+            if (!original) {
+                $btn.data('rm-original-text', $btn.text().trim());
+                original = $btn.data('rm-original-text');
+            }
+            if (isLoading) {
+                $btn.text(loadingText || 'Please wait...');
+            } else {
+                $btn.text(original);
+            }
+        }
+
+        // Simple spinner style (modal button uses .rm-spinner)
+        (function () {
+            if (document.getElementById('rm-inline-spinner-style')) return;
+            var css = document.createElement('style');
+            css.id = 'rm-inline-spinner-style';
+            css.innerHTML = ".rm-spinner,.rm-complete-order-spinner{display:inline-block;width:14px;height:14px;margin-left:10px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:rmspin .8s linear infinite}.rm-complete-order-spinner{vertical-align:-2px}@keyframes rmspin{to{transform:rotate(360deg)}}";
+            document.head.appendChild(css);
+        })();
+
         $(document).ready(function() {
             $(".online_payment").click(function() {
                 $('#manual_payment_description').parent().addClass('d-none');
             });
             toggleManualPaymentData($('input[name=payment_option]:checked').data('id'));
+
+            // OTP modal verify action
+            $('#rm-checkout-otp-verify-btn').on('click', function () {
+                var $btn = $(this);
+                var code = ($('#rm-checkout-otp-code').val() || '').trim();
+                $('#rm-checkout-otp-error').addClass('d-none').text('');
+
+                if (!/^\d{6}$/.test(code)) {
+                    $('#rm-checkout-otp-error').removeClass('d-none').text("{{ translate('Please enter a valid 6 digit OTP') }}");
+                    return;
+                }
+
+                $btn.find('.rm-btn-text').text("{{ translate('Verifying...') }}");
+                $btn.find('.rm-spinner').removeClass('d-none');
+                $btn.prop('disabled', true);
+
+                $.ajax({
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    method: "POST",
+                    url: rmCheckout.verifyOtpUrl,
+                    data: { verification_code: code },
+                    success: function (res) {
+                        rmCheckout.otpVerified = true;
+                        $('#rm-checkout-otp-modal').modal('hide');
+                        // Now submit checkout for final order/payment
+                        $('#checkout-form').submit();
+                    },
+                    error: function (xhr) {
+                        var msg = "{{ translate('OTP does not match. Please try again.') }}";
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(', ') : xhr.responseJSON.message;
+                            }
+                        } catch (e) {}
+                        $('#rm-checkout-otp-error').removeClass('d-none').text(msg);
+                        $btn.prop('disabled', false);
+                        $btn.find('.rm-spinner').addClass('d-none');
+                        $btn.find('.rm-btn-text').text("{{ translate('Verify and Complete Order') }}");
+                    }
+                });
+            });
         });
 
         var minimum_order_amount_check = {{ get_setting('minimum_order_amount_check') == 1 ? 1 : 0 }};
@@ -169,7 +290,8 @@
         }
 
         function submitOrder(el) {
-            $(el).prop('disabled', true);
+            var $btn = $(el);
+            rmSetBtnLoading($btn, true, "{{ translate('Processing...') }}");
             if ($('#agree_checkbox').is(":checked")) {
                 if (minimum_order_amount_check && $('#sub_total').val() < minimum_order_amount) {
                     AIZ.plugins.notify('danger',
@@ -202,13 +324,44 @@
                         }
 
                         if (allIsOk) {
+                            // Guest flow: request OTP first, show modal, then finally submit after verification
+                            if (rmCheckout.isGuest && !rmCheckout.otpVerified) {
+                                rmSetBtnLoading($btn, true, "{{ translate('Sending OTP...') }}");
+                                $.ajax({
+                                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                                    method: "POST",
+                                    url: rmCheckout.requestOtpUrl,
+                                    data: $('#checkout-form').serialize(),
+                                    success: function (res) {
+                                        rmSetBtnLoading($btn, false);
+                                        $('#rm-checkout-otp-code').val('');
+                                        $('#rm-checkout-otp-error').addClass('d-none').text('');
+                                        $('#rm-checkout-otp-verify-btn').prop('disabled', false);
+                                        $('#rm-checkout-otp-verify-btn').find('.rm-spinner').addClass('d-none');
+                                        $('#rm-checkout-otp-verify-btn').find('.rm-btn-text').text("{{ translate('Verify and Complete Order') }}");
+                                        $('#rm-checkout-otp-modal').modal({ backdrop: 'static', keyboard: false });
+                                    },
+                                    error: function (xhr) {
+                                        rmSetBtnLoading($btn, false);
+                                        var msg = "{{ translate('Could not send OTP. Please try again later.') }}";
+                                        try {
+                                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                                msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(', ') : xhr.responseJSON.message;
+                                            }
+                                        } catch (e) {}
+                                        AIZ.plugins.notify('danger', msg);
+                                    }
+                                });
+                                return;
+                            }
+
                             $('#checkout-form').submit();
                         }
                     }
                 }
             } else {
                 AIZ.plugins.notify('danger', '{{ translate('You need to agree with our policies') }}');
-                $(el).prop('disabled', false);
+                rmSetBtnLoading($btn, false);
             }
         }
 
