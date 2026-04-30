@@ -3,13 +3,26 @@
     <div class="tab-pane fade show active" id="shipping-address" role="tabpanel"
         aria-labelledby="shipping-address-tab">
         <div class="p-3">
-            <!-- Name -->
+            <!-- First name -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('Name')}} <span class="text-danger">*</span></label>
+                    <label>{{ translate('First name')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
-                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Name')}}" rows="2" name="name" required></input>
+                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your First Name')}}" rows="2" name="name" required></input>
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="row">
+                <div class="col-md-2 mt-md-2">
+                    <label>{{ translate('Phone')}} <span class="text-danger">*</span></label>
+                </div>
+                <div class="col-md-10">
+                    <div class="mb-3">
+                        <input type="tel" id="phone-code" class="form-control rounded-0" placeholder="" name="phone" autocomplete="off" required>
+                        <input type="hidden" name="country_code" value="">
+                    </div>
                 </div>
             </div>
 
@@ -20,16 +33,6 @@
                 </div>
                 <div class="col-md-10">
                     <input type="email" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Email')}}" name="email" value="" required>
-                </div>
-            </div>
-
-            <!-- Address -->
-            <div class="row">
-                <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('Address')}} <span class="text-danger">*</span></label>
-                </div>
-                <div class="col-md-10">
-                    <textarea class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Address')}}" rows="2" name="address" required></textarea>
                 </div>
             </div>
 
@@ -44,7 +47,7 @@
                 } catch (\Throwable $e) {
                     $bdCountry = null;
                 }
-                $defaultCountryId = $bdCountry?->id ?? ($activeCountries->first()->id ?? null);
+                $defaultCountryId = ($bdCountry ? $bdCountry->id : null) ?? ($activeCountries->first()->id ?? null);
             @endphp
 
             <!-- Country -->
@@ -93,6 +96,16 @@
                 </div>
             </div>
 
+            <!-- Address -->
+            <div class="row">
+                <div class="col-md-2 mt-md-2">
+                    <label>{{ translate('Address')}} <span class="text-danger">*</span></label>
+                </div>
+                <div class="col-md-10">
+                    <textarea class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Address')}}" rows="2" name="address" required></textarea>
+                </div>
+            </div>
+
             <!--Area-->
             <div class="row area-field d-none">
                 <div class="col-md-2">
@@ -138,26 +151,8 @@
                 </div>
             @endif
 
-            <!-- Postal code -->
-            <div class="row">
-                <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('Postal code')}} <span class="text-danger">*</span></label>
-                </div>
-                <div class="col-md-10">
-                    <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Postal Code')}}" name="postal_code" value="" required>
-                </div>
-            </div>
-
-            <!-- Phone -->
-            <div class="row">
-                <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('Phone')}} <span class="text-danger">*</span></label>
-                </div>
-                <div class="col-md-10">
-                    <input type="tel" id="phone-code" class="form-control rounded-0" placeholder="" name="phone" autocomplete="off" required>
-                    <input type="hidden" name="country_code" value="">
-                </div>
-            </div>
+            <!-- Postal code removed from UI; submit fallback value for validation -->
+            <input type="hidden" name="postal_code" value="00000">
 
             <input type="checkbox" id="sameAsShipping" name="same_as_shipping" value="1" checked style="display:none;">
         </div>
@@ -246,15 +241,8 @@
                 </div>
             </div>
 
-            <!-- Postal code -->
-            <div class="row">
-                <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('Postal code')}} <span class="text-danger">*</span></label>
-                </div>
-                <div class="col-md-10">
-                    <input type="text" class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Postal Code')}}" name="billing_postal_code" value="" required>
-                </div>
-            </div>
+            <!-- Postal code removed from UI; submit fallback value for validation -->
+            <input type="hidden" name="billing_postal_code" value="00000">
 
             <!-- Phone -->
             <div class="row">

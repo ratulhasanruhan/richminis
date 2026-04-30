@@ -66,6 +66,17 @@
     <style>
         .rm-footer { background:#000; }
         .rm-footer__inner { padding: 56px 0 22px; }
+        .rm-footer__columns{
+            display: flex !important;
+            width: 100%;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: clamp(18px, 3vw, 56px);
+        }
+        .rm-footer__columns > *{
+            flex: 1 1 0;
+            min-width: 0;
+        }
         .rm-footer__title {
             margin: 0 0 12px;
             font-size: 14px;
@@ -120,19 +131,20 @@
             font-weight: 600;
             letter-spacing: .08em;
             text-transform: uppercase;
-            text-align: left;
+            text-align: center;
         }
         @media (max-width: 991px){
             .rm-footer__inner { padding: 44px 16px 18px; }
+            .rm-footer__columns{ flex-direction: column; gap: 28px; }
             .rm-footer__copyright { padding-left: 16px; padding-right: 16px; }
             .rm-footer__copyright { text-align: center; }
         }
     </style>
 
     <div class="container rm-footer__inner">
-        <div class="row">
+        <div class="rm-footer__columns">
             <!-- About Us -->
-            <div class="col-lg-4 mb-4">
+            <div class="mb-4 mb-lg-0">
                 <div class="rm-footer__title">{{ translate('About Us') }}</div>
                 <div class="rm-footer__text">
                     {!! get_setting('about_us_description', null, App::getLocale()) !!}
@@ -140,7 +152,7 @@
             </div>
 
             <!-- Store Policy -->
-            <div class="col-lg-4 mb-4">
+            <div class="mb-4 mb-lg-0">
                 <div class="rm-footer__title">{{ translate('Store Policy') }}</div>
                 <div class="d-flex flex-column">
                     <a class="rm-footer__link" href="{{ route('returnpolicy') }}">{{ translate('Return and refund') }}</a>
@@ -150,7 +162,7 @@
             </div>
 
             <!-- Connect -->
-            <div class="col-lg-4 mb-4">
+            <div class="mb-0">
                 <div class="rm-footer__title">{{ translate('Connect With Us') }}</div>
                 <div class="rm-footer__text">
                     @if(!empty($footerPhone))

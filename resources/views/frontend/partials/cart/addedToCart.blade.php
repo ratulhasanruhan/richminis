@@ -1,10 +1,30 @@
 <div class="modal-body px-4 py-5 c-scrollbar-light">
+    <style>
+        .rm-added-cart__banner{
+            background: #121212 !important;
+            border: 1px solid rgba(255,255,255,.08);
+        }
+        .rm-added-cart__banner-text{
+            color: rgba(255,255,255,.92) !important;
+        }
+        .rm-added-cart__view-cart,
+        .rm-added-cart__view-cart:hover,
+        .rm-added-cart__view-cart:focus,
+        .rm-added-cart__view-cart:active{
+            background: var(--secondary-base, #6c757d) !important;
+            color: #fff !important;
+            filter: none !important;
+            box-shadow: none !important;
+            transform: none !important;
+            opacity: 1 !important;
+        }
+    </style>
     <!-- Item added to your cart -->
-    <div class="d-flex align-items-center justify-content-center mb-4 mt-3 py-3 px-3 rounded-1" style="background: #e8fff3;">
+    <div class="rm-added-cart__banner d-flex align-items-center justify-content-center mb-4 mt-3 py-3 px-3 rounded-1">
         <span>
         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#50cd89"><path d="M480-62q-87 0-162.99-32.58-75.98-32.59-132.91-89.52-56.93-56.93-89.52-132.91Q62-393 62-480q0-88 32.58-163.49 32.59-75.48 89.52-132.41 56.93-56.93 132.91-89.52Q393-898 480-898q63 0 120 17t107 50l-87 87q-31-18-66.34-27-35.33-9-73.66-9-125.01 0-212.51 87Q180-606 180-480t87.49 213q87.49 87 212.5 87t212.51-87Q780-354 780-480q0-14.66-2-28.82-2-14.17-5-28.18l96-96q15 35 22 73.45 7 38.46 7 79.12 0 87.43-32.58 163.42-32.59 75.98-89.52 132.91-56.93 56.93-132.41 89.52Q568-62 480-62Zm-58-225L246-463l79-80 98 98 396-396 79 79-476 475Z"/></svg>
     </span>
-        <span class="fs-16 fw-600 pl-2" style="color: #50cd89; margin-top: 3px;">{{ translate('Item successfully added to your cart!')}}</span>
+        <span class="rm-added-cart__banner-text fs-16 fw-600 pl-2" style="margin-top: 3px;">{{ translate('Item successfully added to your cart!')}}</span>
     </div>
 
     <!-- Product Info -->
@@ -40,7 +60,7 @@
     <div class="pt-4">
         <div class="row gutters-5">
             <div class="col-sm-6">
-                <a href="{{ route('cart') }}" class="btn btn-secondary-base mb-2 mb-sm-0 btn-block rounded-1 text-white">{{ translate('View Cart')}}</a>
+                <a href="{{ route('cart') }}" class="rm-added-cart__view-cart btn btn-secondary-base mb-2 mb-sm-0 btn-block rounded-1 text-white">{{ translate('View Cart')}}</a>
             </div>
             <div class="col-sm-6">
                 <a href="{{ route('cart') }}" class="btn btn-primary btn-block rounded-1">{{ translate('Proceed to Checkout')}}</a>

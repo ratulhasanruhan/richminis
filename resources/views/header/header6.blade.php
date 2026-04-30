@@ -92,10 +92,71 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
             .rm-logo-text { font-size: 16px; letter-spacing: .24em; }
         }
         @media (min-width: 992px) {
-            .rm-header__left { display: none !important; }
-            .rm-header__center { justify-content: flex-start; flex: 0 0 auto; }
-            .rm-header__links { margin-left: auto; }
-            .rm-header__right { display: none !important; }
+            /* Desktop: menu left, logo center, icons right */
+            .rm-header__row {
+                display: grid !important;
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
+                gap: 16px;
+            }
+            .rm-header__left { display: block !important; }
+            .rm-header__center { justify-content: center; }
+            .rm-header__right { display: block !important; }
+
+            .rm-header__nav {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                justify-content: flex-start;
+            }
+            .rm-header__icons {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 12px;
+            }
+
+            /* Header category items with hover sub-menu (desktop) */
+            .rm-topcat { position: relative; }
+            .rm-topcat > a{
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .rm-topcat__panel{
+                position: absolute;
+                top: calc(100% + 14px);
+                left: 0;
+                z-index: 1030;
+                min-width: 640px;
+                max-width: 820px;
+                background: #fff;
+                border: 1px solid rgba(0,0,0,.10);
+                border-radius: 12px;
+                box-shadow: 0 18px 44px rgba(0,0,0,.14);
+                padding: 16px 18px;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(6px);
+                transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+            }
+            .rm-topcat:hover .rm-topcat__panel,
+            .rm-topcat:focus-within .rm-topcat__panel{
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+            .rm-topcat__panel .sub-cat-menu{
+                position: static !important;
+                display: block !important;
+                width: 100% !important;
+                border: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                min-height: 120px;
+            }
+            .rm-topcat__panel .c-preloader{ display:none !important; }
         }
     </style>
 
@@ -115,13 +176,16 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                 $menuItems = [];
             }
         }
+
+        $rmTopCats = get_level_zero_categories()->take(4);
     @endphp
 
     <header class="rm-header @if (get_setting('header_stikcy') == 'on') sticky-top @endif z-1020">
         <div class="container">
             <div class="d-flex align-items-center justify-content-between rm-header__row">
-                <!-- Left: drawer (mobile) -->
+                <!-- Left: menu (desktop) / drawer (mobile) -->
                 <div class="rm-header__left d-flex align-items-center">
+                    <!-- Mobile drawer -->
                     <button type="button" class="btn d-lg-none p-0" data-toggle="class-toggle" data-target=".aiz-top-menu-sidebar" aria-label="Menu">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
                             <rect width="16" height="2" y="0" fill="#111" />
@@ -129,6 +193,30 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                             <rect width="16" height="2" y="14" fill="#111" />
                         </svg>
                     </button>
+
+                    <!-- Desktop menu links -->
+                    <div class="rm-header__nav d-none d-lg-flex">
+                        <a class="text-reset" href="{{ route('search', ['sort_by' => 'newest']) }}">NEW IN</a>
+
+                        @foreach ($rmTopCats as $rmCat)
+                            <div class="rm-topcat category-nav-element" data-id="{{ $rmCat->id }}">
+                                <a class="text-reset" href="{{ route('products.category', $rmCat->slug) }}">
+                                    {{ $rmCat->getTranslation('name') }}
+                                </a>
+                                <div class="rm-topcat__panel">
+                                    <div class="sub-cat-menu c-scrollbar-light">
+                                        <div class="c-preloader text-center absolute-center">
+                                            <i class="las la-spinner la-spin la-3x opacity-70"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        @if (get_setting('helpline_number'))
+                            <a class="text-reset" href="tel:{{ get_setting('helpline_number') }}">CALL US</a>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Center: logo (always centered on mobile) -->
@@ -138,60 +226,46 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                     </a>
                 </div>
 
-                <!-- Right: search + menus + call us (desktop) -->
-                <div class="rm-header__links d-none d-lg-flex align-items-center justify-content-end" style="gap: 14px;">
-                    <button type="button" class="rm-icon-btn btn p-0 text-reset rm-search-open" aria-label="{{ translate('Search') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
-                            <path d="M8.5 0a8.5 8.5 0 106.3 14.2l4 4a1 1 0 001.4-1.4l-4-4A8.5 8.5 0 008.5 0zm0 2a6.5 6.5 0 110 13 6.5 6.5 0 010-13z" fill="#111"/>
-                        </svg>
-                    </button>
-                    @if (count($menuItems) > 0)
-                        @foreach ($menuItems as $item)
-                            <a class="text-reset" href="{{ $item['href'] }}">{{ $item['label'] }}</a>
-                        @endforeach
-                    @else
-                        <a class="text-reset" href="{{ route('search', ['sort_by' => 'newest']) }}">NEW IN</a>
-                        <a class="text-reset" href="{{ route('search', ['keyword' => 'shoes']) }}">SHOES</a>
-                        <a class="text-reset" href="{{ route('search', ['keyword' => 'toys']) }}">TOYS</a>
-                        <a class="text-reset" href="{{ route('search', ['keyword' => 'moms']) }}">MOMS</a>
-                        <a class="text-reset" href="{{ route('search', ['keyword' => 'minis']) }}">MINIS</a>
-                    @endif
-                    @if (get_setting('helpline_number'))
-                        <a class="text-reset" href="tel:{{ get_setting('helpline_number') }}">CALL US</a>
-                    @endif
-
-                    @php $rmCartCount = count(get_user_cart()); @endphp
-                    <a href="{{ route('cart') }}" class="rm-icon-btn btn p-0 text-reset rm-cart-btn" aria-label="{{ translate('Cart') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
-                            <path d="M7.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM6.6 5h12.5a1 1 0 0 1 1 1.2l-1.2 6a2 2 0 0 1-2 1.6H8a2 2 0 0 1-2-1.6L4.4 2.3A1 1 0 0 0 3.4 1.5H1.5a1 1 0 1 1 0-2h1.9a3 3 0 0 1 3 2.4L6.6 5z" fill="#111"/>
-                        </svg>
-                        @if($rmCartCount > 0)
-                            <span class="rm-cart-badge">{{ $rmCartCount }}</span>
-                        @endif
-                    </a>
-
-                    <div class="dropdown rm-user-menu">
-                        <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
+                <!-- Right: icons -->
+                <div class="rm-header__right d-flex align-items-center justify-content-end">
+                    <div class="rm-header__icons d-none d-lg-flex">
+                        <button type="button" class="rm-icon-btn btn p-0 text-reset rm-search-open" aria-label="{{ translate('Search') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
-                                <path d="M10 10a4.5 4.5 0 1 0-4.5-4.5A4.51 4.51 0 0 0 10 10zm0-7a2.5 2.5 0 1 1-2.5 2.5A2.5 2.5 0 0 1 10 3zM10 12c-4.3 0-8 2.3-8 5a1 1 0 0 0 2 0c0-1.3 2.6-3 6-3s6 1.7 6 3a1 1 0 0 0 2 0c0-2.7-3.7-5-8-5z" fill="#111"/>
+                                <path d="M8.5 0a8.5 8.5 0 106.3 14.2l4 4a1 1 0 001.4-1.4l-4-4A8.5 8.5 0 008.5 0zm0 2a6.5 6.5 0 110 13 6.5 6.5 0 010-13z" fill="#111"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            @guest
-                                <a class="dropdown-item" href="{{ route('user.login') }}">{{ translate('Login') }}</a>
-                                <a class="dropdown-item" href="{{ route('user.registration') }}">{{ translate('Registration') }}</a>
-                            @endguest
-                            @auth
-                                <a class="dropdown-item" href="{{ route('dashboard') }}">{{ translate('Dashboard') }}</a>
-                                <a class="dropdown-item" href="{{ route('logout') }}">{{ translate('Logout') }}</a>
-                            @endauth
+
+                        @php $rmCartCount = count(get_user_cart()); @endphp
+                        <a href="{{ route('cart') }}" class="rm-icon-btn btn p-0 text-reset rm-cart-btn" aria-label="{{ translate('Cart') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                                <path d="M7.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM6.6 5h12.5a1 1 0 0 1 1 1.2l-1.2 6a2 2 0 0 1-2 1.6H8a2 2 0 0 1-2-1.6L4.4 2.3A1 1 0 0 0 3.4 1.5H1.5a1 1 0 1 1 0-2h1.9a3 3 0 0 1 3 2.4L6.6 5z" fill="#111"/>
+                            </svg>
+                            @if($rmCartCount > 0)
+                                <span class="rm-cart-badge">{{ $rmCartCount }}</span>
+                            @endif
+                        </a>
+
+                        <div class="dropdown rm-user-menu">
+                            <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                                    <path d="M10 10a4.5 4.5 0 1 0-4.5-4.5A4.51 4.51 0 0 0 10 10zm0-7a2.5 2.5 0 1 1-2.5 2.5A2.5 2.5 0 0 1 10 3zM10 12c-4.3 0-8 2.3-8 5a1 1 0 0 0 2 0c0-1.3 2.6-3 6-3s6 1.7 6 3a1 1 0 0 0 2 0c0-2.7-3.7-5-8-5z" fill="#111"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                @guest
+                                    <a class="dropdown-item" href="{{ route('user.login') }}">{{ translate('Login') }}</a>
+                                    <a class="dropdown-item" href="{{ route('user.registration') }}">{{ translate('Registration') }}</a>
+                                @endguest
+                                @auth
+                                    <a class="dropdown-item" href="{{ route('dashboard') }}">{{ translate('Dashboard') }}</a>
+                                    <a class="dropdown-item" href="{{ route('logout') }}">{{ translate('Logout') }}</a>
+                                @endauth
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Right: reserved (keep layout balanced) -->
-                <div class="rm-header__right d-lg-none">
-                    <button type="button" class="rm-icon-btn btn p-0 text-reset rm-search-open" aria-label="{{ translate('Search') }}">
+                    <!-- Mobile: search icon only (keeps header balanced) -->
+                    <button type="button" class="rm-icon-btn btn p-0 text-reset rm-search-open d-lg-none" aria-label="{{ translate('Search') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
                             <path d="M8.5 0a8.5 8.5 0 106.3 14.2l4 4a1 1 0 001.4-1.4l-4-4A8.5 8.5 0 008.5 0zm0 2a6.5 6.5 0 110 13 6.5 6.5 0 010-13z" fill="#111"/>
                         </svg>

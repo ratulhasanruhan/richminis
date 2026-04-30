@@ -238,28 +238,8 @@
                 <p class="my-0 ml-0 mr-4 mr-md-4 mr-lg-5 fs-14 fw-400 text-black">{{ translate('Estimate Shipping Time') }} <span class="fw-bold ml-2">{{ $detailedProduct->est_shipping_days }} {{ translate('Days') }}</span></p>
             </div>
         @endif
-        <div class="py-20px d-flex flex-wrap flex-xl-nowrap align-items-center">
-            <div class="d-flex align-items-center bg-light p-20px rounded-2 w-100 mb-2 mb-xl-0 mr-0 mr-xl-2">
-                <div class="store-logo-container w-48px h-48px bg-white border bordre-2 border-gray rounded-1 overflow-hidden mr-3 d-flex flex-shrink-0 align-items-center justify-content-center">
-                    <img src="{{ uploaded_asset($seller_logo) }}" alt="seller">
-                </div>
-                <div>
-                    @if ($detailedProduct->added_by == 'seller' && get_setting('vendor_system_activation') == 1)
-                        <p class="m-0 fs-14">
-                            <span class="fw-400 text-gray">{{ translate('Sold by') }}</span>
-                            <a href="{{ route('shop.visit', $detailedProduct->user->shop->slug) }}" class="fw-bold text-blue ml-2">{{ $detailedProduct->user->shop->name }}</a>
-                        </p>
-                    @else
-                        <p class="m-0 fs-14">
-                            <span class="fw-bold text-blue">{{ translate('Inhouse product') }}</span>
-                        </p>
-                    @endif
-                    @if (get_setting('conversation_system') == 1)
-                        <a href="javascript:void();" onclick="show_chat_modal()" class="fs-14 fw-400 text-blue animate-underline-blue has-transition">{{ translate('Message Seller') }}</a>
-                    @endif
-                </div>
-            </div>
-            @if ($detailedProduct->brand != null)
+        @if ($detailedProduct->brand != null)
+            <div class="py-20px d-flex flex-wrap flex-xl-nowrap align-items-center">
                 <div class="d-flex align-items-center bg-light p-20px rounded-2 w-100">
                     <div class="store-logo-container w-48px h-48px bg-white border bordre-2 border-gray rounded-1 overflow-hidden mr-3 d-flex flex-shrink-0 align-items-center justify-content-center">
                         <img src="{{ uploaded_asset($detailedProduct->brand->logo) }}"alt="{{ $detailedProduct->brand->name }}" class="img-fit">
@@ -272,32 +252,10 @@
                         <a href="{{route('products.brand', $detailedProduct->brand->slug)}}" class="fs-14 fw-400 text-blue animate-underline-blue has-transition">{{ translate('Products from this brand') }}</a>
                     </div>
                 </div>
-            @endif
-        </div>
+            </div>
+        @endif
         <!--Shipping Notes End-->
 
-        <!--Warranty Start-->
-        <div class="warranty-section pb-20px">
-            <ul class="m-0 p-0">
-                @if ($detailedProduct->cash_on_delivery)
-                    <li class="d-flex align-items-center">
-                        <span class="d-block flex-shrink-0">
-                            <img src="{{ static_asset('/assets/img/warranty-check-circle.svg') }}" alt="warranty check circle">
-                        </span>
-                        <span class="d-block pl-10px pr-25px fs-14 fw-400 text-dark warranty-text">{{ translate('Cash on Delivery Available')}}</span>
-                    </li>
-                @endif
-                @if ($detailedProduct->shipping_type == 'free')
-                    <li class="d-flex align-items-center">
-                        <span class="d-block flex-shrink-0">
-                            <img src="{{ static_asset('/assets/img/warranty-check-circle.svg') }}" alt="warranty check circle">
-                        </span>
-                        <span class="d-block pl-10px pr-25px fs-14 fw-400 text-dark warranty-text">{{ translate('Free Shipping') }}</span>
-                    </li>
-                @endif
-            </ul>
-        </div>
-        <!--Warranty End-->
         <!-- For auction product End -->
     @else
         <form id="option-choice-form" class="product-details-page">
@@ -442,14 +400,7 @@
                                     }
                                 @endphp
                                 <div class="d-flex flex-column">
-                                    <p class="m-0 fs-14 fw-semibold text-blue opacity-80">
-                                        @if ($detailedProduct->stock_visibility_state == 'quantity')
-                                            <span id="available-quantity">{{ $qty }}</span> {{translate('Available')}}
-                                        @elseif($detailedProduct->stock_visibility_state == 'text' && $qty >= 1)
-                                            <span id="available-quantity">{{translate('In Stock')}}</span>
-                                        @endif
-                                    </p>
-                                    <p class="m-0 fs-14 fw-400 text-gray">{{translate('Minimum order qty')}} <span class="text-dark fw-700">{{ $detailedProduct->min_qty }}</span></p>
+                                    {{-- stock/min qty hints removed per UI request --}}
                                 </div>
                             @endif
                         </div>
@@ -550,28 +501,8 @@
                     <p class="my-0 ml-0 mr-4 mr-md-4 mr-lg-5 fs-14 fw-400 text-black">{{ translate('Estimate Shipping Time') }} <span class="fw-bold ml-2">{{ $detailedProduct->est_shipping_days }} {{ translate('Days') }}</span></p>
                 </div>
             @endif
-            <div class="py-20px d-flex flex-wrap flex-xl-nowrap align-items-center">
-                <div class="d-flex align-items-center bg-light p-20px rounded-2 w-100 mb-2 mb-xl-0 mr-0 mr-xl-2">
-                    <div class="store-logo-container w-48px h-48px bg-white border bordre-2 border-gray rounded-1 overflow-hidden mr-3 d-flex flex-shrink-0 align-items-center justify-content-center">
-                        <img src="{{ uploaded_asset($seller_logo) }}" alt="seller">
-                    </div>
-                    <div>
-                        @if ($detailedProduct->added_by == 'seller' && get_setting('vendor_system_activation') == 1)
-                            <p class="m-0 fs-14">
-                                <span class="fw-400 text-gray">{{ translate('Sold by') }}</span>
-                                <a href="{{ route('shop.visit', $detailedProduct->user->shop->slug) }}" class="fw-bold text-blue pl-15px">{{ $detailedProduct->user->shop->name }}</a>
-                            </p>
-                        @else
-                            <p class="m-0 fs-14">
-                                <span class="fw-bold text-dark">{{ translate('Inhouse product') }}</span>
-                            </p>
-                        @endif
-                        @if (get_setting('conversation_system') == 1)
-                            <a href="javascript:void();" onclick="show_chat_modal()" class="fs-14 fw-400 text-blue animate-underline-blue has-transition">{{ translate('Message Seller') }}</a>
-                        @endif
-                    </div>
-                </div>
-                @if ($detailedProduct->brand != null)
+            @if ($detailedProduct->brand != null)
+                <div class="py-20px d-flex flex-wrap flex-xl-nowrap align-items-center">
                     <div class="d-flex align-items-center bg-light p-20px rounded-2 w-100">
                         <div class="store-logo-container w-48px h-48px bg-white border bordre-2 border-gray rounded-1 overflow-hidden mr-3 d-flex flex-shrink-0 align-items-center justify-content-center">
                             <img src="{{ uploaded_asset($detailedProduct->brand->logo) }}"alt="{{ $detailedProduct->brand->name }}" class="img-fit">
@@ -584,54 +515,9 @@
                             <a href="{{route('products.brand', $detailedProduct->brand->slug)}}" class="fs-14 fw-400 text-blue animate-underline-blue has-transition">{{ translate('Products from this brand') }}</a>
                         </div>
                     </div>
-                @endif
-            </div>
+                </div>
+            @endif
             <!--Shipping Notes End-->
-
-            <!--Warranty Start-->
-            <div class="warranty-section pb-20px">
-                @if ($detailedProduct->has_warranty == 1 && $detailedProduct->warranty_id != null)
-                    <p class="fs-14 fw-bold text-dark mb-2">{{ translate('Warranty') }}</p>
-                    <div class="d-flex pb-20px border-bottom-dashed mb-2">
-                        <div class="mr-4">
-                            <p class="fs-14 fw-400 text-dark m-0">{{ translate('This Product has') }} <span class="fw-bold"> {{ $detailedProduct->warranty->getTranslation('text')}}</span> {{ translate('warranty') }}</p>
-                            @if($detailedProduct->warranty_note_id != null)
-                                <a href="javascript:void(1);" data-toggle="modal" data-target="#warranty-note-modal" class="fs-14 fw-400 text-blue m-0 animate-underline-blue has-transitio">{{ translate('View Details') }}</a>
-                            @endif
-                        </div>
-                        <div class="w-40px h-40px position-relative flex-shrink-0 overflow-hidden">
-                            <img src="{{ uploaded_asset($detailedProduct->warranty->logo) }}" class="img-fluid position-absolute w-100 h-100" alt="Warranty Circle">
-                        </div>
-                    </div>
-                @endif
-                <ul class="m-0 p-0">
-                    @if ($detailedProduct->cash_on_delivery)
-                        <li class="d-flex align-items-center">
-                            <span class="d-block flex-shrink-0">
-                                <img src="{{ static_asset('/assets/img/warranty-check-circle.svg') }}" alt="warranty check circle">
-                            </span>
-                            <span class="d-block pl-10px pr-25px fs-14 fw-400 text-dark warranty-text">{{ translate('Cash on Delivery Available')}}</span>
-                        </li>
-                    @endif
-                    @if ($detailedProduct->shipping_type == 'free')
-                        <li class="d-flex align-items-center">
-                            <span class="d-block flex-shrink-0">
-                                <img src="{{ static_asset('/assets/img/warranty-check-circle.svg') }}" alt="warranty check circle">
-                            </span>
-                            <span class="d-block pl-10px pr-25px fs-14 fw-400 text-dark warranty-text">{{ translate('Free Shipping') }}</span>
-                        </li>
-                    @endif
-                    @if (addon_is_activated('refund_request') && $detailedProduct->refundable == 1)
-                        <li class="d-flex align-items-center">
-                            <span class="d-block flex-shrink-0">
-                                <img src="{{ static_asset('/assets/img/warranty-check-circle.svg') }}" alt="warranty check circle">
-                            </span>
-                            <span class="d-block pl-10px pr-25px fs-14 fw-400 text-dark warranty-text">{{ translate('Refund Available for this producte') }}</span>
-                        </li>
-                    @endif
-                </ul>
-            </div>
-            <!--Warranty End-->
 
             <!--Active Gurantee Card Start-->
             @php

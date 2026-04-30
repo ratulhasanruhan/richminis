@@ -97,6 +97,54 @@
         @endauth
         <hr>
         <ul class="mb-0 pl-3 pb-3 h-100">
+            @php
+                $rmTopCats = get_level_zero_categories()->take(4);
+            @endphp
+
+            <li class="mr-0">
+                <a href="{{ route('search', ['sort_by' => 'newest']) }}"
+                    class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links">
+                    {{ translate('New In') }}
+                </a>
+            </li>
+
+            @foreach ($rmTopCats as $rmCat)
+                @php
+                    $rmChildren = $rmCat->childrenCategories;
+                    $rmHasChildren = $rmChildren && $rmChildren->count() > 0;
+                    $rmCollapseId = 'rm-mcat-'.$rmCat->id;
+                @endphp
+                <li class="mr-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <a href="{{ route('products.category', $rmCat->slug) }}"
+                            class="fs-13 px-3 py-3 flex-grow-1 d-inline-block fw-700 text-dark header_menu_links">
+                            {{ $rmCat->getTranslation('name') }}
+                        </a>
+                        @if($rmHasChildren)
+                            <button type="button" class="btn btn-sm px-3 py-3 border-0 bg-transparent text-dark"
+                                data-toggle="collapse" data-target="#{{ $rmCollapseId }}"
+                                aria-expanded="false" aria-controls="{{ $rmCollapseId }}">
+                                <i class="las la-angle-down"></i>
+                            </button>
+                        @endif
+                    </div>
+                    @if($rmHasChildren)
+                        <div class="collapse" id="{{ $rmCollapseId }}">
+                            <ul class="list-unstyled pl-4 pr-3 pb-2">
+                                @foreach ($rmChildren->take(12) as $rmChild)
+                                    <li class="mr-0">
+                                        <a href="{{ route('products.category', $rmChild->slug) }}"
+                                            class="fs-13 px-3 py-2 w-100 d-inline-block fw-500 text-dark header_menu_links">
+                                            {{ $rmChild->getTranslation('name') }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </li>
+            @endforeach
+
             @if (get_setting('header_menu_labels') != null)
                 @foreach (json_decode(get_setting('header_menu_labels'), true) as $key => $value)
                     <li class="mr-0">
@@ -168,6 +216,16 @@
                     </a>
                 </li>
             @endauth
+
+            @if (get_setting('helpline_number'))
+                <hr>
+                <li class="mr-0">
+                    <a href="tel:{{ get_setting('helpline_number') }}"
+                        class="fs-13 px-3 py-3 w-100 d-inline-block fw-700 text-dark header_menu_links">
+                        {{ translate('Call Us') }}
+                    </a>
+                </li>
+            @endif
         </ul>
         <br>
         <br>

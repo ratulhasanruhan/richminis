@@ -2,9 +2,9 @@
 
 <style>
     .rm-hero { margin: 0; padding: 0; line-height: 0; }
-    .rm-hero img { width: 100%; height: 520px; object-fit: cover; display:block; }
-    @media (max-width: 991px) { .rm-hero img { height: 420px; } }
-    @media (max-width: 575px) { .rm-hero img { height: 320px; } }
+    .rm-hero img { width: 100%; height: 760px; object-fit: cover; display:block; }
+    @media (max-width: 991px) { .rm-hero img { height: 520px; } }
+    @media (max-width: 575px) { .rm-hero img { height: 400px; } }
 
     .rm-space { height: 28px; }
     @media (max-width: 575px) { .rm-space { height: 18px; } }
@@ -72,9 +72,20 @@
         line-height: 1;
     }
 
-    .rm-editorial img { width: 100%; height: 520px; object-fit: cover; border-radius: 0; display:block; }
-    @media (max-width: 991px) { .rm-editorial img { height: 400px; } }
-    @media (max-width: 575px) { .rm-editorial img { height: 300px; } }
+    .rm-editorial { margin: 0 !important; padding: 0 !important; line-height: 0; }
+    .rm-editorial .container-fluid { margin: 0 !important; padding: 0 !important; }
+    .rm-editorial .aiz-carousel,
+    .rm-editorial .carousel-box,
+    .rm-editorial .slick-slider,
+    .rm-editorial .slick-list,
+    .rm-editorial .slick-track,
+    .rm-editorial .slick-slide {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .rm-editorial img { width: 100%; height: 760px; object-fit: cover; border-radius: 0; display:block; }
+    @media (max-width: 991px) { .rm-editorial img { height: 540px; } }
+    @media (max-width: 575px) { .rm-editorial img { height: 360px; } }
 
     .rm-brandline {
         margin-top: 44px;
@@ -172,7 +183,7 @@
 <!-- EDITORIAL BANNER / SLIDER -->
 @php $homeBanner1Images = get_setting('home_banner1_images', null, $lang); @endphp
 @if ($homeBanner1Images != null)
-    <section class="rm-editorial py-4">
+    <section class="rm-editorial py-0">
         <div class="container-fluid px-0">
             @php
                 $banner_1_imags = json_decode($homeBanner1Images, true) ?? [];
@@ -197,10 +208,8 @@
     </section>
 @endif
 
-<div class="rm-space"></div>
-
 <!-- NEW IN -->
-<section class="py-2">
+<section class="pt-0 pb-2">
     <div class="container-fluid px-0">
         <div class="rm-title-strip">NEW IN</div>
         <div class="container">
@@ -240,22 +249,19 @@
             </div>
         </div>
     </section>
-    <div class="rm-space"></div>
 @endif
 
 <!-- FULL-WIDTH VIDEO BANNER (optional: set a public mp4 URL in setting `home_video_mp4_url`) -->
 @php $homeVideoMp4 = get_setting('home_video_mp4_url'); @endphp
 @if (!empty($homeVideoMp4))
-    <section class="rm-video py-4">
+    <section class="rm-video pt-0 pb-4">
         <video autoplay muted loop playsinline>
             <source src="{{ $homeVideoMp4 }}" type="video/mp4">
         </video>
     </section>
 @endif
 
-<div class="rm-space"></div>
-
-<section class="py-2">
+<section class="pt-0 pb-2">
     <div class="container-fluid px-0">
         <div class="rm-title-strip">RARE PICKS</div>
         <div class="container">

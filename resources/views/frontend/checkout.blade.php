@@ -66,7 +66,7 @@
                                         <!-- Agree Box -->
                                         <div class="pt-2rem fs-14">
                                             <label class="aiz-checkbox">
-                                                <input type="checkbox" required id="agree_checkbox" onchange="stepCompletionPaymentInfo()">
+                                                <input type="checkbox" required id="agree_checkbox" checked onchange="stepCompletionPaymentInfo()">
                                                 <span class="aiz-square-check"></span>
                                                 <span>{{ translate('I agree to the') }}</span>
                                             </label>
@@ -451,13 +451,11 @@
 
         function stepCompletionShippingInfo() {
             var headColor = '#9d9da6';
-            var btnDisable = true;
             var allOk = false;
             @if (Auth::check())
                 var length = $('input[name="address_id"]:checked').length;
                 if (length > 0) {
                     headColor = '#15a405';
-                    btnDisable = false;
                     allOk = true;
                 }
             @else
@@ -470,13 +468,11 @@
                 });
                 if (count == length) {
                     headColor = '#15a405';
-                    btnDisable = false;
                     allOk = true;
                 }
             @endif
 
             $('#headingShippingInfo svg *').css('fill', headColor);
-            $("#submitOrderBtn").prop('disabled', btnDisable);
             return allOk;
         }
 
@@ -521,7 +517,6 @@
 
         function stepCompletionDeliveryInfo() {
             var headColor = '#9d9da6';
-            var btnDisable = true;
             var allOk = false;
             var content = $('#delivery_info [required]');
             if (content.length > 0) {
@@ -550,17 +545,14 @@
 
                     if (allOk) {
                         headColor = '#15a405';
-                        btnDisable = false;
                     }
                 }
             }else{
                 allOk = true
                 headColor = '#15a405';
-                btnDisable = false;
             }
 
             $('#headingDeliveryInfo svg *').css('fill', headColor);
-            $("#submitOrderBtn").prop('disabled', btnDisable);
             return allOk;
         }
 
@@ -611,7 +603,6 @@
 
         function stepCompletionPaymentInfo() {
             var headColor = '#9d9da6';
-            var btnDisable = true;
             var payment = false;
             var agree = false;
             var allOk = false;
@@ -631,28 +622,23 @@
 
                 if (payment && agree) {
                     headColor = '#15a405';
-                    btnDisable = false;
                     allOk = true;
                 }
             }
 
             $('#headingPaymentInfo svg *').css('fill', headColor);
-            $("#submitOrderBtn").prop('disabled', btnDisable);
             return allOk;
         }
 
         function stepCompletionWalletPaymentInfo() {
             var headColor = '#9d9da6';
-            var btnDisable = true;
             var allOk = false;
             if ($('#agree_checkbox').is(":checked")){
                 headColor = '#15a405';
-                btnDisable = false;
                 allOk = true;
             }
 
             $('#headingPaymentInfo svg *').css('fill', headColor);
-            $("#submitOrderBtn").prop('disabled', btnDisable);
             return allOk;
         }
 
@@ -662,7 +648,6 @@
 
         function checkCarrerShippingInfo(){
            const shippingType = @json(get_setting('shipping_type'));
-            const isDisabled = carrierCount === 0;
             let carrierSelected = false;
             let pickupSelected = false;
             $('.shipping-type-radio').each(function () {
@@ -675,21 +660,9 @@
                     pickupSelected = true;
                 }
             });
-                if(shippingType == 'carrier_wise_shipping' && carrierSelected){
-                    if (carrierCount === 0) {
-                        if( (carrierSelected && pickupSelected) || (carrierSelected && !pickupSelected) ){
-                            $('#submitOrderBtn').prop('disabled', true);
-                            $('#agree_checkbox').prop('checked', false).prop('disabled', true);
-                            $('.online_payment, .offline_payment_option').prop('checked', false).prop('disabled', true);
-                        }
-                    } else {
-                        $('#agree_checkbox').prop('disabled', false);
-                        $('.online_payment, .offline_payment_option').prop('disabled', false);
-                    }
-                }else{
-                    $('#agree_checkbox').prop('disabled', false);
-                    $('.online_payment, .offline_payment_option').prop('disabled', false);
-                }
+            // Keep "Complete Order" enabled; validate on click instead
+            $('#agree_checkbox').prop('disabled', false);
+            $('.online_payment, .offline_payment_option').prop('disabled', false);
         }
 
         $(document).ready(function(){

@@ -101,7 +101,7 @@
                     @if($address)
                     <div class="form-group form-check px-0 py-1 m-0">
                         <label class="aiz-checkbox m-0">
-                            <input type="radio" data-type="shipping" name="billing_address_id" value="" required>
+                            <input type="radio" data-type="shipping" name="billing_address_id" value="" checked required>
                             <span class="fs-14 fw-300 text-reset">{{ translate('Use this as billing address') }}</span>
                             <span class="aiz-square-check"></span>
                         </label>
