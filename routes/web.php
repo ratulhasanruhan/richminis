@@ -52,6 +52,7 @@ use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SizeChartController;
+use Illuminate\Support\Facades\Artisan;
 
 /*
   |--------------------------------------------------------------------------
@@ -78,6 +79,34 @@ Route::controller(DemoController::class)->group(function () {
 
 Route::get('/refresh-csrf', function () {
     return csrf_token();
+});
+
+// TEMPORARY: open in browser to run migrations, then delete this route block from web.php
+Route::get('/__temp-run-migrate-delete-me', function () {
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+
+        return response(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Migrate</title></head><body>'
+            . '<h1>php artisan migrate --force</h1>'
+            . '<pre style="white-space:pre-wrap;background:#f5f5f5;padding:1rem;">'
+            . e($output !== '' ? $output : '(no console output)')
+            . '</pre>'
+            . '<p><strong>Delete this route</strong> (<code>__temp-run-migrate-delete-me</code>) from <code>routes/web.php</code> when finished.</p>'
+            . '</body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8']
+        );
+    } catch (\Throwable $e) {
+        return response(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Migrate error</title></head><body>'
+            . '<h1>Error</h1><pre style="white-space:pre-wrap;">' . e($e->getMessage()) . '</pre>'
+            . '</body></html>',
+            500,
+            ['Content-Type' => 'text/html; charset=UTF-8']
+        );
+    }
 });
 
 // AIZ Uploader
