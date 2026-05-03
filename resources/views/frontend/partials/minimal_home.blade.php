@@ -1,10 +1,78 @@
 @php $lang = get_system_language()->code; @endphp
 
 <style>
-    .rm-hero { margin: 0; padding: 0; line-height: 0; }
-    .rm-hero img { width: 100%; height: 760px; object-fit: cover; display:block; }
-    @media (max-width: 991px) { .rm-hero img { height: 520px; } }
-    @media (max-width: 575px) { .rm-hero img { height: 400px; } }
+    .rm-hero {
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        background: #0a0a0a;
+    }
+    .rm-hero .slick-list,
+    .rm-hero .slick-track {
+        overflow: hidden;
+    }
+    .rm-hero .carousel-box > a {
+        display: block;
+        line-height: 0;
+    }
+    .rm-hero img {
+        width: 100%;
+        height: 760px;
+        object-fit: cover;
+        object-position: center center;
+        display: block;
+    }
+    /*
+      Tablet & mobile: fixed-aspect frame (landscape-friendly).
+      Wide slider assets were cropped badly with portrait aspect-ratio; this matches typical 1920×960-type banners.
+    */
+    @media (max-width: 991px) {
+        .rm-hero .carousel-box > a {
+            position: relative;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+        .rm-hero .carousel-box > a::before {
+            content: "";
+            display: block;
+            width: 100%;
+            padding-bottom: 52%;
+        }
+        .rm-hero img {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100% !important;
+            object-fit: cover;
+            object-position: center center;
+        }
+    }
+    @media (max-width: 575px) {
+        /* Slightly taller on phones (~16:9 → comfortable hero band without portrait crop) */
+        .rm-hero .carousel-box > a::before {
+            padding-bottom: 62%;
+        }
+        .rm-hero img {
+            object-position: center 42%;
+        }
+        .rm-hero .slick-dots {
+            bottom: 14px !important;
+            left: 0;
+            right: 0;
+            padding: 0 16px;
+        }
+        .rm-hero .slick-dots li button:before {
+            font-size: 9px;
+            opacity: 0.55;
+        }
+        .rm-hero .slick-dots li.slick-active button:before {
+            opacity: 0.95;
+        }
+    }
 
     .rm-space { height: 28px; }
     @media (max-width: 575px) { .rm-space { height: 18px; } }
@@ -83,9 +151,31 @@
         margin: 0 !important;
         padding: 0 !important;
     }
-    .rm-editorial img { width: 100%; height: 760px; object-fit: cover; border-radius: 0; display:block; }
-    @media (max-width: 991px) { .rm-editorial img { height: 540px; } }
-    @media (max-width: 575px) { .rm-editorial img { height: 360px; } }
+    .rm-editorial img {
+        width: 100%;
+        height: 760px;
+        object-fit: cover;
+        object-position: center center;
+        border-radius: 0;
+        display: block;
+    }
+    @media (max-width: 991px) {
+        .rm-editorial img {
+            height: min(70vw, 580px);
+            min-height: 280px;
+            object-position: center top;
+        }
+    }
+    @media (max-width: 575px) {
+        .rm-editorial img {
+            height: auto;
+            aspect-ratio: 16 / 10;
+            max-height: min(52vh, 420px);
+            min-height: 200px;
+            object-fit: cover;
+            object-position: center 22%;
+        }
+    }
 
     .rm-brandline {
         margin-top: 44px;
