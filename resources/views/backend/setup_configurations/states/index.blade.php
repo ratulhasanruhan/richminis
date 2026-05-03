@@ -40,6 +40,7 @@
                             <tr>
                                 <th width="10%">#</th>
                                 <th>{{translate('Name')}}</th>
+                                <th>{{ translate('Delivery charge') }}</th>
                                 <th>{{translate('Country')}}</th>
                                 <th>{{translate('Show/Hide')}}</th>
                                 <th class="text-right">{{translate('Action')}}</th>
@@ -50,6 +51,7 @@
                                 <tr>
                                     <td>{{ ($key+1) + ($states->currentPage() - 1)*$states->perPage() }}</td>
                                     <td>{{ $state->name }}</td>
+                                    <td>{{ single_price($state->cost ?? 0) }}</td>
                                     <td>{{ $state->country->name }}</td>
                                     <td>
                                         <label class="aiz-switch aiz-switch-success mb-0">
@@ -84,6 +86,11 @@
     						<label for="name">{{translate('Name')}}</label>
     						<input type="text" placeholder="{{translate('Name')}}" name="name" class="form-control" required>
     					</div>
+
+                        <div class="form-group mb-3">
+                            <label for="cost_new">{{ translate('Delivery charge (state)') }}</label>
+                            <input type="number" step="0.01" min="0" class="form-control" name="cost" id="cost_new" value="0">
+                        </div>
 
                         <div class="form-group">
                             <label for="country">{{translate('Country')}}</label>

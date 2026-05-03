@@ -15,6 +15,8 @@
                     <button class="btn bg-blue-color2 text-primary w-100 "><h6 class="font-weight-bold mb-0">{{ translate('You have selected Seller Wise Flat Shipping Cost') }}</h6></button>
                     @elseif(get_setting('shipping_type') == 'area_wise_shipping')
                     <button class="btn bg-blue-color2 text-primary w-100 "><h6 class="font-weight-bold mb-0">{{ translate('You have selected Area Wise Flat Shipping Cost') }}</h6></button>
+                    @elseif(get_setting('shipping_type') == 'state_wise_shipping')
+                    <button class="btn bg-blue-color2 text-primary w-100 "><h6 class="font-weight-bold mb-0">{{ translate('You have selected State Wise Shipping Cost') }}</h6></button>
                     @elseif(get_setting('shipping_type') == 'carrier_wise_shipping')
                     <button class="btn bg-blue-color2 text-primary w-100 "><h6 class="font-weight-bold mb-0">{{ translate('You have selected Carrier Wise Shipping Cost') }}</h6></button>
                     @endif
@@ -22,9 +24,13 @@
         </div>
 
         <div class="card">
-            <div class="{{ get_setting('shipping_type') == 'area_wise_shipping' ? 'border border-primary border-2 rounded-2' : '' }}">
+            <div class="{{ in_array(get_setting('shipping_type'), ['area_wise_shipping', 'state_wise_shipping'], true) ? 'border border-primary border-2 rounded-2' : '' }}">
                 <div class="card-header">
+                    @if (get_setting('shipping_type') == 'state_wise_shipping')
+                    <h6 class="mb-0">{{ translate('State Wise Shipping Cost') }} <br> <p class="text-danger fs-12 fw-400 mb-0 pt-2 lh-1-5">{{ translate('Delivery charge is taken from each state\'s cost field. Enable states in shipping configuration, then set cost per state on the States edit page.') }}</p></h6>
+                    @else
                     <h6 class="mb-0">{{translate('Shipping Area Coverage & Area Wise Shipping Cost')}} <br> <p class="text-danger fs-12 fw-400 mb-0 pt-2 lh-1-5">Area-wise shipping cost is calculated based on the rates set in this configuration. The system’s shipping area coverage and the fields shown in the customer address will depend on this configuration.</p></h6>
+                    @endif
 
                 </div>
                 <div class="card-body">

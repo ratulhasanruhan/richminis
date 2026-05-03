@@ -30,6 +30,10 @@
     <!-- Nav Tabs End -->
 
 @if (Auth::check())
+    @php
+        $area_required_for_shipping = get_setting('shipping_type') == 'area_wise_shipping';
+        $show_city_in_checkout_address = checkout_requires_city_for_shipping_quote();
+    @endphp
 
     <div class="tab-content" id="shippingTabContent">
         <!--Shipping Address-->
@@ -55,7 +59,7 @@
                 $is_disabled =
                     $city_status === 0 ||
                     ($has_area_id && $area_status === 0) ||
-                    ($active_area_exists && !$has_area_id) ||
+                    ($area_required_for_shipping && $active_area_exists && !$has_area_id) ||
                     ($address->state_id == null && get_setting('has_state') == 1);
                 }
                 @endphp
@@ -70,7 +74,7 @@
                                 <span class="d-flex p-3 aiz-megabox-elem border-0">
                                     <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
                                     <span class="pl-3 text-left w-xl-300px"  id="choose-default">
-                                        {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}-{{ $address->city->name }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
+                                        {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}{{ $show_city_in_checkout_address && $address->city ? '-' . $address->city->name : '' }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
                                         <br>  {{ $address->phone }}
                                     </span>
                                 </span>
@@ -144,7 +148,7 @@
                 $is_disabled =
                     $city_status === 0 ||
                     ($has_area_id && $area_status === 0) ||
-                    ($active_area_exists && !$has_area_id) ||
+                    ($area_required_for_shipping && $active_area_exists && !$has_area_id) ||
                     ($address->state_id == null && get_setting('has_state') == 1);
                 }
                 @endphp
@@ -157,7 +161,7 @@
                                 <span class="d-flex p-3 aiz-megabox-elem border-0">
                                     <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
                                     <span class="pl-3 text-left w-xl-300px" id="choose-default-billing">
-                                        {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}-{{ $address->city->name }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
+                                        {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}{{ $show_city_in_checkout_address && $address->city ? '-' . $address->city->name : '' }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
                                         <br>  {{ $address->phone }}
                                     </span>
                                 </span>
@@ -225,7 +229,7 @@
                             $is_disabled =
                                 $city_status === 0 ||
                                 ($has_area_id && $area_status === 0) ||
-                                ($active_area_exists && !$has_area_id) ||
+                                ($area_required_for_shipping && $active_area_exists && !$has_area_id) ||
                                 ($address->state_id == null && get_setting('has_state') == 1);
                         @endphp
                         <div class="border {{ $is_disabled ? 'border-danger' : '' }} mb-3">
@@ -237,7 +241,7 @@
                                         <span class="d-flex p-3 aiz-megabox-elem border-0">
                                             <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
                                             <span class="pl-3 text-left w-xl-300px address-text">
-                                                {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}-{{ $address->city->name }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
+                                                {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}{{ $show_city_in_checkout_address && $address->city ? '-' . $address->city->name : '' }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
                                               <br>  {{ $address->phone }}
                                             </span>
                                         </span>
@@ -309,7 +313,7 @@
                             $is_disabled =
                                 $city_status === 0 ||
                                 ($has_area_id && $area_status === 0) ||
-                                ($active_area_exists && !$has_area_id) ||
+                                ($area_required_for_shipping && $active_area_exists && !$has_area_id) ||
                                 ($address->state_id == null && get_setting('has_state') == 1);
                         @endphp
                         <div class="border {{ $is_disabled ? 'border-danger' : '' }} mb-3">
@@ -321,7 +325,7 @@
                                         <span class="d-flex p-3 aiz-megabox-elem border-0">
                                             <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
                                             <span class="pl-3 text-left w-xl-300px address-text">
-                                                {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}-{{ $address->city->name }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
+                                                {{ $address->address }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}{{ $show_city_in_checkout_address && $address->city ? '-' . $address->city->name : '' }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
                                                 <br>  {{ $address->phone }}
                                             </span>
                                         </span>

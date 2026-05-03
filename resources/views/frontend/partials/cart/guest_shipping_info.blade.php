@@ -78,13 +78,16 @@
                     <label>{{ translate('State')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
-                    <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="state_id" required>
+                    <select class="form-control mb-3 aiz-selectpicker rounded-0 guest-checkout" data-live-search="true" name="state_id" required>
 
                     </select>
                 </div>
             </div>
 
-            <!-- City -->
+            <!-- City (hidden when state-wise shipping: server picks a city in the state) -->
+            @if (!checkout_requires_city_for_shipping_quote())
+            <input type="hidden" name="city_id" value="">
+            @else
             <div class="row">
                 <div class="col-md-2 mt-md-2">
                     <label>{{ translate('City')}} <span class="text-danger">*</span></label>
@@ -95,6 +98,7 @@
                     </select>
                 </div>
             </div>
+            @endif
 
             <!-- Address -->
             <div class="row">
@@ -124,7 +128,7 @@
                     <input id="searchInput" class="controls" type="text" placeholder="{{translate('Enter a location')}}">
                     <div id="map"></div>
                     <ul id="geoData">
-                        <li style="display: none;">Full Address: <span id="location"></span></li>
+                        <li style="display: none;">{{ translate('Address') }}: <span id="location"></span></li>
                         <li style="display: none;">Postal Code: <span id="postal_code"></span></li>
                         <li style="display: none;">Country: <span id="country"></span></li>
                         <li style="display: none;">Latitude: <span id="lat"></span></li>
@@ -161,13 +165,13 @@
     @if (get_setting('billing_address_required'))
     <div class="tab-pane fade" id="billing-address" role="tabpanel" aria-labelledby="billing-address-tab">
         <div class="p-3">
-            <!-- Name -->
+            <!-- First name -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('Name')}} <span class="text-danger">*</span></label>
+                    <label>{{ translate('First name')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
-                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your Name')}}" rows="2" name="billing_name" required></input>
+                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your First Name')}}" rows="2" name="billing_name" required></input>
                 </div>
             </div>
 
@@ -217,6 +221,9 @@
             </div>
             @endif
 
+            @if (!checkout_requires_city_for_shipping_quote())
+            <input type="hidden" name="billing_city_id" value="">
+            @else
             <!-- City -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
@@ -228,6 +235,7 @@
                     </select>
                 </div>
             </div>
+            @endif
 
             <!--Area-->
             <div class="row billing-area-field d-none">

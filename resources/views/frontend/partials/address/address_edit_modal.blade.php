@@ -53,6 +53,9 @@
         </div>
         @endif
 
+        @if (!checkout_requires_city_for_shipping_quote())
+        <input type="hidden" name="city_id" value="{{ $address_data->city_id }}">
+        @else
         <!-- City -->
         <div class="row">
             <div class="col-md-2">
@@ -69,6 +72,7 @@
                 </select>
             </div>
         </div>
+        @endif
 
        
         <div class="row area-field {{ ($areas->count() == 0) ? 'd-none' : '' }}">
@@ -92,7 +96,7 @@
                 <input id="edit_searchInput" class="controls" type="text" placeholder="Enter a location">
                 <div id="edit_map"></div>
                 <ul id="geoData">
-                    <li style="display: none;">Full Address: <span id="location"></span></li>
+                    <li style="display: none;">{{ translate('Address') }}: <span id="location"></span></li>
                     <li style="display: none;">Postal Code: <span id="postal_code"></span></li>
                     <li style="display: none;">Country: <span id="country"></span></li>
                     <li style="display: none;">Latitude: <span id="lat"></span></li>

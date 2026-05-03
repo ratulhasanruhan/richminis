@@ -29,8 +29,8 @@
                                 </div>
                             </div>
 
-                            <!-- Delivery Info -->
-                            <div class="card rounded-0 border shadow-none" style="margin-bottom: 2rem; overflow: visible !important;">
+                            <!-- Delivery Info (hidden — shipping defaults applied server-side) -->
+                            <div id="rm-checkout-delivery-section" class="card rounded-0 border shadow-none d-none" style="margin-bottom: 2rem; overflow: visible !important;">
                                 <div class="card-header border-bottom-0 py-3 py-xl-4" id="headingDeliveryInfo" type="button" data-toggle="collapse" data-target="#collapseDeliveryInfo" aria-expanded="true" aria-controls="collapseDeliveryInfo">
                                     <div class="d-flex align-items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
@@ -421,13 +421,43 @@
             @endif
         });
 
+        function rmShippingInfoCountryId() {
+            var $r = $('#shipping_info');
+            if (!$r.length) {
+                return $('select[name="country_id"]').val() != null ? $('select[name="country_id"]').val() : ($('input[name="country_id"]').val() || 0);
+            }
+            if ($r.find('select[name="country_id"]').length) {
+                return $r.find('select[name="country_id"]').val() || 0;
+            }
+            return $r.find('input[name="country_id"]').val() || 0;
+        }
+
+        function rmShippingInfoCityId() {
+            var $r = $('#shipping_info');
+            if (!$r.length) {
+                var $gh = $('input[type="hidden"][name="city_id"]');
+                if ($gh.length) {
+                    return $gh.val() || 0;
+                }
+                return $('select[name="city_id"]').val() != null ? $('select[name="city_id"]').val() : 0;
+            }
+            var $h = $r.find('input[type="hidden"][name="city_id"]');
+            if ($h.length) {
+                return $h.val() || 0;
+            }
+            var $s = $r.find('select[name="city_id"]');
+            return $s.length ? ($s.val() || 0) : 0;
+        }
+
         function updateDeliveryAddress(id, city_id = 0, area_id=0) {
             $('.aiz-refresh').addClass('active');
+            var state_id = $('select[name="state_id"]').length ? ($('select[name="state_id"]').val() || 0) : 0;
             $.post('{{ route('checkout.updateDeliveryAddress') }}', {
                 _token: AIZ.data.csrf,
                 address_id: id,
                 city_id: city_id,
-                area_id: area_id
+                area_id: area_id,
+                state_id: state_id
             }, function(data) {
                 $('#delivery_info').html(data.delivery_info);
                 $('#cart_summary').html(data.cart_summary);
@@ -500,10 +530,8 @@
         });
 
         $('select[name="area_id"].guest-checkout').change(function () {
-            let country_id = $('select[name="country_id"]').length
-                ? $('select[name="country_id"]').val()
-                : $('input[name="country_id"]').val();
-            let city_id = $('select[name="city_id"]').val();
+            let country_id = rmShippingInfoCountryId();
+            let city_id = rmShippingInfoCityId();
             let area_id = $(this).val();
 
             if (area_id) {
@@ -515,7 +543,23 @@
             stepCompletionShippingInfo();
         });
 
+        @if (!checkout_requires_city_for_shipping_quote())
+        $('select[name="state_id"].guest-checkout').on('change', function () {
+            let country_id = rmShippingInfoCountryId();
+            let city_id = rmShippingInfoCityId();
+            let area_id = $('select[name="area_id"]').length ? ($('select[name="area_id"]').val() || 0) : 0;
+            let stateVal = $(this).val();
+            if (country_id && stateVal) {
+                updateDeliveryAddress(country_id, city_id, area_id);
+            }
+            stepCompletionShippingInfo();
+        });
+        @endif
+
         function stepCompletionDeliveryInfo() {
+            if ($('#rm-checkout-delivery-section').length && $('#rm-checkout-delivery-section').hasClass('d-none')) {
+                return true;
+            }
             var headColor = '#9d9da6';
             var allOk = false;
             var content = $('#delivery_info [required]');
@@ -557,10 +601,8 @@
         }
 
         function updateDeliveryInfo(shipping_type, type_id, user_id, country_id = 0, city_id = 0) {
-            @if (get_setting('shipping_type') == 'area_wise_shipping' || get_setting('shipping_type') == 'carrier_wise_shipping')
-                country_id = $('select[name="country_id"]').val() != null ? $('select[name="country_id"]').val() : 0;
-                city_id = $('select[name="city_id"]').val() != null ? $('select[name="city_id"]').val() : 0;
-            @endif
+            country_id = rmShippingInfoCountryId();
+            city_id = rmShippingInfoCityId();
             $('.aiz-refresh').addClass('active');
             $.post('{{ route('checkout.updateDeliveryInfo') }}', {
                 _token: AIZ.data.csrf,

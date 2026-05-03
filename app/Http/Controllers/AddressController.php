@@ -49,7 +49,8 @@ class AddressController extends Controller
         $address->address       = $request->address;
         $address->country_id    = $request->country_id;
         $address->state_id      = $request->state_id;
-        $address->city_id       = $request->city_id;
+        $resolvedCity = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
+        $address->city_id       = $resolvedCity !== null ? $resolvedCity : $request->city_id;
         $address->area_id       = $request->area_id;
         $address->longitude     = $request->longitude;
         $address->latitude      = $request->latitude;
@@ -72,7 +73,8 @@ class AddressController extends Controller
         $address->address       = $request->address;
         $address->country_id    = $request->country_id;
         $address->state_id      = $request->state_id;
-        $address->city_id       = $request->city_id;
+        $resolvedCity = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
+        $address->city_id       = $resolvedCity !== null ? $resolvedCity : $request->city_id;
         $address->area_id       = $request->area_id;
         $address->longitude     = $request->longitude;
         $address->latitude      = $request->latitude;
@@ -147,7 +149,9 @@ class AddressController extends Controller
             $address->state_id = $request->state_id ?? $address->state_id;
         }
         $address->country_id    = $request->country_id;
-        $address->city_id       = $request->city_id ?? $address->city_id;
+        $stateForCity = $request->state_id ?? $address->state_id;
+        $resolvedCity = resolve_city_id_for_state_wise_shipping($stateForCity, $request->city_id ?? null);
+        $address->city_id       = $resolvedCity !== null ? $resolvedCity : ($request->city_id ?? $address->city_id);
         $address->area_id       = $request->area_id ?? null;
         $address->longitude     = $request->longitude;
         $address->latitude      = $request->latitude;
@@ -168,7 +172,9 @@ class AddressController extends Controller
             $address->state_id = $request->state_id ?? $address->state_id;
         }
         $address->country_id    = $request->country_id;
-        $address->city_id       = $request->city_id ?? $address->city_id;
+        $stateForCity = $request->state_id ?? $address->state_id;
+        $resolvedCity = resolve_city_id_for_state_wise_shipping($stateForCity, $request->city_id ?? null);
+        $address->city_id       = $resolvedCity !== null ? $resolvedCity : ($request->city_id ?? $address->city_id);
         $address->area_id       = $request->area_id ?? null;
         $address->longitude     = $request->longitude;
         $address->latitude      = $request->latitude;

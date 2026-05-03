@@ -32,6 +32,12 @@
                         </select>
                     </div>
 
+                    <div class="form-group mb-3">
+                        <label for="cost">{{ translate('Delivery charge (state)') }}</label>
+                        <input type="number" step="0.01" min="0" class="form-control" name="cost" id="cost" value="{{ $state->cost ?? 0 }}">
+                        <small class="text-muted">{{ translate('Used when shipping method is State Wise.') }}</small>
+                    </div>
+
                     <div class="form-group mb-3 text-right">
                         <button type="submit" class="btn btn-primary">
                             {{ translate('Update') }}

@@ -33,6 +33,25 @@
                     </div>
                 </div>
 
+                <!-- State Wise Shipping Cost -->
+                <div class="col-md-6 col-lg-4 d-flex">
+                    <div class="card text-center px-3 py-4 w-100" data-shipping="State Wise Shipping Cost">
+                        <img src="{{ static_asset('assets/img/shipping/area_wise_flat_shipping.png') }}" class="card-img-top mx-auto" alt="Shipping Icon">
+
+                        <div class="text-left mx-4">
+                            <div class="d-flex align-items-left justify-content-left mb-2">
+                                <input type="radio" hidden id="stateWiseShipping" class="mr-2" name="shipping_type" value="state_wise_shipping" @if(get_setting('shipping_type')=='state_wise_shipping' ) checked @endif>
+                                <p for="stateWiseShipping" class="mb-0 font-weight-bold">
+                                    {{ translate('State Wise Shipping Cost') }}
+                                </p>
+                            </div>
+                            <p class="text-muted mb-0 " style="font-size: 12px;">
+                                {{ translate('Fixed delivery charge per state. Set each state cost under Shipping Setup → States.') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-6 col-lg-4 d-flex">
                     <div class="card text-center px-3 py-4 w-100" data-shipping="Product Wise Shipping Cost">
                         <img src="{{ static_asset('assets/img/shipping/product_wise_shipping.png') }}" class="card-img-top mx-auto" alt="Shipping Icon">

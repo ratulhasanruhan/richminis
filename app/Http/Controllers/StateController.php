@@ -61,6 +61,7 @@ class StateController extends Controller
 
         $state->name        = $request->name;
         $state->country_id  = $request->country_id;
+        $state->cost        = (float) ($request->cost ?? 0);
 
         $state->save();
 
@@ -106,6 +107,7 @@ class StateController extends Controller
 
         $state->name        = $request->name;
         $state->country_id  = $request->country_id;
+        $state->cost        = (float) ($request->cost ?? 0);
 
         $state->save();
 

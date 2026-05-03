@@ -35,6 +35,7 @@ class ShippingController extends Controller
                 $shipping_info['country_id'] = $address->country_id;
                 $shipping_info['city_id'] = $address->city_id;
                 $shipping_info['area_id'] = $address->area_id;
+                $shipping_info['state_id'] = $address->state_id ?? 0;
             }
 
             // Guest User Shipping info
@@ -42,6 +43,7 @@ class ShippingController extends Controller
                 $shipping_info['country_id'] = $request->country_id;
                 $shipping_info['city_id'] = $request->city_id;
                 $shipping_info['area_id'] = $request->area_id;
+                $shipping_info['state_id'] = $request->state_id ?? 0;
             }
 
             foreach ($carts as $key => $cartItem) {
@@ -87,10 +89,14 @@ class ShippingController extends Controller
                 $address = Address::find($cart->address_id);
                 $shipping_info['country_id'] = $address->country_id;
                 $shipping_info['city_id'] = $address->city_id;
+                $shipping_info['area_id'] = $address->area_id;
+                $shipping_info['state_id'] = $address->state_id ?? 0;
             }
         } elseif ($tempUserId) {
             $shipping_info['country_id'] = $request->country_id;
             $shipping_info['city_id'] = $request->city_id;
+            $shipping_info['area_id'] = $request->area_id ?? 0;
+            $shipping_info['state_id'] = $request->state_id ?? 0;
         }
 
         // Get unique owner_ids

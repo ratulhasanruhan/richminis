@@ -1,5 +1,64 @@
 <script type="text/javascript">
 
+    function rmFirstCityOptionValue(htmlFragment) {
+        if (!htmlFragment) {
+            return '';
+        }
+        var $tmp = $('<select></select>').html(htmlFragment);
+        var v = '';
+        $tmp.find('option').each(function () {
+            var val = $(this).attr('value');
+            if (val !== undefined && val !== null && String(val).length) {
+                v = val;
+                return false;
+            }
+        });
+        return v;
+    }
+
+    /**
+     * @param {string} fieldBaseName city_id or billing_city_id
+     * @param {string} obj HTML <option> list from server
+     * @param {string} emptyLabel translated "no cities" message
+     * @param {boolean} isBilling whether to refresh billing area
+     */
+    function rmApplyCityAjaxResponse(fieldBaseName, obj, emptyLabel, isBilling) {
+        var $hidden = $('input[type="hidden"][name="' + fieldBaseName + '"]');
+        var $select = $('select[name="' + fieldBaseName + '"]');
+        var hasOpts = obj !== '' && $('<select></select>').html(obj).find('option').length > 1;
+        if (!hasOpts) {
+            if ($hidden.length) {
+                $hidden.val('');
+            }
+            if ($select.length) {
+                $select.html('<option value="">' + emptyLabel + '</option>');
+                $select.attr('disabled', true);
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+            return;
+        }
+        var firstVal = rmFirstCityOptionValue(obj);
+        if ($hidden.length) {
+            $hidden.val(firstVal);
+            if (isBilling) {
+                get_billing_area(firstVal);
+            } else {
+                get_area(firstVal);
+            }
+            if ($select.length) {
+                $select.attr('disabled', false);
+                $select.html(obj);
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+            return;
+        }
+        if ($select.length) {
+            $select.attr('disabled', false);
+            $select.html(obj);
+            AIZ.plugins.bootstrapSelect('refresh');
+        }
+    }
+
     function submitShippingInfoForm(el) {
         // Guest checkout should work for both new and existing users.
         // If the email/phone already exists, OTP will be used to authenticate on order submit.
@@ -193,15 +252,12 @@
             },
             success: function (response) {
                 var obj = JSON.parse(response);
-                if(obj != ''&& $('<select></select>').html(obj).find('option').length > 1) {
-                    $('[name="city_id"]').attr('disabled', false);
-                    $('[name="city_id"]').html(obj);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }else{
-                    $('[name="city_id"]').html('<option value="">{{ translate('No cities are available under this state.') }}</option>');
-                    $('[name="city_id"]').attr('disabled', true);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }
+                rmApplyCityAjaxResponse(
+                    'city_id',
+                    obj,
+                    '{{ translate('No cities are available under this state.') }}',
+                    false
+                );
             }
         });
     }
@@ -219,15 +275,12 @@
             },
             success: function (response) {
                 var obj = JSON.parse(response);
-                if(obj != ''&& $('<select></select>').html(obj).find('option').length > 1) {
-                    $('[name="billing_city_id"]').attr('disabled', false);
-                    $('[name="billing_city_id"]').html(obj);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }else{
-                    $('[name="cbilling_ity_id"]').html('<option value="">{{ translate('No cities are available under this state.') }}</option>');
-                    $('[name="billing_city_id"]').attr('disabled', true);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }
+                rmApplyCityAjaxResponse(
+                    'billing_city_id',
+                    obj,
+                    '{{ translate('No cities are available under this state.') }}',
+                    true
+                );
             }
         });
     }
@@ -274,15 +327,12 @@
             },
             success: function (response) {
                 var obj = JSON.parse(response);
-                if(obj != '' && $('<select></select>').html(obj).find('option').length > 1) {
-                    $('[name="city_id"]').attr('disabled', false);
-                    $('[name="city_id"]').html(obj);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }else{
-                    $('[name="city_id"]').html('<option value="">{{ translate('No cities are available under this country.') }}</option>');
-                    $('[name="city_id"]').attr('disabled', true);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }
+                rmApplyCityAjaxResponse(
+                    'city_id',
+                    obj,
+                    '{{ translate('No cities are available under this country.') }}',
+                    false
+                );
             }
         });
     }
@@ -328,15 +378,12 @@
             },
             success: function (response) {
                 var obj = JSON.parse(response);
-                if(obj != '' && $('<select></select>').html(obj).find('option').length > 1) {
-                    $('[name="billing_city_id"]').attr('disabled', false);
-                    $('[name="billing_city_id"]').html(obj);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }else{
-                    $('[name="billing_city_id"]').html('<option value="">{{ translate('No cities are available under this country.') }}</option>');
-                    $('[name="billing_city_id"]').attr('disabled', true);
-                    AIZ.plugins.bootstrapSelect('refresh');
-                }
+                rmApplyCityAjaxResponse(
+                    'billing_city_id',
+                    obj,
+                    '{{ translate('No cities are available under this country.') }}',
+                    true
+                );
             }
         });
     }

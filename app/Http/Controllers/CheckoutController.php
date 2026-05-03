@@ -38,7 +38,8 @@ class CheckoutController extends Controller
 
         $country_id = 0;
         $city_id = 0;
-        $area_id=0;
+        $area_id = 0;
+        $state_id = 0;
         $address_id = 0;
         $shipping_info = array();
 
@@ -52,12 +53,14 @@ class CheckoutController extends Controller
                 $country_id = $address->country_id;
                 $city_id = $address->city_id;
                 $area_id = $address->area_id;
+                $state_id = $address->state_id ?? 0;
                 $default_address =$addresses->toQuery()->where('set_default', 1)->first();
                 if($default_address != null){
                     $address_id = $default_address->id;
                     $country_id = $default_address->country_id;
                     $city_id = $default_address->city_id;
                     $area_id = $default_address->area_id;
+                    $state_id = $default_address->state_id ?? 0;
                 }
             }
         }
@@ -69,6 +72,7 @@ class CheckoutController extends Controller
         $shipping_info['country_id'] = $country_id;
         $shipping_info['city_id'] = $city_id;
         $shipping_info['area_id'] = $area_id;
+        $shipping_info['state_id'] = $state_id;
         $total = 0;
         $tax = 0;
         $shipping = 0;
@@ -261,7 +265,10 @@ class CheckoutController extends Controller
             $address->address       = $guest['address'] ?? null;
             $address->country_id    = $guest['country_id'] ?? null;
             $address->state_id      = $guest['state_id'] ?? null;
-            $address->city_id       = $guest['city_id'] ?? null;
+            $address->city_id       = resolve_city_id_for_state_wise_shipping(
+                $guest['state_id'] ?? null,
+                $guest['city_id'] ?? null
+            ) ?? ($guest['city_id'] ?? null);
             $address->postal_code   = $guest['postal_code'] ?? null;
             $address->area_id       = $guest['area_id'] ?? null;
             $address->phone         = ($guest['country_code'] ?? '') !== '' ? ('+' . ltrim($guest['country_code'], '+') . ($guest['phone'] ?? '')) : ($guest['phone'] ?? null);
@@ -279,7 +286,10 @@ class CheckoutController extends Controller
                 $billing->address       = $guest['billing_address'] ?? null;
                 $billing->country_id    = $guest['billing_country_id'] ?? null;
                 $billing->state_id      = $guest['billing_state_id'] ?? null;
-                $billing->city_id       = $guest['billing_city_id'] ?? null;
+                $billing->city_id       = resolve_city_id_for_state_wise_shipping(
+                    $guest['billing_state_id'] ?? null,
+                    $guest['billing_city_id'] ?? null
+                ) ?? ($guest['billing_city_id'] ?? null);
                 $billing->postal_code   = $guest['billing_postal_code'] ?? null;
                 $billing->area_id       = $guest['billing_area_id'] ?? null;
                 $billing->phone         = $guest['billing_phone'] ?? null;
@@ -361,6 +371,12 @@ class CheckoutController extends Controller
         $user->save();
 
         // Store guest shipping/billing info for later Address creation after OTP verification
+        $resolvedShippingCity = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
+        $resolvedBillingCity = resolve_city_id_for_state_wise_shipping(
+            $request->billing_state_id,
+            $request->billing_city_id
+        );
+
         $guest = [
             'same_as_shipping' => (int) (($request->same_as_shipping ?? 0) == 1),
             'name' => $request->name,
@@ -368,7 +384,7 @@ class CheckoutController extends Controller
             'address' => $request->address,
             'country_id' => $request->country_id,
             'state_id' => $request->state_id,
-            'city_id' => $request->city_id,
+            'city_id' => $resolvedShippingCity ?? $request->city_id,
             'area_id' => $request->area_id,
             'postal_code' => $request->postal_code,
             'country_code' => $request->country_code,
@@ -378,7 +394,7 @@ class CheckoutController extends Controller
             'billing_address' => $request->billing_address,
             'billing_country_id' => $request->billing_country_id,
             'billing_state_id' => $request->billing_state_id,
-            'billing_city_id' => $request->billing_city_id,
+            'billing_city_id' => $resolvedBillingCity ?? $request->billing_city_id,
             'billing_area_id' => $request->billing_area_id,
             'billing_postal_code' => $request->billing_postal_code,
             'billing_phone' => $request->billing_phone,
@@ -475,6 +491,19 @@ class CheckoutController extends Controller
 
     public function createUser($guest_shipping_info)
     {
+        if (! checkout_requires_city_for_shipping_quote()) {
+            $guest_shipping_info['city_id'] = resolve_city_id_for_state_wise_shipping(
+                $guest_shipping_info['state_id'] ?? null,
+                $guest_shipping_info['city_id'] ?? null
+            );
+            if (!(($guest_shipping_info['same_as_shipping'] ?? 0) == 1) && get_setting('billing_address_required')) {
+                $guest_shipping_info['billing_city_id'] = resolve_city_id_for_state_wise_shipping(
+                    $guest_shipping_info['billing_state_id'] ?? null,
+                    $guest_shipping_info['billing_city_id'] ?? null
+                );
+            }
+        }
+
         $validator = Validator::make($guest_shipping_info, [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users|max:255',
@@ -650,6 +679,7 @@ class CheckoutController extends Controller
     {
         $auth_user = auth()->user();
         $temp_user_id = $request->session()->has('temp_user_id') ? $request->session()->get('temp_user_id') : null;
+        $guestCityId = null;
 
         if($auth_user == null && get_setting('guest_checkout_activation') == 0){
             return redirect()->route('user.login');
@@ -669,8 +699,9 @@ class CheckoutController extends Controller
         }
         else{
             if(get_setting('guest_checkout_activation') == 1){
+                $guestCityId = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
                 if($request->name == null || $request->email == null || $request->address == null ||
-                    $request->country_id == null || $request->state_id == null || $request->city_id == null ||
+                    $request->country_id == null || $request->state_id == null || $guestCityId == null ||
                         $request->postal_code == null || $request->phone == null) {
                     flash(translate("Please add shipping address"))->warning();
                     return redirect()->route('checkout.shipping_info');
@@ -680,7 +711,7 @@ class CheckoutController extends Controller
                 $shipping_info['address'] = $request->address;
                 $shipping_info['country_id'] = $request->country_id;
                 $shipping_info['state_id'] = $request->state_id;
-                $shipping_info['city_id'] = $request->city_id;
+                $shipping_info['city_id'] = $guestCityId;
                 $shipping_info['area_id'] = $request->area_id;
                 $shipping_info['postal_code'] = $request->postal_code;
                 $shipping_info['phone'] = '+'.$request->country_code.$request->phone;
@@ -709,7 +740,7 @@ class CheckoutController extends Controller
         // Guest User Delivery info
         elseif($temp_user_id != null){
             $deliveryInfo['country_id'] = $request->country_id;
-            $deliveryInfo['city_id'] = $request->city_id;
+            $deliveryInfo['city_id'] = $guestCityId ?? $request->city_id;
             $deliveryInfo['area_id'] = $request->area_id;
         }
 
@@ -998,11 +1029,18 @@ class CheckoutController extends Controller
         $area_id = $user != null ?
                     Address::findOrFail($request->address_id)->area_id :
                     $request->area_id;
+        $state_id = $user != null ?
+                    (Address::findOrFail($request->address_id)->state_id ?? 0) :
+                    (int) ($request->state_id ?? 0);
 
-                    
+        if (! checkout_requires_city_for_shipping_quote()) {
+            $city_id = resolve_city_id_for_state_wise_shipping($state_id, $city_id) ?: $city_id;
+        }
+
         $shipping_info['country_id'] = $country_id;
         $shipping_info['city_id'] = $city_id;
         $shipping_info['area_id'] = $area_id;
+        $shipping_info['state_id'] = $state_id;
         $carrier_list = array();
         if (get_setting('shipping_type') == 'carrier_wise_shipping') {
             $default_shipping_type = 'carrier';
@@ -1077,9 +1115,16 @@ class CheckoutController extends Controller
                     Address::findOrFail($carts[0]->address_id)->city_id : $request->city_id;
         $area_id = $user != null ?
                     Address::findOrFail($carts[0]->address_id)->area_id : $request->area_id;
+        $state_id = $user != null ?
+                    (Address::findOrFail($carts[0]->address_id)->state_id ?? 0) :
+                    (int) ($request->state_id ?? 0);
+        if (! checkout_requires_city_for_shipping_quote()) {
+            $city_id = resolve_city_id_for_state_wise_shipping($state_id, $city_id) ?: $city_id;
+        }
         $shipping_info['country_id'] = $country_id;
         $shipping_info['city_id'] = $city_id;
-        $shipping_info['area_id'] = $area_id;   
+        $shipping_info['area_id'] = $area_id;
+        $shipping_info['state_id'] = $state_id;
         $shipping_type = $request->shipping_type;
         foreach ($user_carts as $key => $cartItem) {
             if ($shipping_type != 'carrier' || $shipping_type == 'pickup_point') {

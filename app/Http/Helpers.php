@@ -1087,6 +1087,21 @@ function getShippingCost($carts, $index, $shipping_info = '', $carrier = '')
             }
         }
         return 0;
+    } elseif ($shipping_type == 'state_wise_shipping') {
+        $state = null;
+        if (isset($shipping_info['state_id']) && $shipping_info['state_id'] !== null && (int) $shipping_info['state_id'] !== 0) {
+            $state = State::where('id', $shipping_info['state_id'])->first();
+        }
+        if ($state != null) {
+            $cost = isset($state->cost) ? (float) $state->cost : 0.0;
+            if ($product->added_by == 'admin') {
+                return $cost / max(1, count($admin_products));
+            }
+
+            return $cost / max(1, count($seller_products[$product->user_id]));
+        }
+
+        return 0;
     } elseif ($shipping_type == 'carrier_wise_shipping') { // carrier wise shipping
         $user_zone = $shipping_info['country_id'] != 0 ? Country::where('id', $shipping_info['country_id'])->first()->zone_id : 0;
 
@@ -1400,6 +1415,35 @@ if (!function_exists('isUnique')) {
         } else {
             return '0';
         }
+    }
+}
+
+if (!function_exists('checkout_requires_city_for_shipping_quote')) {
+    /** Area-wise is the only built-in mode that needs customer city (or area) for shipping cost. */
+    function checkout_requires_city_for_shipping_quote(): bool
+    {
+        return get_setting('shipping_type') === 'area_wise_shipping';
+    }
+}
+
+if (!function_exists('resolve_city_id_for_state_wise_shipping')) {
+    /**
+     * When checkout does not collect city (non–area-wise shipping), pick one active city
+     * in the state so legacy address rows (city_id FK) stay valid.
+     */
+    function resolve_city_id_for_state_wise_shipping($stateId, $cityId = null)
+    {
+        $cityId = $cityId !== null && $cityId !== '' ? (int) $cityId : 0;
+        if ($cityId > 0) {
+            return $cityId;
+        }
+        if (checkout_requires_city_for_shipping_quote() || !$stateId) {
+            return null;
+        }
+
+        $resolved = City::where('state_id', $stateId)->where('status', 1)->orderBy('id')->value('id');
+
+        return $resolved ? (int) $resolved : null;
     }
 }
 

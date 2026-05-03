@@ -29,7 +29,8 @@ class AddressController extends Controller
         $address->address = $request->address;
         $address->country_id = $request->country_id;
         $address->state_id = $request->state_id;
-        $address->city_id = $request->city_id;
+        $resolvedCity = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
+        $address->city_id = $resolvedCity !== null ? $resolvedCity : $request->city_id;
         $address->area_id = $request->area_id;
         $address->postal_code = $request->postal_code;
         $address->phone = $request->phone;
@@ -51,7 +52,9 @@ class AddressController extends Controller
         } else {
             $address->state_id = $request->state_id ?? $address->state_id;
         }
-        $address->city_id = $request->city_id;
+        $stateForCity = $request->state_id ?? $address->state_id;
+        $resolvedCity = resolve_city_id_for_state_wise_shipping($stateForCity, $request->city_id ?? null);
+        $address->city_id = $resolvedCity !== null ? $resolvedCity : ($request->city_id ?? $address->city_id);
         $address->area_id = $request->area_id;
         $address->postal_code = $request->postal_code;
         $address->phone = $request->phone;
@@ -135,8 +138,9 @@ class AddressController extends Controller
         else
         {
             if(get_setting('guest_checkout_activation') == 1){
+                $guestCityId = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
                 if($request->name == null || $request->email == null || $request->address == null ||
-                    $request->country_id == null || $request->state_id == null || $request->city_id == null ||
+                    $request->country_id == null || $request->state_id == null || $guestCityId == null ||
                         $request->postal_code == null || $request->phone == null)
                 {
                     return response()->json([
@@ -149,7 +153,7 @@ class AddressController extends Controller
                 $shipping_info['address'] = $request->address;
                 $shipping_info['country_id'] = $request->country_id;
                 $shipping_info['state_id'] = $request->state_id;
-                $shipping_info['city_id'] = $request->city_id;
+                $shipping_info['city_id'] = $guestCityId;
                 $shipping_info['postal_code'] = $request->postal_code;
                 $shipping_info['phone'] = '+'.$request->country_code.$request->phone;
                 $shipping_info['longitude'] = $request->longitude;
@@ -183,12 +187,19 @@ class AddressController extends Controller
                 $address = Address::where('id', $carts[0]['address_id'])->first();
                 $shipping_info['country_id'] = $address->country_id;
                 $shipping_info['city_id'] = $address->city_id;
+                $shipping_info['area_id'] = $address->area_id;
+                $shipping_info['state_id'] = $address->state_id ?? 0;
             }
 
             // Guest User Shipping info
             elseif($tempUserId != null){
                 $shipping_info['country_id'] = $request->country_id;
-                $shipping_info['city_id'] = $request->city_id;
+                $shipping_info['city_id'] = resolve_city_id_for_state_wise_shipping(
+                    $request->state_id ?? null,
+                    $request->city_id ?? null
+                ) ?: $request->city_id;
+                $shipping_info['area_id'] = $request->area_id ?? 0;
+                $shipping_info['state_id'] = $request->state_id ?? 0;
             }
 
             foreach ($carts as $key => $cart) {
