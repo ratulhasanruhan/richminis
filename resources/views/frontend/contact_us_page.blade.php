@@ -54,12 +54,12 @@
     <div class="container">
         <div class="" style="background-color: {{ hex2rgba(get_setting('base_color', '#d43533'), 0.02) }}">
             <div class="row">
-                <div class="col-lg-6 text-center text-lg-left">
+                <div class="col-lg-6 text-left">
                     <div class="p-3 p-md-4 p-xl-5">
                         <h1 class="fs-36 fw-700 mb-4">{{ $page->getTranslation('title') }}</h1>
                         <p class="fs-16 fw-400 mb-5">{{ $content->description }}</p>
-                        <div class="d-flex mb-5">
-                            <span class="size-48px d-flex align-items-center justify-content-center border border-gray-500 rounded-content">
+                        <div class="d-flex mb-5 align-items-start justify-content-start">
+                            <span class="size-48px d-flex align-items-center justify-content-center border border-gray-500 rounded-content flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="19.201" height="24" viewBox="0 0 19.201 24">
                                     <path id="c2b0eedccc4761c59dc63e9987216605" d="M13.6,2A9.611,9.611,0,0,0,4,11.6c0,3.906,2.836,7.15,5.839,10.583.95,1.087,1.934,2.212,2.81,3.349a1.2,1.2,0,0,0,1.9,0c.876-1.138,1.86-2.262,2.81-3.349,3-3.433,5.839-6.677,5.839-10.583A9.611,9.611,0,0,0,13.6,2Zm0,13.2a3.6,3.6,0,1,1,3.6-3.6A3.6,3.6,0,0,1,13.6,15.2Z" transform="translate(-4 -2)" fill="#9d9da6"/>
                                 </svg>
@@ -69,8 +69,8 @@
                                 <span class="fs-14 text-secondary">{!! str_replace("\n", "<br>", $content->address) !!}</span>
                             </span>
                         </div>
-                        <div class="d-flex mb-5">
-                            <span class="size-48px d-flex align-items-center justify-content-center border border-gray-500 rounded-content">
+                        <div class="d-flex mb-5 align-items-start justify-content-start">
+                            <span class="size-48px d-flex align-items-center justify-content-center border border-gray-500 rounded-content flex-shrink-0">
                                 <i class="las la-2x la-phone text-gray"></i>
                             </span>
                             <span class="ml-3">
@@ -78,8 +78,8 @@
                                 <span class="fs-14 text-secondary">{{ $content->phone }}</span>
                             </span>
                         </div>
-                        <div class="d-flex">
-                            <span class="size-48px d-flex align-items-center justify-content-center border border-gray-500 rounded-content">
+                        <div class="d-flex align-items-start justify-content-start">
+                            <span class="size-48px d-flex align-items-center justify-content-center border border-gray-500 rounded-content flex-shrink-0">
                                 <i class="las la-2x la-envelope text-gray"></i>
                             </span>
                             <span class="ml-3">
