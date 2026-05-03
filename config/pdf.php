@@ -47,6 +47,10 @@ return
             ],
             'zawgyi-one' => [
                 'R'  => 'Zawgyi-One.ttf',    // regular font
-            ]
+            ],
+            'raleway' => [
+                'R'  => 'Raleway-Regular.ttf',
+                'B'  => 'Raleway-Bold.ttf',
+            ],
         ]
     ];

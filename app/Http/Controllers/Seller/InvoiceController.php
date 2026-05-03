@@ -70,7 +70,7 @@ class InvoiceController extends Controller
             $font_family = "'zawgyi-one','sans-serif'";
         }else{
             // general for all
-            $font_family = "'Roboto','sans-serif'";
+            $font_family = "'raleway','sans-serif'";
         }
         
         // $config = ['instanceConfigurator' => function($mpdf) {

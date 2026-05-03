@@ -72,3 +72,12 @@
 #33 R:\\SoftwareFiles\\laragon\\www\\richminis\\artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
 #34 {main}
 "} 
+[2026-05-03 13:36:36] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:36:45] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:37:00] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:39:04] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:39:07] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:40:01] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:41:41] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:53:06] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 
+[2026-05-03 13:55:24] local.INFO: Filter Orders Request:  {"page":"1","seller_type":"inhouse","search":null,"order_from":null,"payment_status":null,"date":null,"col":null,"status":null} 

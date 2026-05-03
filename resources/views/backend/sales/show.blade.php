@@ -1,6 +1,60 @@
 @extends('backend.layouts.app')
 
 @section('content')
+    <style>
+        /* Match PDF invoice look on this admin order screen (separate from backend/invoices/invoice.blade.php) */
+        .rm-admin-invoice-strip {
+            background-color: #fff;
+            color: #111;
+            padding: 1rem 1.25rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        .rm-admin-invoice-strip .rm-doc-accent {
+            height: 3px;
+            background: #111;
+            margin: 0.75rem 0 0;
+            max-width: 120px;
+        }
+        .rm-admin-invoice-strip .rm-doc-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #555;
+        }
+        .rm-admin-invoice-strip .rm-doc-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0.15rem 0 0;
+        }
+        .rm-admin-invoice-strip .rm-doc-sub {
+            font-size: 0.85rem;
+            margin-top: 0.35rem;
+            color: #333;
+        }
+        table.invoice-summary thead tr th {
+            background-color: #f2f2f2 !important;
+            color: #111 !important;
+            border-color: #e0e0e0 !important;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+        table.invoice-summary.table-bordered > thead > tr > th,
+        table.invoice-summary.table-bordered > tbody > tr > td {
+            border-color: #e8e8e8;
+        }
+        .rm-admin-qr-box {
+            display: inline-block;
+            border: 1px solid #e0e0e0;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
 
     <div class="card">
         <div class="card-header">
@@ -253,11 +307,42 @@
                 </div>
 
             </div>
-            <div class="mb-3 mt-3">
+
+            <div class="rm-admin-invoice-strip">
+                <div class="d-flex flex-wrap justify-content-between align-items-start">
+                    <div class="pr-3">
+                        <div class="rm-doc-title" style="letter-spacing:0.06em;">{{ strtoupper(get_setting('site_name')) }}</div>
+                        <div class="rm-doc-accent"></div>
+                        <div class="rm-doc-sub mt-2">{{ translate('Order ID') }}: <strong>{{ $order->code }}</strong></div>
+                    </div>
+                    <div class="text-md-right mt-3 mt-md-0">
+                        <div class="rm-doc-title" style="font-size:1.75rem;">
+                            @if ($order->order_from == 'pos')
+                                {{ translate('POS INVOICE') }}
+                            @else
+                                {{ translate('INVOICE') }}
+                            @endif
+                        </div>
+                        <div class="rm-doc-sub font-weight-bold">INV #{{ $order->code }}</div>
+                        <div class="rm-doc-label mt-3">{{ translate('Sold By') }}</div>
+                        <div class="font-weight-bold">{{ $order->shop->name ?? get_setting('site_name') }}</div>
+                        <div class="rm-doc-sub">{{ date('j F Y', $order->date) }}</div>
+                    </div>
+                </div>
+                <div class="mt-3 text-right">
+                    <a href="{{ route('invoice.download', $order->id) }}" class="btn btn-dark btn-sm" target="_blank" rel="noopener">
+                        {{ translate('Download PDF') }}
+                    </a>
+                </div>
+            </div>
+
+            <div class="mb-3 mt-2">
                 @php
                     $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
                 @endphp
-                {!! str_replace($removedXML, '', QrCode::size(100)->generate($order->code)) !!}
+                <div class="rm-admin-qr-box">
+                    {!! str_replace($removedXML, '', QrCode::size(100)->generate($order->code)) !!}
+                </div>
             </div>
             <div class="row gutters-5">
                 <div class="col text-md-left text-center">
@@ -365,7 +450,7 @@
                 <div class="col-lg-12 table-responsive">
                     <table class="table-bordered aiz-table invoice-summary table">
                         <thead>
-                            <tr class="bg-trans-dark">
+                            <tr>
                                 <th data-breakpoints="lg" class="min-col">#</th>
                                 <th width="10%">{{ translate('Photo') }}</th>
                                 <th class="text-uppercase">{{ translate('Description') }}</th>

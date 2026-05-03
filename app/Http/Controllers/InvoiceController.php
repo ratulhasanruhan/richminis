@@ -87,11 +87,10 @@ class InvoiceController extends Controller
         } elseif (
             $currency_code == 'USD'
         ) {
-            // Thai font
-            $font_family = "'Roboto','sans-serif'";
+            $font_family = "'raleway','sans-serif'";
         } else {
-            // general for all
-            $font_family = "freeserif";
+            // general for all (invoice uses Raleway when embedded in PDF)
+            $font_family = "'raleway','sans-serif'";
         }
 
         // $config = ['instanceConfigurator' => function($mpdf) {
@@ -127,7 +126,7 @@ class InvoiceController extends Controller
 
         return view('backend.invoices.invoice', [
             'order' => $order,
-            'font_family' => "'Roboto', sans-serif", // or reuse your logic
+            'font_family' => "'raleway','sans-serif'",
             'direction' => $direction,
             'text_align' => $text_align,
             'not_text_align' => $not_text_align
