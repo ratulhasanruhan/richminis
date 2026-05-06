@@ -16,6 +16,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Utility\EmailUtility;
 use App\Utility\NotificationUtility;
+use App\Services\SendSmsService;
 use Session;
 use Auth;
 use Hash;
@@ -402,12 +403,12 @@ class CheckoutController extends Controller
         $request->session()->put('checkout_guest_shipping_info', $guest);
 
         try {
-            $site = get_setting('site_name') ?: config('app.name');
-            $array = [
-                'subject' => $site . ' - ' . translate('Your OTP Code'),
-                'content' => translate('Your OTP code is') . ': <b>' . $user->verification_code . '</b>',
-            ];
-            Mail::to($user->email)->queue(new MailManager($array));
+            $to = $phoneE164 ?: $user->phone;
+            if (empty($to)) {
+                throw new \Exception('Missing phone for OTP');
+            }
+            $message = 'Your ' . ($site = (get_setting('site_name') ?: config('app.name'))) . ' OTP is: ' . $user->verification_code;
+            (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $message, null);
         } catch (\Exception $e) {
             return response()->json([
                 'result' => false,
@@ -420,7 +421,7 @@ class CheckoutController extends Controller
 
         return response()->json([
             'result' => true,
-            'message' => translate('OTP sent to your email'),
+            'message' => translate('OTP sent to your phone'),
         ]);
     }
 
@@ -470,14 +471,15 @@ class CheckoutController extends Controller
         $user->verification_code = rand(100000, 999999);
         $user->save();
 
-        // Send OTP via email (SMTP)
+        // Send OTP via SMS
         try {
+            $to = $phoneE164 ?: $user->phone;
+            if (empty($to)) {
+                throw new \Exception('Missing phone for OTP');
+            }
             $site = get_setting('site_name') ?: config('app.name');
-            $array = [
-                'subject' => $site . ' - ' . translate('Your OTP Code'),
-                'content' => translate('Your OTP code is') . ': <b>' . $user->verification_code . '</b>',
-            ];
-            Mail::to($user->email)->queue(new MailManager($array));
+            $message = 'Your ' . $site . ' OTP is: ' . $user->verification_code;
+            (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $message, null);
         } catch (\Exception $e) {
             flash(translate('Could not send OTP. Please try again later.'))->warning();
             return redirect()->route('checkout');
@@ -485,7 +487,7 @@ class CheckoutController extends Controller
 
         $request->session()->put('checkout_otp_user_id', $user->id);
         $request->session()->forget('checkout_otp_verified');
-        flash(translate('We sent an OTP to your email. Please enter it to continue.'))->info();
+        flash(translate('We sent an OTP to your phone. Please enter it to continue.'))->info();
         return redirect()->route('checkout');
     }
 
@@ -994,6 +996,19 @@ class CheckoutController extends Controller
                 $order->notified = 1;
                 $order->save();
             }
+        }
+
+        // Extra SMS after successful order confirmation (OTP uses SMS; other notifications remain email)
+        try {
+            $shipping = json_decode($combined_order->shipping_address);
+            $to = $shipping->phone ?? null;
+            if (!empty($to)) {
+                $site = get_setting('site_name') ?: config('app.name');
+                $text = 'Order confirmed. Thank you for choosing ' . $site . '.';
+                (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $text, null);
+            }
+        } catch (\Exception $e) {
+            // avoid breaking order confirmed page
         }
 
         return view('frontend.order_confirmed', compact('combined_order'));

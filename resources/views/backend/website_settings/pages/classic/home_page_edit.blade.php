@@ -147,6 +147,7 @@
 							@csrf
 							<input type="hidden" name="tab" value="home_slider">
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_images">
+							<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_images_for_mobile">
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
@@ -171,7 +172,9 @@
 									<div class="home-slider-target">
 										@php
 											$home_slider_images = get_setting('home_slider_images', null, $lang);
+											$home_slider_images_for_mobile = get_setting('home_slider_images_for_mobile', null, $lang);
 											$home_slider_links = get_setting('home_slider_links', null, $lang);
+											$decoded_home_slider_images_for_mobile = $home_slider_images_for_mobile ? json_decode($home_slider_images_for_mobile, true) : [];
 										@endphp
 										@if ($home_slider_images != null)
 											@foreach (json_decode($home_slider_images, true) as $key => $value)
@@ -189,6 +192,17 @@
 																</div>
 																<div class="file-preview box sm">
 																</div>
+															</div>
+															<div class="form-group mt-2 mb-md-0">
+																<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+																<div class="input-group" data-toggle="aizuploader" data-type="image">
+																	<div class="input-group-prepend">
+																		<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+																	</div>
+																	<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+																	<input type="hidden" name="home_slider_images_for_mobile[]" class="selected-files" value="{{ $decoded_home_slider_images_for_mobile[$key] ?? '' }}">
+																</div>
+																<div class="file-preview box sm"></div>
 															</div>
 														</div>
 														<!-- link -->
@@ -232,6 +246,17 @@
 															</div>
 															<div class="file-preview box sm">
 															</div>
+														</div>
+														<div class="form-group mt-2 mb-md-0">
+															<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+															<div class="input-group" data-toggle="aizuploader" data-type="image">
+																<div class="input-group-prepend">
+																	<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+																</div>
+																<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+																<input type="hidden" name="home_slider_images_for_mobile[]" class="selected-files" value="">
+															</div>
+															<div class="file-preview box sm"></div>
 														</div>
 													</div>
 													<!-- link -->

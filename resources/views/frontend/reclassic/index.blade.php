@@ -58,17 +58,27 @@
                                 @php
                                     $decoded_slider_images = json_decode(get_setting('home_slider_images', null, $lang), true);
                                     $sliders = get_slider_images($decoded_slider_images);
+                                    $decoded_slider_mobile_images = json_decode(get_setting('home_slider_images_for_mobile', null, $lang) ?? '[]', true);
+                                    $sliders_mobile = get_slider_images($decoded_slider_mobile_images);
                                     $home_slider_links = get_setting('home_slider_links', null, $lang);
                                 @endphp
                                 @foreach ($sliders as $key => $slider)
                                     <div class="carousel-box">
                                         <a class="d-block" href="{{ isset(json_decode($home_slider_links, true)[$key]) ? json_decode($home_slider_links, true)[$key] : '' }}">
-                                            <img
-                                                class="d-block mw-100 img-fit h-180px h-md-320px @if(count($featured_categories) == 0) h-lg-530px @else h-lg-350px @endif"
-                                                src="{{ $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg') }}"
-                                                alt="{{ env('APP_NAME')}} promo"
-                                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
-                                            >
+                                            @php
+                                                $desktop_src = $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg');
+                                                $mobile_slider = $sliders_mobile[$key] ?? null;
+                                                $mobile_src = $mobile_slider ? my_asset($mobile_slider->file_name) : $desktop_src;
+                                            @endphp
+                                            <picture>
+                                                <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                                <img
+                                                    class="d-block mw-100 img-fit h-180px h-md-320px @if(count($featured_categories) == 0) h-lg-530px @else h-lg-350px @endif"
+                                                    src="{{ $desktop_src }}"
+                                                    alt="{{ env('APP_NAME')}} promo"
+                                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
+                                                >
+                                            </picture>
                                         </a>
                                     </div>
                                 @endforeach

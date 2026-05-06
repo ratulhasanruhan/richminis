@@ -27,6 +27,8 @@
                         @php
                             $decoded_slider_images = json_decode(get_setting('home_slider_images', null, $lang), true);
                             $sliders = get_slider_images($decoded_slider_images);
+                            $decoded_slider_mobile_images = json_decode(get_setting('home_slider_images_for_mobile', null, $lang) ?? '[]', true);
+                            $sliders_mobile = get_slider_images($decoded_slider_mobile_images);
                             $home_slider_links = get_setting('home_slider_links', null, $lang);
                         @endphp
                         @foreach ($sliders as $key => $slider)
@@ -34,10 +36,18 @@
                                 <a href="{{ isset(json_decode($home_slider_links, true)[$key]) ? json_decode($home_slider_links, true)[$key] : '' }}">
                                     <!-- Image -->
                                     <div class="d-block mw-100 img-fit overflow-hidden h-180px h-md-320px h-lg-460px h-xl-553px overflow-hidden">
-                                        <img class="img-fit h-100 m-auto has-transition ls-is-cached lazyloaded"
-                                        src="{{ $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg') }}"
-                                        alt="{{ env('APP_NAME') }} promo"
-                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
+                                        @php
+                                            $desktop_src = $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg');
+                                            $mobile_slider = $sliders_mobile[$key] ?? null;
+                                            $mobile_src = $mobile_slider ? my_asset($mobile_slider->file_name) : $desktop_src;
+                                        @endphp
+                                        <picture>
+                                            <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                            <img class="img-fit h-100 m-auto has-transition ls-is-cached lazyloaded"
+                                            src="{{ $desktop_src }}"
+                                            alt="{{ env('APP_NAME') }} promo"
+                                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
+                                        </picture>
                                     </div>
                                 </a>
                             </div>
@@ -257,12 +267,16 @@
     @endif
 
     <!-- Banner section 1 -->
-    @php $homeBanner1Images = get_setting('home_banner1_images', null, $lang);   @endphp
+    @php
+        $homeBanner1Images = get_setting('home_banner1_images', null, $lang);
+        $homeBanner1MobileImages = get_setting('home_banner1_images_for_mobile', null, $lang);
+    @endphp
     @if ($homeBanner1Images != null)
         <div class="pb-2 pb-md-3 pt-2 pt-md-3" style="background: #f5f5fa;">
             <div class="container mb-2 mb-md-3">
                 @php
                     $banner_1_imags = json_decode($homeBanner1Images);
+                    $banner_1_mobile_images = $homeBanner1MobileImages ? json_decode($homeBanner1MobileImages) : [];
                     $data_md = count($banner_1_imags) >= 2 ? 2 : 1;
                     $home_banner1_links = get_setting('home_banner1_links', null, $lang);
                 @endphp
@@ -276,10 +290,18 @@
                             <div class="carousel-box overflow-hidden hov-scale-img">
                                 <a href="{{ isset(json_decode($home_banner1_links, true)[$key]) ? json_decode($home_banner1_links, true)[$key] : '' }}"
                                     class="d-block text-reset overflow-hidden">
-                                    <img src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
-                                        data-src="{{ uploaded_asset($value) }}" alt="{{ env('APP_NAME') }} promo"
-                                        class="img-fluid lazyload w-100 has-transition"
-                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
+                                    @php
+                                        $desktop_src = uploaded_asset($value);
+                                        $mobile_value = $banner_1_mobile_images[$key] ?? null;
+                                        $mobile_src = $mobile_value ? uploaded_asset($mobile_value) : $desktop_src;
+                                    @endphp
+                                    <picture>
+                                        <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                        <img src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
+                                            data-src="{{ $desktop_src }}" alt="{{ env('APP_NAME') }} promo"
+                                            class="img-fluid lazyload w-100 has-transition"
+                                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
+                                    </picture>
                                 </a>
                             </div>
                         @endforeach

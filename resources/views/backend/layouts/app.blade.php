@@ -19,11 +19,27 @@
     <link rel="apple-touch-icon" href="{{ uploaded_asset(get_setting('site_icon')) }}">
     <title>{{ get_setting('website_name') . ' | ' . get_setting('site_motto') }}</title>
 
-    <!-- google font -->
-    {{-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700"> --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+    <!-- Fonts (local) -->
+    <style>
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Thin.ttf') }}') format('truetype'); font-weight: 100; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-ThinItalic.ttf') }}') format('truetype'); font-weight: 100; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-ExtraLight.ttf') }}') format('truetype'); font-weight: 200; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-ExtraLightItalic.ttf') }}') format('truetype'); font-weight: 200; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Light.ttf') }}') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-LightItalic.ttf') }}') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Regular.ttf') }}') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Italic.ttf') }}') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Medium.ttf') }}') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-MediumItalic.ttf') }}') format('truetype'); font-weight: 500; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-SemiBold.ttf') }}') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-SemiBoldItalic.ttf') }}') format('truetype'); font-weight: 600; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Bold.ttf') }}') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-BoldItalic.ttf') }}') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-ExtraBold.ttf') }}') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-ExtraBoldItalic.ttf') }}') format('truetype'); font-weight: 800; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-Black.ttf') }}') format('truetype'); font-weight: 900; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Raleway'; src: url('{{ static_asset('assets/fonts/Raleway-BlackItalic.ttf') }}') format('truetype'); font-weight: 900; font-style: italic; font-display: swap; }
+    </style>
 
     <!-- aiz core css -->
     <link rel="stylesheet" href="{{ static_asset('assets/css/vendors.css?v=') }}{{ get_setting('current_version') }}">
@@ -63,7 +79,8 @@
         }
         body {
             font-size: 12px;
-            font-family: {!! !empty(get_setting('system_font_family')) ? get_setting('system_font_family') : "'Raleway', sans-serif" !!};
+            font-family: 'Raleway', sans-serif !important;
+            font-weight: 400;
         }
         /* .bootstrap-select .btn,
         .btn:not(.btn-circle),

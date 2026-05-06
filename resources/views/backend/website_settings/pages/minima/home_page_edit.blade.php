@@ -29,6 +29,13 @@
 							{{ translate('Home Slider') }}
 						</a>
 					</li>
+					<!-- Home Marquee Text -->
+					<li class="nav-item">
+						<a class="nav-link" id="home-marquee-tab" href="#home_marquee_text"
+							data-toggle="tab" data-target="#home_marquee_text" type="button" role="tab" aria-controls="home_marquee_text" aria-selected="false">
+							{{ translate('Home Marquee Text') }}
+						</a>
+					</li>
 					<!-- Flash Deals -->
 					<li class="nav-item">
 						<a class="nav-link" id="flash-deals-tab" href="#flash_deals"
@@ -170,6 +177,7 @@
 							@csrf
 							<input type="hidden" name="tab" value="home_slider">
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_images">
+							<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_images_for_mobile">
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
@@ -194,7 +202,9 @@
 									<div class="home-slider-target">
 										@php
 											$home_slider_images = get_setting('home_slider_images', null, $lang);
+											$home_slider_images_for_mobile = get_setting('home_slider_images_for_mobile', null, $lang);
 											$home_slider_links = get_setting('home_slider_links', null, $lang);
+											$decoded_home_slider_images_for_mobile = $home_slider_images_for_mobile ? json_decode($home_slider_images_for_mobile, true) : [];
 										@endphp
 										@if ($home_slider_images != null)
 											@foreach (json_decode($home_slider_images, true) as $key => $value)
@@ -212,6 +222,17 @@
 																</div>
 																<div class="file-preview box sm">
 																</div>
+															</div>
+															<div class="form-group mt-2 mb-md-0">
+																<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+																<div class="input-group" data-toggle="aizuploader" data-type="image">
+																	<div class="input-group-prepend">
+																		<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+																	</div>
+																	<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+																	<input type="hidden" name="home_slider_images_for_mobile[]" class="selected-files" value="{{ $decoded_home_slider_images_for_mobile[$key] ?? '' }}">
+																</div>
+																<div class="file-preview box sm"></div>
 															</div>
 														</div>
 														<!-- link -->
@@ -256,6 +277,17 @@
 															<div class="file-preview box sm">
 															</div>
 														</div>
+														<div class="form-group mt-2 mb-md-0">
+															<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+															<div class="input-group" data-toggle="aizuploader" data-type="image">
+																<div class="input-group-prepend">
+																	<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+																</div>
+																<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+																<input type="hidden" name="home_slider_images_for_mobile[]" class="selected-files" value="">
+															</div>
+															<div class="file-preview box sm"></div>
+														</div>
 													</div>
 													<!-- link -->
 													<div class="col-md">
@@ -281,6 +313,25 @@
 								</div>
 								<!-- Save Button -->
 								<div class="mt-4 text-right">
+									<button type="submit" class="btn btn-success w-230px btn-md rounded-2 fs-14 fw-700 shadow-success">{{ translate('Save') }}</button>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<!-- Home Marquee Text -->
+					<div class="tab-pane fade" id="home_marquee_text" role="tabpanel" aria-labelledby="home-marquee-tab">
+						<form action="{{ route('business_settings.update') }}" method="POST">
+							@csrf
+							<input type="hidden" name="tab" value="home_marquee_text">
+							<div class="bg-white p-3 p-sm-2rem">
+								<div class="form-group">
+									<label class="fw-600">{{ translate('Home Marquee Text') }}</label>
+									<input type="hidden" name="types[]" value="home_marquee_text">
+									<input type="text" class="form-control" name="home_marquee_text" value="{{ get_setting('home_marquee_text') }}" placeholder="DHAKA · BANGLADESH · EST. 2025 ...">
+									<small class="text-muted">{{ translate('This text will show on the moving marquee strip on homepage.') }}</small>
+								</div>
+								<div class="mt-3 text-right">
 									<button type="submit" class="btn btn-success w-230px btn-md rounded-2 fs-14 fw-700 shadow-success">{{ translate('Save') }}</button>
 								</div>
 							</div>
@@ -535,6 +586,7 @@
 							@csrf
 							<input type="hidden" name="tab" value="banner_1">
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_banner1_images">
+							<input type="hidden" name="types[][{{ $lang }}]" value="home_banner1_images_for_mobile">
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_banner1_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
@@ -546,7 +598,9 @@
 									<div class="home-banner1-target">
 										@php
 											$home_banner1_images = get_setting('home_banner1_images', null, $lang);
+											$home_banner1_images_for_mobile = get_setting('home_banner1_images_for_mobile', null, $lang);
 											$home_banner1_links = get_setting('home_banner1_links', null, $lang);
+											$decoded_home_banner1_images_for_mobile = $home_banner1_images_for_mobile ? json_decode($home_banner1_images_for_mobile, true) : [];
 										@endphp
 										@if ($home_banner1_images != null)
 											@foreach (json_decode($home_banner1_images, true) as $key => $value)
@@ -564,6 +618,17 @@
 																</div>
 																<div class="file-preview box sm">
 																</div>
+															</div>
+															<div class="form-group mt-2 mb-md-0">
+																<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+																<div class="input-group" data-toggle="aizuploader" data-type="image">
+																	<div class="input-group-prepend">
+																		<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+																	</div>
+																	<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+																	<input type="hidden" name="home_banner1_images_for_mobile[]" class="selected-files" value="{{ $decoded_home_banner1_images_for_mobile[$key] ?? '' }}">
+																</div>
+																<div class="file-preview box sm"></div>
 															</div>
 														</div>
 														<!-- link -->
@@ -607,6 +672,17 @@
 															</div>
 															<div class="file-preview box sm">
 															</div>
+														</div>
+														<div class="form-group mt-2 mb-md-0">
+															<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+															<div class="input-group" data-toggle="aizuploader" data-type="image">
+																<div class="input-group-prepend">
+																	<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+																</div>
+																<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+																<input type="hidden" name="home_banner1_images_for_mobile[]" class="selected-files" value="">
+															</div>
+															<div class="file-preview box sm"></div>
 														</div>
 													</div>
 													<!-- link -->

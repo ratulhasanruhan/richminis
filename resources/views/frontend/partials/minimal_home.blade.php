@@ -201,17 +201,27 @@
         @php
             $decoded_slider_images = json_decode(get_setting('home_slider_images', null, $lang), true);
             $sliders = get_slider_images($decoded_slider_images);
+            $decoded_slider_mobile_images = json_decode(get_setting('home_slider_images_for_mobile', null, $lang) ?? '[]', true);
+            $sliders_mobile = get_slider_images($decoded_slider_mobile_images);
             $home_slider_links = get_setting('home_slider_links', null, $lang);
         @endphp
         <div class="aiz-carousel dots-inside-bottom" data-autoplay="true" data-infinite="true" data-fade="true" data-autoplay-speed="3500">
             @foreach ($sliders as $key => $slider)
                 <div class="carousel-box">
                     <a href="{{ isset(json_decode($home_slider_links, true)[$key]) ? json_decode($home_slider_links, true)[$key] : '' }}">
-                        <img
-                            src="{{ $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg') }}"
-                            alt="{{ env('APP_NAME') }} promo"
-                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
-                        >
+                        @php
+                            $desktop_src = $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg');
+                            $mobile_slider = $sliders_mobile[$key] ?? null;
+                            $mobile_src = $mobile_slider ? my_asset($mobile_slider->file_name) : $desktop_src;
+                        @endphp
+                        <picture>
+                            <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                            <img
+                                src="{{ $desktop_src }}"
+                                alt="{{ env('APP_NAME') }} promo"
+                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
+                            >
+                        </picture>
                     </a>
                 </div>
             @endforeach
@@ -223,7 +233,7 @@
 <div class="rm-marquee">
     <div class="rm-marquee__track">
         @php
-            $marquee = 'DHAKA · BANGLADESH · EST. 2025 · FOR THE CHOSEN ONLY · LUXURY BABY BRAND · PREMIUM SHOES';
+            $marquee = get_setting('home_marquee_text') ?: 'DHAKA · BANGLADESH · EST. 2025 · FOR THE CHOSEN ONLY · LUXURY BABY BRAND · PREMIUM SHOES';
         @endphp
         <div class="rm-marquee__item">{{ $marquee }}</div>
         <div class="rm-marquee__item">{{ $marquee }}</div>

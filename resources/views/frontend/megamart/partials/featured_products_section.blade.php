@@ -49,6 +49,8 @@
                     <div class="col-xxl-3 col-lg-4 col-md-6 d-none d-md-block">
                         @php
                             $banner_1_imags = json_decode($homeBanner1Images);
+                            $homeBanner1MobileImages = get_setting('home_banner1_images_for_mobile', null, $lang);
+                            $banner_1_mobile_images = $homeBanner1MobileImages ? json_decode($homeBanner1MobileImages) : [];
                             $home_banner1_links = get_setting('home_banner1_links', null, $lang);
                         @endphp
                         <div class="aiz-carousel overflow-hidden arrow-inactive-none arrow-dark arrow-x-0"
@@ -57,10 +59,18 @@
                                 <div class="carousel-box overflow-hidden hov-scale-img">
                                     <a href="{{ isset(json_decode($home_banner1_links, true)[$key]) ? json_decode($home_banner1_links, true)[$key] : '' }}"
                                         class="d-block text-reset overflow-hidden" style="height: 370px;">
-                                        <img src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
-                                            data-src="{{ uploaded_asset($value) }}" alt="{{ env('APP_NAME') }} promo"
-                                            class="img-fit h-100 lazyload has-transition"
-                                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
+                                        @php
+                                            $desktop_src = uploaded_asset($value);
+                                            $mobile_value = $banner_1_mobile_images[$key] ?? null;
+                                            $mobile_src = $mobile_value ? uploaded_asset($mobile_value) : $desktop_src;
+                                        @endphp
+                                        <picture>
+                                            <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                            <img src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
+                                                data-src="{{ $desktop_src }}" alt="{{ env('APP_NAME') }} promo"
+                                                class="img-fit h-100 lazyload has-transition"
+                                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
+                                        </picture>
                                     </a>
                                 </div>
                             @endforeach

@@ -235,10 +235,18 @@ if (!function_exists('currency_symbol')) {
 if (!function_exists('format_price')) {
     function format_price($price, $isMinimize = false)
     {
-        if (get_setting('decimal_separator') == 1) {
-            $fomated_price = number_format($price, get_setting('no_of_decimals'));
-        } else {
-            $fomated_price = number_format($price, get_setting('no_of_decimals'), ',', '.');
+        $decimals = (int) get_setting('no_of_decimals');
+        $decimal_separator = get_setting('decimal_separator') == 1 ? '.' : ',';
+        $thousands_separator = $decimal_separator === '.' ? ',' : '.';
+
+        $fomated_price = number_format($price, $decimals, $decimal_separator, $thousands_separator);
+
+        // If the value ends with .00 / ,00 then show it without decimals (125.00 -> 125)
+        if ($decimals > 0) {
+            $zero_decimal_suffix = $decimal_separator . str_repeat('0', $decimals);
+            if (substr($fomated_price, -strlen($zero_decimal_suffix)) === $zero_decimal_suffix) {
+                $fomated_price = substr($fomated_price, 0, -strlen($zero_decimal_suffix));
+            }
         }
 
 

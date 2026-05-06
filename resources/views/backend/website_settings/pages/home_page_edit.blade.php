@@ -51,6 +51,18 @@
 					                            <div class="file-preview box sm">
 					                            </div>
 				                            </div>
+				                            <div class="form-group mt-2">
+												<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+												<div class="input-group" data-toggle="aizuploader" data-type="image">
+													<div class="input-group-prepend">
+														<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+													</div>
+													<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+													<input type="hidden" name="types[][{{ $lang }}]" value="home_slider_images_for_mobile">
+													<input type="hidden" name="home_slider_images_for_mobile[]" class="selected-files" value="{{ (json_decode(get_setting('home_slider_images_for_mobile', null, $lang), true)[$key] ?? '') }}">
+												</div>
+												<div class="file-preview box sm"></div>
+				                            </div>
 										</div>
 										<div class="col-md">
 											<div class="form-group">
@@ -90,6 +102,18 @@
 											</div>
 											<div class="file-preview box sm">
 											</div>
+										</div>
+										<div class="form-group mt-2">
+											<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+											<div class="input-group" data-toggle="aizuploader" data-type="image">
+												<div class="input-group-prepend">
+													<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+												</div>
+												<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+												<input type="hidden" name="types[]" value="home_slider_images_for_mobile">
+												<input type="hidden" name="home_slider_images_for_mobile[]" class="selected-files">
+											</div>
+											<div class="file-preview box sm"></div>
 										</div>
 									</div>
 									<div class="col-md">
@@ -213,6 +237,18 @@
 					                            <div class="file-preview box sm">
 					                            </div>
 				                            </div>
+				                            <div class="form-group mt-2">
+												<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+												<div class="input-group" data-toggle="aizuploader" data-type="image">
+													<div class="input-group-prepend">
+														<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+													</div>
+													<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+													<input type="hidden" name="types[][{{ $lang }}]" value="home_banner1_images_for_mobile">
+													<input type="hidden" name="home_banner1_images_for_mobile[]" class="selected-files" value="{{ (json_decode(get_setting('home_banner1_images_for_mobile', null, $lang), true)[$key] ?? '') }}">
+												</div>
+												<div class="file-preview box sm"></div>
+				                            </div>
 										</div>
 										<div class="col-md">
 											<div class="form-group">
@@ -252,6 +288,18 @@
 											</div>
 											<div class="file-preview box sm">
 											</div>
+										</div>
+										<div class="form-group mt-2">
+											<label class="fs-12 text-secondary mb-1">{{ translate('Mobile Image (Optional)') }}</label>
+											<div class="input-group" data-toggle="aizuploader" data-type="image">
+												<div class="input-group-prepend">
+													<div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+												</div>
+												<div class="form-control file-amount">{{ translate('Choose File') }}</div>
+												<input type="hidden" name="types[]" value="home_banner1_images_for_mobile">
+												<input type="hidden" name="home_banner1_images_for_mobile[]" class="selected-files">
+											</div>
+											<div class="file-preview box sm"></div>
 										</div>
 									</div>
 									<div class="col-md">
