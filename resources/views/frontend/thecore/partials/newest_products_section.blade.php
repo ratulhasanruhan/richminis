@@ -11,7 +11,7 @@
             @foreach ($newest_products as $index => $new_product)
                 <div class="col-md-3 col-lg-3 col-xl-2 col-sm-4 col-6 d-flex product-card hov-animate-outline-2 d-flex justify-content-center mx-auto">
                     <div class="carousel-box has-transition rounded-2">
-                        @include('frontend.'.get_setting('homepage_select').'.partials.home_product_box', ['product' => $new_product])
+                        @include('frontend.product_box_for_listing_page', ['product' => $new_product])
                     </div>
                 </div>
             @endforeach

@@ -34,10 +34,8 @@
                         <div class="px-xl-1">
                             <div class="aiz-carousel arrow-none" data-items="{{ $xxl_items }}" data-xl-items="{{ $xl_items }}" data-lg-items="{{ $lg_items }}"  data-md-items="{{ $md_items }}" data-sm-items="2" data-xs-items="2" data-arrows='true' data-infinite='false'>
                                 @foreach (get_featured_products() as $key => $product)
-                                <div class="carousel-box position-relative px-0 has-transition hov-animate-outline">
-                                    <div class="px-3">
-                                        @include('frontend.'.get_setting('homepage_select').'.partials.product_box_1',['product' => $product])
-                                    </div>
+                                <div class="col border-right border-bottom has-transition hov-shadow-out z-1 ">
+                                    @include('frontend.product_box_for_listing_page', ['product' => $product])
                                 </div>
                                 @endforeach
                             </div>

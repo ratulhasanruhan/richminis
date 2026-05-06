@@ -156,6 +156,17 @@
             font-weight: 600 !important;
         }
 
+        /* Ensure top desktop nav + dropdowns use weights too */
+        header a,
+        header .nav-link,
+        header .dropdown-menu a,
+        .aiz-header-menu a{
+            font-family: 'Raleway', sans-serif !important;
+        }
+        header .dropdown-menu a{
+            font-weight: 100 !important;
+        }
+
         /* Category submenu: Raleway Thin */
         .aiz-category-menu .sub-cat-menu,
         .aiz-category-menu .sub-cat-menu a{

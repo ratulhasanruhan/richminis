@@ -18,8 +18,8 @@
             <div class="px-sm-3">
                 <div class="aiz-carousel arrow-none sm-gutters-16" data-rows="2" data-items="3" data-xl-items="3" data-lg-items="4"  data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows='true' data-infinite='false'>
                     @foreach ($newest_products as $key => $new_product)
-                    <div class="carousel-box px-3 position-relative has-transition hov-animate-outline">
-                        @include('frontend.'.get_setting('homepage_select').'.partials.product_box_1',['product' => $new_product])
+                    <div class="col border-right border-bottom has-transition hov-shadow-out z-1">
+                        @include('frontend.product_box_for_listing_page', ['product' => $new_product])
                     </div>
                     @endforeach
                 </div>
