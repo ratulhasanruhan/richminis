@@ -66,6 +66,43 @@
                 @endif
             </div>
 
+            @if ($proceed != 1)
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="fs-13 fw-700 text-dark">{{ translate('Items') }}</div>
+                        <a href="{{ route('cart') }}" class="fs-12 text-secondary hov-text-primary">
+                            {{ translate('Edit') }}
+                        </a>
+                    </div>
+
+                    <div class="mt-2" style="max-height: 220px; overflow:auto;">
+                        @foreach ($carts as $cartItem)
+                            @php $product = get_single_product($cartItem['product_id']); @endphp
+                            @if ($product != null)
+                                <div class="d-flex align-items-center py-2 border-top" style="border-color:#f1f1f1 !important;">
+                                    <img
+                                        src="{{ static_asset('assets/img/placeholder.jpg') }}"
+                                        data-src="{{ uploaded_asset($product->thumbnail_img) }}"
+                                        class="lazyload img-fit rounded-1"
+                                        style="width:42px;height:42px;"
+                                        alt="{{ $product->getTranslation('name') }}"
+                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
+                                    >
+                                    <div class="minw-0 pl-2 flex-grow-1">
+                                        <div class="fs-12 fw-700 text-dark text-truncate-2" title="{{ $product->getTranslation('name') }}">
+                                            {{ $product->getTranslation('name') }}
+                                        </div>
+                                        <div class="fs-11 text-secondary">
+                                            {{ $cartItem['quantity'] }}x {{ cart_product_price($cartItem, $product) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <input type="hidden" id="sub_total" value="{{ $subtotal }}">
 
             <table class="table my-3">

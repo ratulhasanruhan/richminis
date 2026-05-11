@@ -51,7 +51,7 @@
             <a href="{{ route('cart') }}" class="btn btn-light btn-sm btn-block fw-700">
                 {{ translate('View cart') }}
             </a>
-            <a href="{{ route('checkout') }}" class="btn btn-primary btn-sm btn-block fw-700">
+            <a href="{{ route('checkout') }}" class="btn btn-primary btn-sm btn-block fw-700 rm-mini-cart__checkout">
                 {{ translate('Checkout') }}
             </a>
         </div>

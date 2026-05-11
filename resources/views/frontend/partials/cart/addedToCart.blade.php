@@ -63,7 +63,7 @@
                 <a href="{{ route('cart') }}" class="rm-added-cart__view-cart btn btn-secondary-base mb-2 mb-sm-0 btn-block rounded-1 text-white">{{ translate('View Cart')}}</a>
             </div>
             <div class="col-sm-6">
-                <a href="{{ route('cart') }}" class="btn btn-primary btn-block rounded-1">{{ translate('Proceed to Checkout')}}</a>
+                <a href="{{ route('checkout') }}" class="btn btn-primary btn-block rounded-1">{{ translate('Proceed to Checkout')}}</a>
             </div>
             <div class="col-12">
                 <button class="btn border border-gray-300  mt-2 mb-sm-0 btn-block rounded-1 text-gray-dark hov-bg-light has-transition" data-dismiss="modal">{{ translate('Back to shopping')}}</button>

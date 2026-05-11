@@ -127,6 +127,16 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
         .rm-mini-cart__actions .btn + .btn{ margin-top: 8px; }
         .rm-mini-cart__empty{ padding: 6px 2px; }
 
+        /* Mini cart: checkout text white normally, black on hover */
+        .rm-cart-panel .rm-mini-cart__checkout,
+        .rm-cart-panel .rm-mini-cart__checkout:visited {
+            color: #fff !important;
+        }
+        .rm-cart-panel .rm-mini-cart__checkout:hover,
+        .rm-cart-panel .rm-mini-cart__checkout:focus {
+            color: #000 !important;
+        }
+
         /* User icon dropdown */
         #rm-user-menu.dropdown-toggle::after { display: none; }
         #rm-user-menu:focus { box-shadow: none; }
@@ -176,6 +186,13 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                 align-items: center;
                 gap: 16px;
                 justify-content: flex-start;
+            }
+            .rm-header__nav > a,
+            .rm-topcat > a {
+                font-weight: 600;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+                font-size: 12px;
             }
             .rm-header__icons {
                 display: flex;

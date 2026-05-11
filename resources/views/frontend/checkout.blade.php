@@ -130,7 +130,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-2 text-muted">{{ translate('We sent an OTP to your email. Enter it to continue.') }}</div>
+                    <div class="mb-2 text-muted">{{ translate("We will send an OTP to your 'phone' to confirm your order.") }}</div>
                     <div class="form-group mb-2">
                         <input type="text" id="rm-checkout-otp-code" class="form-control rounded-0"
                             inputmode="numeric" pattern="[0-9]*" maxlength="6"

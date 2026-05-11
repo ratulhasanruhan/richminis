@@ -1,4 +1,8 @@
 <div class="container">
+    <style>
+        /* Cart page: hide inhouse (site_name) seller checkbox header */
+        #cart-details .rm-admin-seller-select { display: none !important; }
+    </style>
     @php
         $cart_count = count($carts);
         $active_carts = $cart_count > 0 ? $carts->toQuery()->active()->get() : [];
@@ -68,7 +72,7 @@
                                         $all_admin_products = false;
                                     }
                                 @endphp
-                                <div class="pt-3 px-0">
+                                <div class="pt-3 px-0 rm-admin-seller-select">
                                     <div class="aiz-checkbox-inline">
                                         <label class="aiz-checkbox d-block">
                                             <input type="checkbox" class="check-one check-seller" value="admin" @if($all_admin_products) checked @endif>

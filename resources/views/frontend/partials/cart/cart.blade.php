@@ -8,6 +8,16 @@
         }
     }
 @endphp
+<style>
+    /* Force black text for checkout button inside cart dropdown */
+    #cart_items .rm-cart-checkout-btn,
+    #cart_items .rm-cart-checkout-btn:hover,
+    #cart_items .rm-cart-checkout-btn:focus,
+    #cart_items .rm-cart-checkout-btn:active,
+    #cart_items .rm-cart-checkout-btn:visited {
+        color: #000 !important;
+    }
+</style>
 <!-- Cart button with cart count -->
 <a href="javascript:void(0)" class="d-flex align-items-center @if (get_setting('header_element') !=6) px-3 @endif h-100" data-toggle="dropdown" data-display="static"
     title="{{translate('Cart')}}">
@@ -122,7 +132,7 @@
                     </a>
                 </div>
                 <div class="col-sm-6">
-                    <a href="{{ route('checkout') }}" class="btn btn-primary btn-sm btn-block rounded-4">
+                    <a href="{{ route('checkout') }}" class="btn btn-primary btn-sm btn-block rounded-4 rm-cart-checkout-btn">
                         {{ translate('Checkout') }}
                     </a>
                 </div>

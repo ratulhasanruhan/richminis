@@ -272,7 +272,7 @@
     <div class="col-md-2 mt-md-2"></div>
     <div class="col-md-10">
         <div class="bg-soft-info p-2">
-            {{ translate('We will send an OTP to your email to confirm your order.') }}
+            {{ translate("We will send an OTP to your 'phone' to confirm your order.") }}
         </div>
     </div>
 </div>

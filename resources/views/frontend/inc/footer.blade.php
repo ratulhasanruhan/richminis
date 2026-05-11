@@ -66,40 +66,34 @@
     <style>
         .rm-footer { background:#000; }
         .rm-footer__inner { padding: 56px 0 22px; }
-        /* About (left) — large empty gap — Store Policy + Connect (right, side by side) */
+        /* About | Store Policy | Connect — equal column widths (desktop) */
         .rm-footer__columns{
-            display: flex !important;
-            flex-direction: row;
-            flex-wrap: nowrap;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             width: 100%;
             align-items: flex-start;
-            justify-content: space-between;
-            gap: clamp(32px, 6vw, 80px);
+            gap: clamp(24px, 4vw, 48px);
         }
-        .rm-footer__col--about{
-            flex: 0 1 auto;
-            max-width: min(520px, 46%);
-            min-width: 0;
-        }
-        .rm-footer__col--right{
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: flex-start;
-            gap: clamp(20px, 3vw, 44px);
-            flex: 0 1 auto;
-            min-width: 0;
-        }
+        .rm-footer__col--about,
         .rm-footer__col--policy,
         .rm-footer__col--connect{
-            flex: 0 1 auto;
             min-width: 0;
+        }
+        /* Middle column: block centered; headings + links left-aligned */
+        .rm-footer__col--policy {
+            display: flex;
+            justify-content: center;
+        }
+        .rm-footer__policy-inner {
+            text-align: left;
+            width: fit-content;
+            max-width: 100%;
         }
         .rm-footer__title {
             margin: 0 0 12px;
             font-size: 14px;
             font-weight: 700;
-            letter-spacing: .22em;
+            letter-spacing: .08em;
             text-transform: uppercase;
             color: rgba(255,255,255,.86);
         }
@@ -108,6 +102,7 @@
             font-size: 14px;
             line-height: 1.8;
             font-weight: 500;
+            letter-spacing: -0.01em;
         }
         .rm-footer__link {
             display: inline-block;
@@ -115,7 +110,7 @@
             font-size: 14px;
             line-height: 1.9;
             font-weight: 600;
-            letter-spacing: .02em;
+            letter-spacing: -0.01em;
         }
         .rm-footer__link:hover,
         .rm-footer__link:focus { color: #fff !important; }
@@ -148,36 +143,15 @@
             color: rgba(255,255,255,.70);
             font-size: 13px;
             font-weight: 600;
-            letter-spacing: .08em;
+            letter-spacing: .02em;
             text-transform: uppercase;
             text-align: center;
         }
         @media (max-width: 991px){
             .rm-footer__inner { padding: 44px 16px 18px; }
             .rm-footer__columns{
-                flex-direction: column;
-                flex-wrap: nowrap;
-                align-items: stretch;
-                justify-content: flex-start;
+                grid-template-columns: 1fr;
                 gap: 32px;
-            }
-            .rm-footer__col--about{
-                max-width: 100%;
-                flex: none;
-            }
-            /* Stack Policy then Connect — full width each (no side-by-side squeeze) */
-            .rm-footer__col--right{
-                flex-direction: column;
-                flex-wrap: nowrap;
-                width: 100%;
-                align-items: stretch;
-                justify-content: flex-start;
-                gap: 32px;
-            }
-            .rm-footer__col--policy,
-            .rm-footer__col--connect{
-                width: 100%;
-                flex: none;
             }
             .rm-footer__copyright { padding-left: 16px; padding-right: 16px; }
             .rm-footer__copyright { text-align: center; }
@@ -193,59 +167,59 @@
                 </div>
             </div>
 
-            <div class="rm-footer__col rm-footer__col--right">
-                <div class="rm-footer__col rm-footer__col--policy">
+            <div class="rm-footer__col rm-footer__col--policy">
+                <div class="rm-footer__policy-inner">
                     <div class="rm-footer__title">{{ translate('Store Policy') }}</div>
-                    <div class="d-flex flex-column">
+                    <div class="d-flex flex-column align-items-start">
                         <a class="rm-footer__link" href="{{ route('returnpolicy') }}">{{ translate('Return and refund') }}</a>
                         <a class="rm-footer__link rm-footer__privacy-link" href="{{ route('privacypolicy') }}">{{ translate('Privacy policy') }}</a>
                         <a class="rm-footer__link" href="{{ route('terms') }}">{{ translate('Terms of service') }}</a>
                     </div>
                 </div>
+            </div>
 
-                <div class="rm-footer__col rm-footer__col--connect">
-                    <div class="rm-footer__title">{{ translate('Connect With Us') }}</div>
-                    <div class="rm-footer__text">
-                        @if(!empty($footerPhone))
-                            <div>{{ translate('Care') }}: <a class="rm-footer__link" href="tel:{{ $footerPhone }}">{{ $footerPhone }}</a></div>
-                        @endif
-                        @if(!empty($footerEmail))
-                            <div>{{ translate('Email') }}: <a class="rm-footer__link" href="mailto:{{ $footerEmail }}">{{ $footerEmail }}</a></div>
-                        @endif
-                    </div>
-
-                    <div class="rm-footer__text" style="margin-top: 14px;">
-                        {{ translate('Follow us to get first dibs on new arrivals, sales, exclusive content, events and more!') }}
-                    </div>
-
-                    @if (get_setting('show_social_links'))
-                        <div class="rm-footer__social" aria-label="{{ translate('Social links') }}">
-                            @if (!empty(get_setting('facebook_link')))
-                                <a href="{{ get_setting('facebook_link') }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="lab la-facebook-f"></i></a>
-                            @endif
-                            @if (!empty(get_setting('twitter_link')))
-                                <a href="{{ get_setting('twitter_link') }}" target="_blank" rel="noopener noreferrer" aria-label="X">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/></svg>
-                                </a>
-                            @endif
-                            @if (!empty(get_setting('instagram_link')))
-                                <a href="{{ get_setting('instagram_link') }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="lab la-instagram"></i></a>
-                            @endif
-                            @if (!empty(get_setting('youtube_link')))
-                                <a href="{{ get_setting('youtube_link') }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="lab la-youtube"></i></a>
-                            @endif
-                            @if (!empty(get_setting('linkedin_link')))
-                                <a href="{{ get_setting('linkedin_link') }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="lab la-linkedin-in"></i></a>
-                            @endif
-                            @if (!empty(env('WHATSAPP_NUMBER')))
-                                @php $wa = preg_replace('/[^0-9]/', '', env('WHATSAPP_NUMBER')); @endphp
-                                @if(!empty($wa))
-                                    <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="lab la-whatsapp"></i></a>
-                                @endif
-                            @endif
-                        </div>
+            <div class="rm-footer__col rm-footer__col--connect">
+                <div class="rm-footer__title">{{ translate('Connect With Us') }}</div>
+                <div class="rm-footer__text">
+                    @if(!empty($footerPhone))
+                        <div>{{ translate('Care') }}: <a class="rm-footer__link" href="tel:{{ $footerPhone }}">{{ $footerPhone }}</a></div>
+                    @endif
+                    @if(!empty($footerEmail))
+                        <div>{{ translate('Email') }}: <a class="rm-footer__link" href="mailto:{{ $footerEmail }}">{{ $footerEmail }}</a></div>
                     @endif
                 </div>
+
+                <div class="rm-footer__text" style="margin-top: 14px;">
+                    {{ translate('Follow us to get first dibs on new arrivals, sales, exclusive content, events and more!') }}
+                </div>
+
+                @if (get_setting('show_social_links'))
+                    <div class="rm-footer__social" aria-label="{{ translate('Social links') }}">
+                        @if (!empty(get_setting('facebook_link')))
+                            <a href="{{ get_setting('facebook_link') }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="lab la-facebook-f"></i></a>
+                        @endif
+                        @if (!empty(get_setting('twitter_link')))
+                            <a href="{{ get_setting('twitter_link') }}" target="_blank" rel="noopener noreferrer" aria-label="X">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/></svg>
+                            </a>
+                        @endif
+                        @if (!empty(get_setting('instagram_link')))
+                            <a href="{{ get_setting('instagram_link') }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="lab la-instagram"></i></a>
+                        @endif
+                        @if (!empty(get_setting('youtube_link')))
+                            <a href="{{ get_setting('youtube_link') }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="lab la-youtube"></i></a>
+                        @endif
+                        @if (!empty(get_setting('linkedin_link')))
+                            <a href="{{ get_setting('linkedin_link') }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="lab la-linkedin-in"></i></a>
+                        @endif
+                        @if (!empty(env('WHATSAPP_NUMBER')))
+                            @php $wa = preg_replace('/[^0-9]/', '', env('WHATSAPP_NUMBER')); @endphp
+                            @if(!empty($wa))
+                                <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="lab la-whatsapp"></i></a>
+                            @endif
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>
