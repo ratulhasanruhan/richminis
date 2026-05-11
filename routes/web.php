@@ -81,31 +81,53 @@ Route::get('/refresh-csrf', function () {
     return csrf_token();
 });
 
-// TEMPORARY: open in browser to run migrations, then delete this route block from web.php
-Route::get('/__temp-run-migrate-delete-me', function () {
+// TEMPORARY: open in browser, run command, then delete these routes
+Route::get('/__temp/migrate-force', function () {
     try {
         Artisan::call('migrate', ['--force' => true]);
-        $output = Artisan::output();
-
-        return response(
-            '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Migrate</title></head><body>'
-            . '<h1>php artisan migrate --force</h1>'
-            . '<pre style="white-space:pre-wrap;background:#f5f5f5;padding:1rem;">'
-            . e($output !== '' ? $output : '(no console output)')
-            . '</pre>'
-            . '<p><strong>Delete this route</strong> (<code>__temp-run-migrate-delete-me</code>) from <code>routes/web.php</code> when finished.</p>'
-            . '</body></html>',
-            200,
-            ['Content-Type' => 'text/html; charset=UTF-8']
-        );
+        return nl2br(e(Artisan::output() ?: 'OK'));
     } catch (\Throwable $e) {
-        return response(
-            '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Migrate error</title></head><body>'
-            . '<h1>Error</h1><pre style="white-space:pre-wrap;">' . e($e->getMessage()) . '</pre>'
-            . '</body></html>',
-            500,
-            ['Content-Type' => 'text/html; charset=UTF-8']
-        );
+        return response($e->getMessage(), 500);
+    }
+});
+
+Route::get('/__temp/cache-clear', function () {
+    try {
+        Artisan::call('cache:clear');
+        return nl2br(e(Artisan::output() ?: 'OK'));
+    } catch (\Throwable $e) {
+        return response($e->getMessage(), 500);
+    }
+});
+
+Route::get('/__temp/storage-link', function () {
+    try {
+        Artisan::call('storage:link');
+        return nl2br(e(Artisan::output() ?: 'OK'));
+    } catch (\Throwable $e) {
+        // Fallback for environments where PHP symlink() is unavailable.
+        try {
+            $target = storage_path('app/public');
+            $link = public_path('storage');
+
+            if (file_exists($link)) {
+                return response("Skipped: {$link} already exists.", 200);
+            }
+
+            $cmd = 'cmd /c mklink /J '.escapeshellarg($link).' '.escapeshellarg($target);
+            exec($cmd, $out, $code);
+
+            if ($code !== 0) {
+                return response(
+                    "storage:link failed: {$e->getMessage()}\n\nFallback mklink failed (exit {$code}):\n{$cmd}\n\n".implode("\n", $out),
+                    500
+                );
+            }
+
+            return response("Created junction:\n{$link} -> {$target}\n\n{$cmd}", 200);
+        } catch (\Throwable $fallback) {
+            return response("storage:link failed: {$e->getMessage()}\n\nFallback failed: {$fallback->getMessage()}", 500);
+        }
     }
 });
 

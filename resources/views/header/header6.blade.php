@@ -59,6 +59,74 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
             text-align:center;
         }
 
+        /* Mini cart (desktop hover) */
+        .rm-cart-hover { position: relative; }
+        .rm-cart-panel {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 340px;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,.10);
+            border-radius: 12px;
+            box-shadow: 0 18px 44px rgba(0,0,0,.14);
+            padding: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(6px);
+            transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+            z-index: 1030;
+        }
+        .rm-cart-hover:hover .rm-cart-panel,
+        .rm-cart-hover:focus-within .rm-cart-panel{
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .rm-mini-cart__title{
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            font-size: 12px;
+            padding: 2px 2px 10px;
+            border-bottom: 1px solid rgba(0,0,0,.08);
+            margin-bottom: 10px;
+        }
+        .rm-mini-cart__list{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 280px;
+            overflow: auto;
+        }
+        .rm-mini-cart__item{ padding: 8px 2px; border-bottom: 1px solid rgba(0,0,0,.06); }
+        .rm-mini-cart__item:last-child{ border-bottom: 0; }
+        .rm-mini-cart__link{ display:flex; gap:10px; align-items:center; }
+        .rm-mini-cart__img{ width: 56px; height: 56px; border-radius: 10px; }
+        .rm-mini-cart__meta{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+        .rm-mini-cart__name{
+            font-weight: 700;
+            font-size: 13px;
+            color:#111;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .rm-mini-cart__price{ font-size: 12px; color: #6b7280; }
+        .rm-mini-cart__subtotal{
+            display:flex;
+            justify-content: space-between;
+            align-items:center;
+            padding-top: 10px;
+            margin-top: 8px;
+            border-top: 1px solid rgba(0,0,0,.08);
+            font-size: 13px;
+        }
+        .rm-mini-cart__actions{ padding-top: 10px; }
+        .rm-mini-cart__actions .btn + .btn{ margin-top: 8px; }
+        .rm-mini-cart__empty{ padding: 6px 2px; }
+
         /* User icon dropdown */
         #rm-user-menu.dropdown-toggle::after { display: none; }
         #rm-user-menu:focus { box-shadow: none; }
@@ -236,14 +304,19 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                         </button>
 
                         @php $rmCartCount = count(get_user_cart()); @endphp
-                        <a href="{{ route('cart') }}" class="rm-icon-btn btn p-0 text-reset rm-cart-btn" aria-label="{{ translate('Cart') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
-                                <path d="M7.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM6.6 5h12.5a1 1 0 0 1 1 1.2l-1.2 6a2 2 0 0 1-2 1.6H8a2 2 0 0 1-2-1.6L4.4 2.3A1 1 0 0 0 3.4 1.5H1.5a1 1 0 1 1 0-2h1.9a3 3 0 0 1 3 2.4L6.6 5z" fill="#111"/>
-                            </svg>
-                            @if($rmCartCount > 0)
-                                <span class="rm-cart-badge">{{ $rmCartCount }}</span>
-                            @endif
-                        </a>
+                        <div class="rm-cart-hover">
+                            <a href="{{ route('cart') }}" class="rm-icon-btn btn p-0 text-reset rm-cart-btn" aria-label="{{ translate('Cart') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
+                                    <path d="M7.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM6.6 5h12.5a1 1 0 0 1 1 1.2l-1.2 6a2 2 0 0 1-2 1.6H8a2 2 0 0 1-2-1.6L4.4 2.3A1 1 0 0 0 3.4 1.5H1.5a1 1 0 1 1 0-2h1.9a3 3 0 0 1 3 2.4L6.6 5z" fill="#111"/>
+                                </svg>
+                                @if($rmCartCount > 0)
+                                    <span class="rm-cart-badge">{{ $rmCartCount }}</span>
+                                @endif
+                            </a>
+                            <div class="rm-cart-panel d-none d-lg-block">
+                                @include('frontend.partials.cart.mini_cart_simple')
+                            </div>
+                        </div>
 
                         <div class="dropdown rm-user-menu">
                             <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
