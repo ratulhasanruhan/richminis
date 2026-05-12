@@ -21,6 +21,7 @@ use Session;
 use Auth;
 use Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Mail;
 use App\Mail\MailManager;
 
@@ -410,6 +411,9 @@ class CheckoutController extends Controller
             $message = 'Your ' . ($site = (get_setting('site_name') ?: config('app.name'))) . ' OTP is: ' . $user->verification_code;
             (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $message, null);
         } catch (\Exception $e) {
+            Log::warning('checkout_otp_send_failed', [
+                'message' => $e->getMessage(),
+            ]);
             return response()->json([
                 'result' => false,
                 'message' => translate('Could not send OTP. Please try again later.'),
@@ -481,6 +485,9 @@ class CheckoutController extends Controller
             $message = 'Your ' . $site . ' OTP is: ' . $user->verification_code;
             (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $message, null);
         } catch (\Exception $e) {
+            Log::warning('checkout_otp_send_failed_redirect', [
+                'message' => $e->getMessage(),
+            ]);
             flash(translate('Could not send OTP. Please try again later.'))->warning();
             return redirect()->route('checkout');
         }

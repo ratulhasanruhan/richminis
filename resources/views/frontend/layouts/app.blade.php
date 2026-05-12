@@ -163,7 +163,8 @@
         .aiz-header-menu a{
             font-family: 'Raleway', sans-serif !important;
         }
-        header .dropdown-menu a{
+        /* Thin weight for header dropdowns — exclude account menu (#rm-user-dropdown) so Login/Registration stay readable */
+        header .dropdown-menu:not(#rm-user-dropdown) a{
             font-weight: 100 !important;
         }
 
@@ -274,6 +275,22 @@
         @endphp
         <!-- Header -->
         @include('frontend.inc.nav')
+        @if (get_setting('homepage_select') == 'thecore')
+            {{-- Load after global CSS so account dropdown text stays black (menu may sit under body) --}}
+            <style>
+                .dropdown-menu#rm-user-dropdown {
+                    background-color: #fff !important;
+                    color: #000 !important;
+                }
+                .dropdown-menu#rm-user-dropdown > a.dropdown-item {
+                    color: #000 !important;
+                    -webkit-text-fill-color: #000 !important;
+                    opacity: 1 !important;
+                    font-weight: 600 !important;
+                    font-family: 'Raleway', sans-serif !important;
+                }
+            </style>
+        @endif
 
         @yield('content')
 

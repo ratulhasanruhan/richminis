@@ -14,6 +14,12 @@
                     max-width: 20%;
                 }
             }
+
+            /* NEW IN: space around product image inside the card */
+            #newest-products-list .aiz-card-box > .position-relative.img-fit.overflow-hidden {
+                padding: clamp(8px, 1.6vw, 14px);
+                box-sizing: border-box;
+            }
         </style>
         <div class="row px-3" id="newest-products-list">
             @foreach ($newest_products as $index => $new_product)

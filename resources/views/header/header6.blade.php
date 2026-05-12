@@ -137,29 +137,44 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
             color: #000 !important;
         }
 
-        /* User icon dropdown */
+        /*
+         * User icon dropdown — do NOT scope under .rm-header: Bootstrap/Popper may move
+         * .dropdown-menu to <body>, which would make .rm-header #rm-user-dropdown never match.
+         */
         #rm-user-menu.dropdown-toggle::after { display: none; }
         #rm-user-menu:focus { box-shadow: none; }
-        .rm-user-menu .dropdown-menu {
+        .dropdown-menu#rm-user-dropdown {
             min-width: 190px;
             margin-top: 10px;
             border-radius: 10px;
-            border: 1px solid rgba(0,0,0,.08);
+            border: 1px solid rgba(0,0,0,.08) !important;
             box-shadow: 0 14px 30px rgba(0,0,0,.12);
             padding: 8px;
+            background-color: #fff !important;
+            color: #000 !important;
         }
-        .rm-user-menu .dropdown-item {
+        .dropdown-menu#rm-user-dropdown > a.dropdown-item,
+        .dropdown-menu#rm-user-dropdown a.dropdown-item,
+        .dropdown-menu#rm-user-dropdown > a.dropdown-item:link,
+        .dropdown-menu#rm-user-dropdown > a.dropdown-item:visited,
+        .dropdown-menu#rm-user-dropdown > a.dropdown-item:active {
             border-radius: 8px;
             padding: 10px 12px;
-            font-weight: 700;
+            font-weight: 600 !important;
             letter-spacing: .08em;
             text-transform: uppercase;
             font-size: 12px;
-        }
-        .rm-user-menu .dropdown-item:hover,
-        .rm-user-menu .dropdown-item:focus {
             color: #000 !important;
-            background: rgba(0,0,0,.04);
+            opacity: 1 !important;
+            -webkit-text-fill-color: #000 !important;
+        }
+        .dropdown-menu#rm-user-dropdown > a.dropdown-item:hover,
+        .dropdown-menu#rm-user-dropdown > a.dropdown-item:focus {
+            color: #000 !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #000 !important;
+            font-weight: 600 !important;
+            background: rgba(0,0,0,.06) !important;
         }
         .rm-searchbar { display:none; border-top: 1px solid #eee; background:#fff; }
         .rm-searchbar.is-open { display:block; }
@@ -336,19 +351,19 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
                         </div>
 
                         <div class="dropdown rm-user-menu">
-                            <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
+                            <button class="rm-icon-btn btn p-0 text-reset dropdown-toggle" type="button" id="rm-user-menu" data-toggle="dropdown" data-display="static" aria-haspopup="true" aria-expanded="false" aria-label="{{ translate('Account') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20">
                                     <path d="M10 10a4.5 4.5 0 1 0-4.5-4.5A4.51 4.51 0 0 0 10 10zm0-7a2.5 2.5 0 1 1-2.5 2.5A2.5 2.5 0 0 1 10 3zM10 12c-4.3 0-8 2.3-8 5a1 1 0 0 0 2 0c0-1.3 2.6-3 6-3s6 1.7 6 3a1 1 0 0 0 2 0c0-2.7-3.7-5-8-5z" fill="#111"/>
                                 </svg>
                             </button>
-                            <div class="dropdown-menu dropdown-menu-right">
+                            <div class="dropdown-menu dropdown-menu-right text-dark" id="rm-user-dropdown" style="background-color:#fff;color:#000;">
                                 @guest
-                                    <a class="dropdown-item" href="{{ route('user.login') }}">{{ translate('Login') }}</a>
-                                    <a class="dropdown-item" href="{{ route('user.registration') }}">{{ translate('Registration') }}</a>
+                                    <a class="dropdown-item text-dark" style="color:#000 !important;-webkit-text-fill-color:#000;" href="{{ route('user.login') }}">{{ translate('Login') }}</a>
+                                    <a class="dropdown-item text-dark" style="color:#000 !important;-webkit-text-fill-color:#000;" href="{{ route('user.registration') }}">{{ translate('Registration') }}</a>
                                 @endguest
                                 @auth
-                                    <a class="dropdown-item" href="{{ route('dashboard') }}">{{ translate('Dashboard') }}</a>
-                                    <a class="dropdown-item" href="{{ route('logout') }}">{{ translate('Logout') }}</a>
+                                    <a class="dropdown-item text-dark" style="color:#000 !important;-webkit-text-fill-color:#000;" href="{{ route('dashboard') }}">{{ translate('Dashboard') }}</a>
+                                    <a class="dropdown-item text-dark" style="color:#000 !important;-webkit-text-fill-color:#000;" href="{{ route('logout') }}">{{ translate('Logout') }}</a>
                                 @endauth
                             </div>
                         </div>
