@@ -1,4 +1,7 @@
 <div class="col-sm-12 col-lg-6">
+    @php
+        $rmThecorePriceClass = get_setting('homepage_select') == 'thecore' ? ' rm-thecore-price-raleway' : '';
+    @endphp
     <div class="d-flex align-items-center justify-content-end pb-20px right-side-cws">
         @php
         $seller_logo = $detailedProduct->user->shop?->logo 
@@ -189,7 +192,7 @@
             <div class="border-bottom-dashed py-3">
                 <div class="mb-1 fs-14 fw-bold text-dark">{{ translate('Starting Bid') }}</div>
                 <div class="">
-                    <span class="text-dark fs-20 fw-400">{{ single_price($detailedProduct->starting_bid) }}</span>
+                    <span class="text-dark fs-20 fw-400{{ $rmThecorePriceClass }}">{{ single_price($detailedProduct->starting_bid) }}</span>
                     @if ($detailedProduct->unit != null)
                         <span class="text-secondary fs-14 fw-400">/{{ $detailedProduct->getTranslation('unit') }}</span>
                     @endif
@@ -200,7 +203,7 @@
                 <div class="mb-1 fs-14 fw-bold text-dark">{{ translate('Highest Bid') }}</div>
                 <div class="">
                     @php $highest_bid = $detailedProduct->bids->max('amount'); @endphp
-                    <span class="text-dark fs-20 fw-400">
+                    <span class="text-dark fs-20 fw-400{{ $rmThecorePriceClass }}">
                         @if ($highest_bid != null)
                             {{ single_price($highest_bid) }}
                         @endif
@@ -280,7 +283,7 @@
                                 <tr>
                                     <td>{{ $wholesalePrice->min_qty }}</td>
                                     <td>{{ $wholesalePrice->max_qty }}</td>
-                                    <td>{{ single_price($wholesalePrice->price) }}</td>
+                                    <td @if($rmThecorePriceClass) class="{{ trim($rmThecorePriceClass) }}" @endif>{{ single_price($wholesalePrice->price) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -385,7 +388,7 @@
                                     <!-- Total Price -->
                                     <div class="no-gutters d-none mr-1 mb-2" id="chosen_price_div">
                                         <div class="product-price">
-                                            <strong id="chosen_price" class="fs-24 fw-bold"> </strong>
+                                            <strong id="chosen_price" class="fs-24 fw-bold{{ $rmThecorePriceClass }}"> </strong>
                                         </div>
                                     </div>
                                 @else

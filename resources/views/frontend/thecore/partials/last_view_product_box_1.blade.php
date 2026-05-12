@@ -97,18 +97,18 @@ $cart_added = [];
             <!-- Previous price -->
             @if (home_base_price($product) != home_discounted_base_price($product))
             <div class="disc-amount has-transition">
-                <del class="fw-400 text-secondary mr-1">{{ home_base_price($product) }}</del>
+                <del class="fw-400 text-secondary mr-1 rm-thecore-price-raleway">{{ home_base_price($product) }}</del>
             </div>
             @endif
             <!-- price -->
             <div class="">
-                <span class="fw-700 text-primary">{{ home_discounted_base_price($product) }}</span>
+                <span class="fw-700 text-primary rm-thecore-price-raleway">{{ home_discounted_base_price($product) }}</span>
             </div>
             @endif
             @if ($product->auction_product == 1)
             <!-- Bid Amount -->
             <div class="">
-                <span class="fw-700 text-primary">{{ single_price($product->starting_bid) }}</span>
+                <span class="fw-700 text-primary rm-thecore-price-raleway">{{ single_price($product->starting_bid) }}</span>
             </div>
             @endif
         </div>

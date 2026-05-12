@@ -25,10 +25,10 @@
                     <a href="{{ route('product', $related_product->slug) }}" class="text-reset hov-text-primary hov-text-primary">{{ $related_product->name }}</a>
                 </h3>
                 <div class="fw-700 fs-14 mb-1 mt-2">
-                    <span >{{ home_discounted_base_price($related_product) }}</span>
+                    <span class="@if(get_setting('homepage_select') == 'thecore')rm-thecore-price-raleway @endif">{{ home_discounted_base_price($related_product) }}</span>
                     @if (home_base_price($related_product) != home_discounted_base_price($related_product))
                         <del
-                            class="fw-700 opacity-60 ml-1">{{ home_base_price($related_product) }}</del>
+                            class="fw-700 opacity-60 ml-1 @if(get_setting('homepage_select') == 'thecore')rm-thecore-price-raleway @endif">{{ home_base_price($related_product) }}</del>
                     @endif
                 </div>
             </div>

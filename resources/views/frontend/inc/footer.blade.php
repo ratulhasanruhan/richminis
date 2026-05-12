@@ -1,3 +1,35 @@
+@php
+    $footerPhone = get_setting('contact_phone') ?: get_setting('helpline_number');
+    $footerEmail = get_setting('contact_email');
+
+    /**
+     * Wrap BDT price snippets for distinct typography in footer markup (BDT + amount or amount + BDT).
+     */
+    $rmFooterRalewayPriceWrap = static function (?string $html): string {
+        if ($html === null || $html === '') {
+            return '';
+        }
+        $pattern = '/\bBDT\.?\s*[\d,]+(?:\.\d+)?|[\d,]+(?:\.\d+)?\s*BDT\.?\b/ui';
+
+        return (string) preg_replace($pattern, '<span class="rm-footer__price-raleway">$0</span>', $html);
+    };
+@endphp
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+    /* Google Fonts Raleway (CDN) — footer BDT price snippets only */
+    .rm-footer__price-raleway {
+        font-family: 'Raleway', sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        font-variant-numeric: tabular-nums;
+    }
+    .rm-footer__link.rm-footer__care-num {
+        font-weight: 700;
+        letter-spacing: 0.06em;
+    }
+</style>
 <!-- Last Viewed Products  -->
 @if(get_setting('last_viewed_product_activation') == 1 && Auth::check() && auth()->user()->user_type == 'customer')
 <div class="border-top" id="section_last_viewed_products" style="background-color: #fcfcfc;">
@@ -45,10 +77,10 @@
             @php
                 $fullDescription = nl2br(get_setting('footer_description', null, $system_language->code));
             @endphp
-            
+
             <div class="footer-desc-container">
                 <p class="fs-15 fw-700 text-gray-dark text-center mb-0">
-                        {!! $fullDescription !!}
+                        {!! $rmFooterRalewayPriceWrap($fullDescription) !!}
                 </p>
             </div>
         </div>
@@ -56,11 +88,6 @@
 @endif
 
 {{-- policy bar removed per request --}}
-
-@php
-    $footerPhone = get_setting('contact_phone') ?: get_setting('helpline_number');
-    $footerEmail = get_setting('contact_email');
-@endphp
 
 <footer class="rm-footer" style="background:#000; color:#fff;">
     <style>
@@ -163,7 +190,7 @@
             <div class="rm-footer__col rm-footer__col--about">
                 <div class="rm-footer__title">{{ translate('About Us') }}</div>
                 <div class="rm-footer__text">
-                    {!! get_setting('about_us_description', null, App::getLocale()) !!}
+                    {!! $rmFooterRalewayPriceWrap(get_setting('about_us_description', null, App::getLocale())) !!}
                 </div>
             </div>
 
@@ -182,7 +209,7 @@
                 <div class="rm-footer__title">{{ translate('Connect With Us') }}</div>
                 <div class="rm-footer__text">
                     @if(!empty($footerPhone))
-                        <div>{{ translate('Care') }}: <a class="rm-footer__link" href="tel:{{ $footerPhone }}">{{ $footerPhone }}</a></div>
+                        <div>{{ translate('Care') }}: <a class="rm-footer__link rm-footer__care-num" href="tel:{{ $footerPhone }}">{{ $footerPhone }}</a></div>
                     @endif
                     @if(!empty($footerEmail))
                         <div>{{ translate('Email') }}: <a class="rm-footer__link" href="mailto:{{ $footerEmail }}">{{ $footerEmail }}</a></div>
@@ -226,7 +253,7 @@
 
     <div class="container">
         <div class="rm-footer__copyright">
-            {!! get_setting('frontend_copyright_text', null, App::getLocale()) !!}
+            {!! $rmFooterRalewayPriceWrap(get_setting('frontend_copyright_text', null, App::getLocale())) !!}
         </div>
     </div>
 </footer>

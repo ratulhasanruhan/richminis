@@ -9,6 +9,38 @@
     $total_gallery= count($photos)  +count($short_video) + (is_iterable($videos) ? count($videos) : 0);
 
 @endphp
+<style>
+    /* Product details gallery: show full image inside the frame (no cropping). */
+    .product-slider-wrapper .main-slider {
+        width: 100%;
+        aspect-ratio: 1;
+        max-height: min(85vh, 800px);
+    }
+    .product-slider-wrapper .main-slider .swiper-wrapper {
+        height: 100%;
+    }
+    .product-slider-wrapper .main-slider .swiper-slide.lightbox-item {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        position: relative;
+    }
+    .product-slider-wrapper .main-slider .lightbox-source {
+        width: auto !important;
+        max-width: 100%;
+        max-height: 100%;
+        height: auto !important;
+        object-fit: contain;
+        object-position: center;
+    }
+    .product-slider-wrapper .thumb-slider .swiper-slide img {
+        object-fit: contain;
+        object-position: center;
+        max-width: 100%;
+        max-height: 100%;
+    }
+</style>
 <div class="row">
     <div class="col-md-2 col-lg-3 col-xl-2 order-2 order-md-1">
         <!--THUMBNAILS SLIDER-->
@@ -22,7 +54,7 @@
                                     <div class="swiper-slide rounded-corner-8px border border-light-gray bg-light cursor-pointer overflow-hidden d-flex align-items-center justify-content-center"
                                         data-variation-image="{{ $stock->image }}">
                                         <img src="{{ uploaded_asset($stock->image) }}"
-                                            class="img-fluid object-fit-cover object-position-center"
+                                            class="img-fluid object-fit-contain object-position-center"
                                             alt="">
                                     </div>
                                 @endif
@@ -33,7 +65,7 @@
                     @foreach ($photos as $key => $photo)
                         <div class="swiper-slide rounded-corner-8px border border-light-gray bg-light cursor-pointer overflow-hidden d-flex align-items-center justify-content-center">
                             <img src="{{ uploaded_asset($photo) }}"
-                                class="img-fluid object-fit-cover object-position-center"
+                                class="img-fluid object-fit-contain object-position-center"
                                 alt="">
                         </div>
                     @endforeach
@@ -44,7 +76,7 @@
                     <div
                         class="swiper-slide position-relative rounded-corner-8px border  border-light-gray bg-light cursor-pointer overflow-hidden d-flex align-items-center justify-content-center">
                         
-                            <img class="img-fluid object-fit-cover object-position-center position-absolute z-1" src="{{ $detailedProduct->short_video_thumbnail
+                            <img class="img-fluid object-fit-contain object-position-center position-absolute z-1" src="{{ $detailedProduct->short_video_thumbnail
                             ? uploaded_asset(
                                 count($short_video_thumb) == count($short_video) ? $short_video_thumb[$index] : $short_video_thumb[0],
                             )
@@ -67,7 +99,7 @@
                         <div
                             class="swiper-slide position-relative rounded-corner-8px border  border-light-gray bg-light cursor-pointer overflow-hidden d-flex align-items-center justify-content-center" data-variation="youtube">
                             
-                                <img class="img-fluid object-fit-cover object-position-cent" src="{{ $youtube_thumb }}"
+                                <img class="img-fluid object-fit-contain object-position-center" src="{{ $youtube_thumb }}"
                             onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
                             <span class="position-absolute z-2">
                                 <i class="las la-play-circle fs-36 text-gray has-transition"></i>
@@ -113,7 +145,7 @@
                                 <div
                                     class="swiper-slide rounded-corner-8px border  border-light-gray bg-light overflow-hidden lightbox-item"
                                     data-variation="{{ $stock->variant }}">
-                                    <img src="{{ uploaded_asset($stock->image) }}" class="img-fluid w-100 h-100 lightbox-source" alt="">
+                                    <img src="{{ uploaded_asset($stock->image) }}" class="img-fluid lightbox-source" alt="">
                                     <div class="img-preview-btn wd-show-product-gallery-wrap rounded-pill overflow-hidden">
                                         <a href="#"
                                             class="border-0 bg-transparent d-inline-flex align-items-center woodmart-show-product-gallery">
@@ -134,7 +166,7 @@
                 <!--Single-->
                 <div
                     class="swiper-slide rounded-corner-8px border  border-light-gray bg-light overflow-hidden lightbox-item">
-                    <img src="{{ uploaded_asset($photo) }}" class="img-fluid w-100 h-100 lightbox-source" alt="">
+                    <img src="{{ uploaded_asset($photo) }}" class="img-fluid lightbox-source" alt="">
                     <div class="img-preview-btn wd-show-product-gallery-wrap rounded-pill overflow-hidden">
                         <a href="#"
                             class="border-0 bg-transparent d-inline-flex align-items-center woodmart-show-product-gallery">

@@ -27,10 +27,10 @@
                                     class="d-block text-reset hov-text-primary">{{ $related_product->getTranslation('name') }}</a>
                             </h3>
                             <div class="fs-14 mt-3">
-                                <span class="fw-700 text-primary">{{ home_discounted_base_price($related_product) }}</span>
+                                <span class="fw-700 text-primary @if(get_setting('homepage_select') == 'thecore')rm-thecore-price-raleway @endif">{{ home_discounted_base_price($related_product) }}</span>
                                 @if (home_base_price($related_product) != home_discounted_base_price($related_product))
                                     <del
-                                        class="fw-700 opacity-60 ml-1">{{ home_base_price($related_product) }}</del>
+                                        class="fw-700 opacity-60 ml-1 @if(get_setting('homepage_select') == 'thecore')rm-thecore-price-raleway @endif">{{ home_base_price($related_product) }}</del>
                                 @endif
                             </div>
                         </div>

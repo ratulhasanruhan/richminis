@@ -92,6 +92,25 @@
     <link rel="stylesheet" href="{{ static_asset('assets/css/custom-style.css?v=') }}{{ get_setting('current_version') }}">
     @if(get_setting('homepage_select') == 'thecore')
     <link rel="stylesheet" href="{{ static_asset('assets/css/thecore.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* thecore: product prices (cards + PDP) use Google Fonts Raleway */
+        .aiz-thecore .rm-thecore-price-raleway {
+            font-family: 'Raleway', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            font-variant-numeric: tabular-nums;
+        }
+        .aiz-thecore del.rm-thecore-price-raleway {
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+        .aiz-thecore td.rm-thecore-price-raleway {
+            font-weight: 600;
+        }
+    </style>
     @endif
 
     <script>

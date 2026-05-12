@@ -55,9 +55,9 @@
 
                                 <!-- Price -->
                                 <div class="fs-14 mt-1 text-start px-2">
-                                    <span class="d-block fw-700">{{ home_discounted_base_price($product) }}</span>
+                                    <span class="d-block fw-700 rm-thecore-price-raleway">{{ home_discounted_base_price($product) }}</span>
                                     @if (home_base_price($product) != home_discounted_base_price($product))
-                                        <del class="d-block text-secondary fs-12 fw-400">{{ home_base_price($product) }}</del>
+                                        <del class="d-block text-secondary fs-12 fw-400 rm-thecore-price-raleway">{{ home_base_price($product) }}</del>
                                     @endif
                                 </div>
                             </a>
