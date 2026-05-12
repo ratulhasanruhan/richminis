@@ -15,12 +15,14 @@ class SendSmsService
             })
             ->first();
 
-        if (!$otpRow || empty($otpRow->type)) {
-            Log::warning('sms_otp_no_provider_enabled');
-            throw new \RuntimeException('No OTP/SMS provider is enabled in admin OTP configuration.');
-        }
+        $otp = ($otpRow && !empty($otpRow->type)) ? $otpRow->type : null;
 
-        $otp = $otpRow->type;
+        // No provider toggled in admin → use MIM SMS by default (see App\Services\OTP\Mimsms).
+        // Override with SMS_DEFAULT_PROVIDER in .env if needed.
+        if (!$otp) {
+            $otp = env('SMS_DEFAULT_PROVIDER', 'mimsms');
+            Log::info('sms_otp_using_default_provider', ['type' => $otp]);
+        }
         $otp_class = __NAMESPACE__ . '\\OTP\\' . str_replace(' ', '', ucwords(str_replace('_', ' ', $otp)));
 
         if (!class_exists($otp_class)) {

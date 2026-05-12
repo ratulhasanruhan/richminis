@@ -11,60 +11,31 @@
 
                         <div class="accordion" id="accordioncCheckoutInfo">
 
-                            <!-- Shipping Info -->
-                            <div class="card rounded-0 border shadow-none" style="margin-bottom: 2rem;">
-                                <div class="card-header border-bottom-0 py-3 py-xl-4" id="headingShippingInfo" type="button" data-toggle="collapse" data-target="#collapseShippingInfo" aria-expanded="true" aria-controls="collapseShippingInfo">
+                            <!-- Single card: shipping + payment (minimal) -->
+                            <div class="card rounded-0 border shadow-none mb-0">
+                                <div class="card-header border-bottom-0 py-3 py-xl-4" id="headingCheckoutInfo" type="button" data-toggle="collapse" data-target="#collapseCheckoutInfo" aria-expanded="true" aria-controls="collapseCheckoutInfo">
                                     <div class="d-flex align-items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
                                             <path id="Path_42357" data-name="Path 42357" d="M58,48A10,10,0,1,0,68,58,10,10,0,0,0,58,48ZM56.457,61.543a.663.663,0,0,1-.423.212.693.693,0,0,1-.428-.216l-2.692-2.692.856-.856,2.269,2.269,6-6.043.841.87Z" transform="translate(-48 -48)" fill="#9d9da6"/>
                                         </svg>
-                                        <span class="ml-2 fs-19 fw-700">{{ translate('Shipping Info') }}</span>
+                                        <span class="ml-2 fs-19 fw-700">{{ translate('Checkout') }}</span>
                                     </div>
                                     <i class="las la-angle-down fs-18"></i>
                                 </div>
-                                <div id="collapseShippingInfo" class="collapse show" aria-labelledby="headingShippingInfo" data-parent="#accordioncCheckoutInfo">
-                                    <div class="card-body" id="shipping_info">
-                                       @include('frontend.partials.cart.shipping_info', ['address_id' => $address_id])
-                                    </div>
-                                </div>
-                            </div>
+                                <div id="collapseCheckoutInfo" class="collapse show" aria-labelledby="headingCheckoutInfo" data-parent="#accordioncCheckoutInfo">
+                                    <div class="card-body pb-0">
+                                        <div id="shipping_info">
+                                            @include('frontend.partials.cart.shipping_info', ['address_id' => $address_id])
+                                        </div>
 
-                            <!-- Delivery Info (hidden — shipping defaults applied server-side) -->
-                            <div id="rm-checkout-delivery-section" class="card rounded-0 border shadow-none d-none" style="margin-bottom: 2rem; overflow: visible !important;">
-                                <div class="card-header border-bottom-0 py-3 py-xl-4" id="headingDeliveryInfo" type="button" data-toggle="collapse" data-target="#collapseDeliveryInfo" aria-expanded="true" aria-controls="collapseDeliveryInfo">
-                                    <div class="d-flex align-items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
-                                            <path id="Path_42357" data-name="Path 42357" d="M58,48A10,10,0,1,0,68,58,10,10,0,0,0,58,48ZM56.457,61.543a.663.663,0,0,1-.423.212.693.693,0,0,1-.428-.216l-2.692-2.692.856-.856,2.269,2.269,6-6.043.841.87Z" transform="translate(-48 -48)" fill="#9d9da6"/>
-                                        </svg>
-                                        <span class="ml-2 fs-19 fw-700">{{ translate('Delivery Info') }}</span>
-                                    </div>
-                                    <i class="las la-angle-down fs-18"></i>
-                                </div>
-                                <div id="collapseDeliveryInfo" class="collapse show" aria-labelledby="headingDeliveryInfo" data-parent="#accordioncCheckoutInfo">
-                                    <div class="card-body" id="delivery_info">
-                                        @include('frontend.partials.cart.delivery_info', ['carts' => $carts, 'carrier_list' => $carrier_list, 'shipping_info' => $shipping_info])
-                                    </div>
-                                </div>
-                            </div>
+                                        <hr class="my-4">
 
-
-                            <!-- Payment Info -->
-                            <div class="card rounded-0 mb-0 border shadow-none">
-                                <div class="card-header border-bottom-0 py-3 py-xl-4" id="headingPaymentInfo" type="button" data-toggle="collapse" data-target="#collapsePaymentInfo" aria-expanded="true" aria-controls="collapsePaymentInfo">
-                                    <div class="d-flex align-items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
-                                            <path id="Path_42357" data-name="Path 42357" d="M58,48A10,10,0,1,0,68,58,10,10,0,0,0,58,48ZM56.457,61.543a.663.663,0,0,1-.423.212.693.693,0,0,1-.428-.216l-2.692-2.692.856-.856,2.269,2.269,6-6.043.841.87Z" transform="translate(-48 -48)" fill="#9d9da6"/>
-                                        </svg>
-                                        <span class="ml-2 fs-19 fw-700">{{ translate('Payment') }}</span>
-                                    </div>
-                                    <i class="las la-angle-down fs-18"></i>
-                                </div>
-                                <div id="collapsePaymentInfo" class="collapse show" aria-labelledby="headingPaymentInfo" data-parent="#accordioncCheckoutInfo">
-                                    <div class="card-body" id="payment_info">
-                                        @include('frontend.partials.cart.payment_info', ['carts' => $carts, 'total' => $total])
+                                        <div id="payment_info">
+                                            @include('frontend.partials.cart.payment_info', ['carts' => $carts, 'total' => $total, 'checkout_compact' => true])
+                                        </div>
 
                                         <!-- Agree Box -->
-                                        <div class="pt-2rem fs-14">
+                                        <div class="pt-3 fs-14">
                                             <label class="aiz-checkbox">
                                                 <input type="checkbox" required id="agree_checkbox" checked onchange="stepCompletionPaymentInfo()">
                                                 <span class="aiz-square-check"></span>
@@ -79,14 +50,12 @@
                                         </div>
 
                                         <div class="row align-items-center pt-3 mb-4">
-                                            <!-- Return to shop -->
                                             <div class="col-6">
                                                 <a href="{{ route('home') }}" class="btn btn-link fs-14 fw-700 px-0">
                                                     <i class="las la-arrow-left fs-16"></i>
                                                     {{ translate('Return to shop') }}
                                                 </a>
                                             </div>
-                                            <!-- Complete Ordert -->
                                             <div class="col-6 text-right">
                                                 <button type="button" onclick="submitOrder(this)" id="submitOrderBtn"
                                                     class="btn btn-primary fs-14 fw-700 rounded-0 px-4">
@@ -95,8 +64,14 @@
                                                 </button>
                                             </div>
                                         </div>
-
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Delivery Info (hidden — shipping defaults applied server-side) -->
+                            <div id="rm-checkout-delivery-section" class="d-none" style="overflow: visible !important;">
+                                <div id="delivery_info">
+                                    @include('frontend.partials.cart.delivery_info', ['carts' => $carts, 'carrier_list' => $carrier_list, 'shipping_info' => $shipping_info])
                                 </div>
                             </div>
 
@@ -502,7 +477,7 @@
                 }
             @endif
 
-            $('#headingShippingInfo svg *').css('fill', headColor);
+            $('#headingCheckoutInfo svg *').css('fill', headColor);
             return allOk;
         }
 
@@ -596,7 +571,7 @@
                 headColor = '#15a405';
             }
 
-            $('#headingDeliveryInfo svg *').css('fill', headColor);
+            $('#headingCheckoutInfo svg *').css('fill', headColor);
             return allOk;
         }
 
@@ -668,7 +643,7 @@
                 }
             }
 
-            $('#headingPaymentInfo svg *').css('fill', headColor);
+            $('#headingCheckoutInfo svg *').css('fill', headColor);
             return allOk;
         }
 
@@ -680,7 +655,7 @@
                 allOk = true;
             }
 
-            $('#headingPaymentInfo svg *').css('fill', headColor);
+            $('#headingCheckoutInfo svg *').css('fill', headColor);
             return allOk;
         }
 

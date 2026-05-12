@@ -3,13 +3,13 @@
     <div class="tab-pane fade show active" id="shipping-address" role="tabpanel"
         aria-labelledby="shipping-address-tab">
         <div class="p-3">
-            <!-- First name -->
+            <!-- Full name -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('First name')}} <span class="text-danger">*</span></label>
+                    <label>{{ translate('Full Name')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
-                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your First Name')}}" rows="2" name="name" required></input>
+                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your full name')}}" rows="2" name="name" required></input>
                 </div>
             </div>
 
@@ -72,10 +72,10 @@
             <input type="hidden" name="country_id" value="{{ $defaultCountryId }}">
             @endif
 
-            <!-- State -->
+            <!-- District / City (state) -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('State')}} <span class="text-danger">*</span></label>
+                    <label>{{ translate('District/City')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
                     <select class="form-control mb-3 aiz-selectpicker rounded-0 guest-checkout" data-live-search="true" name="state_id" required>
@@ -165,13 +165,13 @@
     @if (get_setting('billing_address_required'))
     <div class="tab-pane fade" id="billing-address" role="tabpanel" aria-labelledby="billing-address-tab">
         <div class="p-3">
-            <!-- First name -->
+            <!-- Full name (billing) -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('First name')}} <span class="text-danger">*</span></label>
+                    <label>{{ translate('Full Name')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
-                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your First Name')}}" rows="2" name="billing_name" required></input>
+                    <input class="form-control mb-3 rounded-0" placeholder="{{ translate('Your full name')}}" rows="2" name="billing_name" required></input>
                 </div>
             </div>
 
@@ -208,10 +208,10 @@
             @endif
 
             @if(get_setting('has_state') == 1)
-            <!-- State -->
+            <!-- District / City (billing state) -->
             <div class="row">
                 <div class="col-md-2 mt-md-2">
-                    <label>{{ translate('State')}} <span class="text-danger">*</span></label>
+                    <label>{{ translate('District/City')}} <span class="text-danger">*</span></label>
                 </div>
                 <div class="col-md-10">
                     <select class="form-control mb-3 aiz-selectpicker rounded-0" data-live-search="true" name="billing_state_id" required>

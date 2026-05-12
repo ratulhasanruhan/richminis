@@ -199,14 +199,25 @@
                 if(obj != '') {
                     $('[name="state_id"]').html(obj);
                     AIZ.plugins.bootstrapSelect('refresh');
-                    // Auto-select first real option and load cities
                     var $state = $('[name="state_id"]');
                     if ($state.find('option').length > 1 && (!$state.val() || $state.val() === '')) {
-                        var firstVal = $state.find('option').filter(function () {
+                        var preferVal = null;
+                        if ($('#checkout-form').length) {
+                            $state.find('option').each(function () {
+                                var v = $(this).val();
+                                if (!v) return;
+                                var t = ($(this).text() || '').trim().toLowerCase();
+                                if (t === 'dhaka' || t.indexOf('dhaka') !== -1) {
+                                    preferVal = v;
+                                    return false;
+                                }
+                            });
+                        }
+                        var pickVal = preferVal || $state.find('option').filter(function () {
                             return $(this).val() !== '';
                         }).first().val();
-                        if (firstVal) {
-                            $state.val(firstVal);
+                        if (pickVal) {
+                            $state.val(pickVal);
                             AIZ.plugins.bootstrapSelect('refresh');
                             $state.trigger('change');
                         }
@@ -232,6 +243,27 @@
                 if(obj != '') {
                     $('[name="billing_state_id"]').html(obj);
                     AIZ.plugins.bootstrapSelect('refresh');
+                    var $bs = $('[name="billing_state_id"]');
+                    if ($('#checkout-form').length && $bs.length && $bs.find('option').length > 1 && (!$bs.val() || $bs.val() === '')) {
+                        var preferVal = null;
+                        $bs.find('option').each(function () {
+                            var v = $(this).val();
+                            if (!v) return;
+                            var t = ($(this).text() || '').trim().toLowerCase();
+                            if (t === 'dhaka' || t.indexOf('dhaka') !== -1) {
+                                preferVal = v;
+                                return false;
+                            }
+                        });
+                        var pickVal = preferVal || $bs.find('option').filter(function () {
+                            return $(this).val() !== '';
+                        }).first().val();
+                        if (pickVal) {
+                            $bs.val(pickVal);
+                            AIZ.plugins.bootstrapSelect('refresh');
+                            $bs.trigger('change');
+                        }
+                    }
                 }
             }
         });

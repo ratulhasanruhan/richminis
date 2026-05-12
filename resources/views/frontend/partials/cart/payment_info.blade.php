@@ -1,14 +1,25 @@
-<div class="mb-4">
-    <h3 class="fs-16 fw-700 text-dark">
-        {{ translate('Any additional info?') }}
-    </h3>
-    <textarea name="additional_info" rows="5" class="form-control rounded-0"
+@php
+    $checkout_compact = isset($checkout_compact) && $checkout_compact;
+@endphp
+<div class="{{ $checkout_compact ? 'mb-2' : 'mb-4' }}">
+    @if ($checkout_compact)
+        <p class="mb-2 fs-15 fw-700 text-dark border-bottom pb-2">{{ translate('Additional notes') }}</p>
+    @else
+        <h3 class="fs-16 fw-700 text-dark">
+            {{ translate('Any additional info?') }}
+        </h3>
+    @endif
+    <textarea name="additional_info" rows="{{ $checkout_compact ? 2 : 5 }}" class="form-control rounded-0"
         placeholder="{{ translate('Type your text...') }}"></textarea>
 </div>
 <div>
-    <h3 class="fs-16 fw-700 text-dark">
-        {{ translate('Select a payment option') }}
-    </h3>
+    @if ($checkout_compact)
+        <p class="mb-2 fs-15 fw-700 text-dark border-bottom pb-2">{{ translate('Payment') }}</p>
+    @else
+        <h3 class="fs-16 fw-700 text-dark">
+            {{ translate('Select a payment option') }}
+        </h3>
+    @endif
     <div class="row gutters-10">
         @foreach (get_activate_payment_methods() as $payment_method)
             <div class="col-xl-4 col-md-6">
@@ -141,8 +152,8 @@
 
     <!-- Wallet Payment -->
     @if (Auth::check() && get_setting('wallet_system') == 1)
-        <div class="py-4 px-4 text-center bg-soft-secondary-base mt-4">
-            <div class="fs-14 mb-3">
+        <div class="{{ $checkout_compact ? 'py-3 px-3 mt-2 text-center' : 'py-4 px-4 text-center mt-4' }} bg-soft-secondary-base">
+            <div class="fs-14 mb-2">
                 <span class="opacity-80">{{ translate('Or, Your wallet balance :') }}</span>
                 <span class="fw-700">{{ single_price(Auth::user()->balance) }}</span>
             </div>
