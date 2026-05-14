@@ -40,11 +40,12 @@
                                     id="default_text" 
                                     class="aiz-text-editor" 
                                     data-min-height="350px" 
-                                    data-buttons='[["font", ["bold", "underline", "italic"]],["para", ["ul", "ol"]],["insert", ["link"]],["view", ["undo","redo"]]]'
+                                    data-buttons='[["style", ["style"]],["font", ["bold", "underline", "italic", "clear"]],["fontsize", ["fontsize"]],["color", ["color"]],["para", ["ul", "ol", "paragraph"]],["insert", ["link"]],["view", ["undo","redo"]]]'
                                     placeholder="{{ translate('Default Text') }}" required>
                                     {{ $emailTemplate->default_text }}
                                 </textarea>
                                 <small class="form-text text-danger">{{ translate('N.B : Do Not Change The Variables Like') }} [[ ____ ]]</small>
+                                <small class="form-text text-muted">{{ translate('You can now format text size, color, and paragraph style for email content.') }}</small>
                             @else
                                 <small class="form-text fs-13 text-danger">{{ translate('Content is not editable for this Email.') }}</small>
                             @endif
