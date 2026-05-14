@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\SmsTemplate;
 use App\Http\Controllers\OTPVerificationController;
 use App\Models\EmailTemplate;
+use App\Services\SendSmsService;
+use Illuminate\Support\Facades\Log;
 use Mail;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\OrderNotification;
@@ -51,6 +53,31 @@ class NotificationUtility
                 $otpController->send_order_code($order);
             } catch (\Exception $e) {
 
+            }
+        }
+
+        $adminSmsPhone = env('ADMIN_ORDER_SMS_PHONE');
+        if (addon_is_activated('otp_system') && !empty($adminSmsPhone)) {
+            try {
+                $shipping = json_decode($order->shipping_address ?? '{}');
+                $site = get_setting('site_name') ?: config('app.name');
+                $customerName = $shipping->name ?? optional($order->user)->name ?? 'Customer';
+                $customerPhone = $shipping->phone ?? optional($order->user)->phone ?? 'N/A';
+                $amount = number_format((float) $order->grand_total, 2, '.', '');
+
+                $message = "New order placed on {$site}. "
+                    . "Order: {$order->code}, "
+                    . "Customer: {$customerName}, "
+                    . "Phone: {$customerPhone}, "
+                    . "Amount: {$amount}.";
+
+                (new SendSmsService())->sendSMS($adminSmsPhone, env('MIM_SENDER_ID', config('app.name')), $message, null);
+            } catch (\Exception $e) {
+                Log::warning('admin_order_sms_failed', [
+                    'order_id' => $order->id,
+                    'order_code' => $order->code,
+                    'message' => $e->getMessage(),
+                ]);
             }
         }
 
