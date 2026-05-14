@@ -18,6 +18,7 @@ use Auth;
 use Mail;
 use App\Mail\InvoiceEmailManager;
 use App\Models\OrdersExport;
+use App\Services\SteadfastService;
 use App\Utility\NotificationUtility;
 use CoreComponentRepository;
 use App\Utility\SmsUtility;
@@ -26,6 +27,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\OrderNotification;
 use App\Utility\EmailUtility;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -420,98 +422,157 @@ class OrderController extends Controller
     public function update_delivery_status(Request $request)
     {
         $order = Order::findOrFail($request->order_id);
-        $order->delivery_viewed = '0';
-        $order->delivery_status = $request->status;
-        $order->save();
+        $steadfastMessage = null;
 
-        if($request->status == 'delivered'){
-            $order->delivered_date = date("Y-m-d H:i:s");
-            $order->save();
-        }
-        
-        if ($request->status == 'cancelled' && $order->payment_type == 'wallet') {
-            $user = User::where('id', $order->user_id)->first();
-            $user->balance += $order->grand_total;
-            $user->save();
-        }
+        try {
+            DB::beginTransaction();
 
-        // If the order is cancelled and the seller commission is calculated, deduct seller earning
-        if($request->status == 'cancelled' && $order->user->user_type == 'seller' && $order->payment_status == 'paid' && $order->commission_calculated == 1){
-            $sellerEarning = $order->commissionHistory->seller_earning;
-            $shop = $order->shop;
-            $shop->admin_to_pay -= $sellerEarning;
-            $shop->save();
-        }
+            $order->delivery_viewed = '0';
+            $order->delivery_status = $request->status;
 
-        if (Auth::user()->user_type == 'seller') {
-            foreach ($order->orderDetails->where('seller_id', Auth::user()->id) as $key => $orderDetail) {
-                $orderDetail->delivery_status = $request->status;
-                $orderDetail->save();
-
-                if ($request->status == 'cancelled') {
-                    product_restock($orderDetail);
-                }
+            if ($request->status == 'delivered') {
+                $order->delivered_date = date("Y-m-d H:i:s");
             }
-        } else {
-            foreach ($order->orderDetails as $key => $orderDetail) {
 
-                $orderDetail->delivery_status = $request->status;
-                $orderDetail->save();
+            $order->save();
 
-                if ($request->status == 'cancelled') {
-                    product_restock($orderDetail);
+            if ($request->status == 'cancelled' && $order->payment_type == 'wallet') {
+                $user = User::where('id', $order->user_id)->first();
+                $user->balance += $order->grand_total;
+                $user->save();
+            }
+
+            // If the order is cancelled and the seller commission is calculated, deduct seller earning
+            if ($request->status == 'cancelled' && $order->user->user_type == 'seller' && $order->payment_status == 'paid' && $order->commission_calculated == 1) {
+                $sellerEarning = $order->commissionHistory->seller_earning;
+                $shop = $order->shop;
+                $shop->admin_to_pay -= $sellerEarning;
+                $shop->save();
+            }
+
+            if (Auth::user()->user_type == 'seller') {
+                foreach ($order->orderDetails->where('seller_id', Auth::user()->id) as $key => $orderDetail) {
+                    $orderDetail->delivery_status = $request->status;
+                    $orderDetail->save();
+
+                    if ($request->status == 'cancelled') {
+                        product_restock($orderDetail);
+                    }
                 }
+            } else {
+                foreach ($order->orderDetails as $key => $orderDetail) {
+                    $orderDetail->delivery_status = $request->status;
+                    $orderDetail->save();
 
-                if (addon_is_activated('affiliate_system')) {
-                    if (($request->status == 'delivered' || $request->status == 'cancelled') &&
-                        $orderDetail->product_referral_code
-                    ) {
+                    if ($request->status == 'cancelled') {
+                        product_restock($orderDetail);
+                    }
 
-                        $no_of_delivered = 0;
-                        $no_of_canceled = 0;
+                    if (addon_is_activated('affiliate_system')) {
+                        if (($request->status == 'delivered' || $request->status == 'cancelled') &&
+                            $orderDetail->product_referral_code
+                        ) {
+                            $no_of_delivered = 0;
+                            $no_of_canceled = 0;
 
-                        if ($request->status == 'delivered') {
-                            $no_of_delivered = $orderDetail->quantity;
+                            if ($request->status == 'delivered') {
+                                $no_of_delivered = $orderDetail->quantity;
+                            }
+                            if ($request->status == 'cancelled') {
+                                $no_of_canceled = $orderDetail->quantity;
+                            }
+
+                            $referred_by_user = User::where('referral_code', $orderDetail->product_referral_code)->first();
+
+                            $affiliateController = new AffiliateController;
+                            $affiliateController->processAffiliateStats($referred_by_user->id, 0, 0, $no_of_delivered, $no_of_canceled);
                         }
-                        if ($request->status == 'cancelled') {
-                            $no_of_canceled = $orderDetail->quantity;
-                        }
-
-                        $referred_by_user = User::where('referral_code', $orderDetail->product_referral_code)->first();
-
-                        $affiliateController = new AffiliateController;
-                        $affiliateController->processAffiliateStats($referred_by_user->id, 0, 0, $no_of_delivered, $no_of_canceled);
                     }
                 }
             }
+
+            $shouldCreateSteadfastBooking = Auth::user()->user_type !== 'seller'
+                && $request->status === 'confirmed'
+                && empty($order->steadfast_consignment_id)
+                && (empty($order->shipping_method) || $order->shipping_method === 'steadfast');
+
+            if ($shouldCreateSteadfastBooking) {
+                $result = (new SteadfastService())->createBooking($order);
+                $steadfastMessage = $result['message'] ?? null;
+                $order->refresh();
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            Log::warning('order_delivery_status_update_failed', [
+                'order_id' => $order->id,
+                'order_code' => $order->code,
+                'status' => $request->status,
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         }
-        // Delivery Status change email notification to Admin, seller, Customer
-        EmailUtility::order_email($order, $request->status);  
+
+        try {
+            EmailUtility::order_email($order, $request->status);
+        } catch (\Throwable $e) {
+            Log::warning('order_delivery_status_email_failed', [
+                'order_id' => $order->id,
+                'status' => $request->status,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         // Delivery Status change SMS notification
         if (addon_is_activated('otp_system') && SmsTemplate::where('identifier', 'delivery_status_change')->first()->status == 1) {
             try {
                 SmsUtility::delivery_status_change(json_decode($order->shipping_address)->phone, $order);
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+                Log::warning('order_delivery_status_sms_failed', [
+                    'order_id' => $order->id,
+                    'status' => $request->status,
+                    'message' => $e->getMessage(),
+                ]);
+            }
         }
 
-        //Send web Notifications to user
-        NotificationUtility::sendNotification($order, $request->status);
+        try {
+            NotificationUtility::sendNotification($order, $request->status);
+        } catch (\Throwable $e) {
+            Log::warning('order_delivery_status_notification_failed', [
+                'order_id' => $order->id,
+                'status' => $request->status,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         //Sends Firebase Notifications to user
         if (get_setting('google_firebase') == 1 && $order->user->device_token != null) {
-            $request->device_token = $order->user->device_token;
-            $request->title = "Order updated !";
-            $status = str_replace("_", "", $order->delivery_status);
-            $request->text = " Your order {$order->code} has been {$status}";
+            try {
+                $request->device_token = $order->user->device_token;
+                $request->title = "Order updated !";
+                $status = str_replace("_", "", $order->delivery_status);
+                $request->text = " Your order {$order->code} has been {$status}";
 
-            $request->type = "order";
-            $request->id = $order->id;
-            $request->user_id = $order->user->id;
+                $request->type = "order";
+                $request->id = $order->id;
+                $request->user_id = $order->user->id;
 
-            NotificationUtility::sendFirebaseNotification($request);
+                NotificationUtility::sendFirebaseNotification($request);
+            } catch (\Throwable $e) {
+                Log::warning('order_delivery_status_firebase_failed', [
+                    'order_id' => $order->id,
+                    'status' => $request->status,
+                    'message' => $e->getMessage(),
+                ]);
+            }
         }
-
 
         if (addon_is_activated('delivery_boy')) {
             if (Auth::user()->user_type == 'delivery_boy') {
@@ -520,7 +581,10 @@ class OrderController extends Controller
             }
         }
 
-        return 1;
+        return response()->json([
+            'success' => true,
+            'message' => $steadfastMessage ?: 'Delivery status has been updated',
+        ]);
     }
 
     public function update_tracking_code(Request $request)
