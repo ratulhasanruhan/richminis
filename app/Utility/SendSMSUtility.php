@@ -10,7 +10,11 @@ class SendSMSUtility
 {
     public static function sendSMS($to, $from, $text, $template_id)
     {
-        if (OtpConfiguration::where('type', 'nexmo')->first()->value == 1) {
+        $nexmo = OtpConfiguration::where('type', 'nexmo')->first();
+        $twillo = OtpConfiguration::where('type', 'twillo')->first();
+        $sslWireless = OtpConfiguration::where('type', 'ssl_wireless')->first();
+
+        if (($nexmo->value ?? null) == 1) {
             $api_key = env("NEXMO_KEY"); //put ssl provided api_token here
             $api_secret = env("NEXMO_SECRET"); // put ssl provided sid here
 
@@ -41,7 +45,7 @@ class SendSMSUtility
             curl_close($ch);
 
             return $response;
-        } elseif (OtpConfiguration::where('type', 'twillo')->first()->value == 1) {
+        } elseif (($twillo->value ?? null) == 1) {
             $sid = env("TWILIO_SID"); // Your Account SID from www.twilio.com/console
             $token = env("TWILIO_AUTH_TOKEN"); // Your Auth Token from www.twilio.com/console
             $type = env("TWILLO_TYPE"); // sms type
@@ -58,7 +62,7 @@ class SendSMSUtility
             } catch (\Exception $e) {
             }
             
-        } elseif (OtpConfiguration::where('type', 'ssl_wireless')->first()->value == 1) {
+        } elseif (($sslWireless->value ?? null) == 1) {
             $token = env("SSL_SMS_API_TOKEN"); //put ssl provided api_token here
             $sid = env("SSL_SMS_SID"); // put ssl provided sid here
 
