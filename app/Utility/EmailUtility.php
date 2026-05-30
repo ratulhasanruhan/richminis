@@ -6,6 +6,7 @@ use App\Mail\MailManager;
 use App\Models\EmailTemplate;
 use App\Models\User;
 use Mail;
+use Illuminate\Support\Facades\Password;
 
 class EmailUtility
 {
@@ -34,6 +35,69 @@ class EmailUtility
         $array['content'] = $emailBody;
 
         Mail::to($emailSendTo)->queue(new MailManager($array));
+    }
+
+    /**
+     * Email sent after checkout auto-creates a customer account — link to set password (no plain password).
+     */
+    public static function sendCheckoutAccountPasswordSetupEmail(User $user, $orderCode = null)
+    {
+        if (empty($user->email)) {
+            return;
+        }
+
+        $token = Password::createToken($user);
+        $setupUrl = route('account.setup-password.show', [
+            'token' => $token,
+            'email' => $user->email,
+        ]);
+
+        $setupButton = '<div style="display: flex; justify-content: center; padding: 16px 0 8px;">'
+            . '<a href="' . $setupUrl . '" target="_blank" style="background: #000; text-decoration:none; padding: 14px 24px; color:#fff; border-radius: 0; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">'
+            . translate('Set your password')
+            . '</a></div>';
+
+        $emailTemplate = EmailTemplate::whereIdentifier('registration_from_system_email_to_customer')->first();
+
+        if ($emailTemplate != null && $emailTemplate->status == 1) {
+            $admin = get_admin();
+            $emailSubject = $emailTemplate->subject;
+            $emailSubject = str_replace('[[customer_name]]', $user->name, $emailSubject);
+            $emailSubject = str_replace('[[store_name]]', get_setting('site_name'), $emailSubject);
+            if (!empty($orderCode)) {
+                $emailSubject = str_replace('[[order_code]]', $orderCode, $emailSubject);
+            }
+
+            $emailBody = $emailTemplate->default_text;
+            $emailBody = str_replace('[[store_name]]', get_setting('site_name'), $emailBody);
+            $emailBody = str_replace('[[admin_name]]', $admin->name, $emailBody);
+            $emailBody = str_replace('[[customer_name]]', $user->name, $emailBody);
+            $emailBody = str_replace('[[email]]', $user->email, $emailBody);
+            $emailBody = str_replace('[[password]]', translate('An account was created when you placed your order. Use the button below to choose your password.'), $emailBody);
+            $emailBody = str_replace('[[set_password_button]]', $setupButton, $emailBody);
+            $emailBody = str_replace('[[email/phone]]', $user->email, $emailBody);
+            $emailBody = str_replace('[[date]]', date('d-m-Y', strtotime($user->created_at)), $emailBody);
+            $emailBody = str_replace('[[admin_email]]', $admin->email, $emailBody);
+            if (!empty($orderCode)) {
+                $emailBody = str_replace('[[order_code]]', $orderCode, $emailBody);
+            }
+
+            if (strpos($emailBody, $setupUrl) === false && strpos($emailBody, 'set_password_button') === false) {
+                $emailBody .= $setupButton;
+            }
+        } else {
+            $siteName = get_setting('site_name') ?: config('app.name');
+            $emailSubject = translate('Set your password for your new account on') . ' ' . $siteName;
+            $emailBody = '<p>' . translate('Hi') . ' ' . e($user->name) . ',</p>';
+            $emailBody .= '<p>' . translate('An account was created when you placed your order') . (!empty($orderCode) ? ' (' . e($orderCode) . ')' : '') . '. '
+                . translate('Click the button below to set your password and sign in anytime.') . '</p>';
+            $emailBody .= $setupButton;
+        }
+
+        $array['subject'] = $emailSubject;
+        $array['content'] = $emailBody;
+
+        Mail::to($user->email)->queue(new MailManager($array));
     }
 
      // Email verification for customer Registration

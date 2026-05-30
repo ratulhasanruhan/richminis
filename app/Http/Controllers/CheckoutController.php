@@ -359,7 +359,9 @@ class CheckoutController extends Controller
             })
             ->first();
 
+        $isNewCheckoutAccount = false;
         if (!$user) {
+            $isNewCheckoutAccount = true;
             $password = substr(hash('sha512', rand()), 0, 12);
             $user = new User();
             $user->name = $request->name;
@@ -371,6 +373,10 @@ class CheckoutController extends Controller
 
         $user->verification_code = rand(100000, 999999);
         $user->save();
+
+        if ($isNewCheckoutAccount) {
+            $request->session()->put('checkout_new_account_user_id', $user->id);
+        }
 
         // Store guest shipping/billing info for later Address creation after OTP verification
         $resolvedShippingCity = resolve_city_id_for_state_wise_shipping($request->state_id, $request->city_id);
@@ -462,7 +468,9 @@ class CheckoutController extends Controller
             })
             ->first();
 
+        $isNewCheckoutAccount = false;
         if (!$user) {
+            $isNewCheckoutAccount = true;
             $password = substr(hash('sha512', rand()), 0, 12);
             $user = new User();
             $user->name = $request->name;
@@ -474,6 +482,10 @@ class CheckoutController extends Controller
 
         $user->verification_code = rand(100000, 999999);
         $user->save();
+
+        if ($isNewCheckoutAccount) {
+            $request->session()->put('checkout_new_account_user_id', $user->id);
+        }
 
         // Send OTP via SMS
         try {
@@ -538,20 +550,11 @@ class CheckoutController extends Controller
         $user->email = $guest_shipping_info['email'];
         $user->phone = addon_is_activated('otp_system') ? '+'.$guest_shipping_info['country_code'].$guest_shipping_info['phone'] : null;
         $user->password = Hash::make($password);
+        $user->user_type = 'customer';
         $user->email_verified_at = $isEmailVerificationEnabled != 1 ? date('Y-m-d H:m:s') : null;
         $user->save();
 
-        // Guest Account Opening and verification(if activated) eamil send
-        try {
-            EmailUtility::customer_registration_email('registration_from_system_email_to_customer', $user, $password);
-        } catch (\Exception $e) {
-            $success = 0;
-            $user->delete();
-        }
-
-        if($success == 0){
-            return $success;
-        }
+        Session::put('checkout_new_account_user_id', $user->id);
 
         // Sending email verification Notification
         if($isEmailVerificationEnabled == 1){
@@ -1018,7 +1021,36 @@ class CheckoutController extends Controller
             // avoid breaking order confirmed page
         }
 
+        $this->sendCheckoutNewAccountSetupEmail($combined_order->orders->first()->code ?? null);
+
         return view('frontend.order_confirmed', compact('combined_order'));
+    }
+
+    /**
+     * After checkout, email new auto-created customers a link to set their password.
+     */
+    private function sendCheckoutNewAccountSetupEmail(?string $orderCode = null): void
+    {
+        $userId = Session::get('checkout_new_account_user_id');
+        if (!$userId) {
+            return;
+        }
+
+        Session::forget('checkout_new_account_user_id');
+
+        $user = User::find($userId);
+        if (!$user || empty($user->email)) {
+            return;
+        }
+
+        try {
+            EmailUtility::sendCheckoutAccountPasswordSetupEmail($user, $orderCode);
+        } catch (\Exception $e) {
+            Log::warning('checkout_account_setup_email_failed', [
+                'user_id' => $user->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function guestCustomerInfoCheck(Request $request){

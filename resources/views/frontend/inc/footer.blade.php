@@ -175,13 +175,26 @@
             text-align: center;
         }
         @media (max-width: 991px){
-            .rm-footer__inner { padding: 44px 16px 18px; }
+            .rm-footer__inner { padding: 44px 0 18px; }
             .rm-footer__columns{
                 grid-template-columns: 1fr;
                 gap: 32px;
+                justify-items: start;
             }
-            .rm-footer__copyright { padding-left: 16px; padding-right: 16px; }
-            .rm-footer__copyright { text-align: center; }
+            .rm-footer__col--about,
+            .rm-footer__col--policy,
+            .rm-footer__col--connect{
+                width: 100%;
+                text-align: left;
+            }
+            .rm-footer__col--policy {
+                justify-content: flex-start;
+            }
+            .rm-footer__copyright {
+                padding-left: 0;
+                padding-right: 0;
+                text-align: left;
+            }
         }
     </style>
 
