@@ -1,3 +1,22 @@
+@php
+    $emailContent = str_ireplace(
+        ['<h1>', '<h2>', '<h3>', '<h4>', '<h5>', '<h6>', '<p>', '<ul>', '<ol>', '<li>'],
+        [
+            '<h1 style="margin:0 0 18px; font-size:32px; line-height:1.3; font-weight:700; color:#111827;">',
+            '<h2 style="margin:0 0 16px; font-size:28px; line-height:1.35; font-weight:700; color:#111827;">',
+            '<h3 style="margin:0 0 14px; font-size:24px; line-height:1.4; font-weight:700; color:#111827;">',
+            '<h4 style="margin:0 0 12px; font-size:20px; line-height:1.45; font-weight:700; color:#111827;">',
+            '<h5 style="margin:0 0 10px; font-size:18px; line-height:1.5; font-weight:700; color:#111827;">',
+            '<h6 style="margin:0 0 10px; font-size:16px; line-height:1.5; font-weight:700; color:#111827;">',
+            '<p style="margin:0 0 14px; font-size:16px; line-height:1.7; color:#1f2937;">',
+            '<ul style="margin:0 0 14px 20px; padding:0; font-size:16px; line-height:1.7; color:#1f2937;">',
+            '<ol style="margin:0 0 14px 20px; padding:0; font-size:16px; line-height:1.7; color:#1f2937;">',
+            '<li style="margin:0 0 8px; font-size:16px; line-height:1.7; color:#1f2937;">',
+        ],
+        $content
+    );
+@endphp
+
 <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#e8ebef">
     @php
     $logo = get_setting('header_logo');
@@ -44,7 +63,9 @@
 
                                     <!-- Content -->
                                     <div style="padding: 10px 30px 70px 30px;">
-                                        <p>{!! $content !!}</p>
+                                        <div style="font-size:16px; line-height:1.7; color:#1f2937;">
+                                            {!! $emailContent !!}
+                                        </div>
                                     </div>
                                     
                                 </td>

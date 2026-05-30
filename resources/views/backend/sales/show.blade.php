@@ -338,7 +338,7 @@
 
             <div class="mb-3 mt-2">
                 @php
-                    $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
+                    $removedXML = '<?xml version="1.0" encoding="UTF-8"?' . '>';
                 @endphp
                 <div class="rm-admin-qr-box">
                     {!! str_replace($removedXML, '', QrCode::size(100)->generate($order->code)) !!}
@@ -886,7 +886,17 @@
                 order_id: order_id,
                 status: status
             }, function(data) {
-                AIZ.plugins.notify('success', '{{ translate('Delivery status has been updated') }}');
+                if (data.success) {
+                    AIZ.plugins.notify('success', data.message || '{{ translate('Delivery status has been updated') }}');
+                } else {
+                    AIZ.plugins.notify('danger', data.message || '{{ translate('Something went wrong') }}');
+                }
+                location.reload();
+            }).fail(function(xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : '{{ translate('Something went wrong') }}';
+                AIZ.plugins.notify('danger', message);
                 location.reload();
             });
         });
