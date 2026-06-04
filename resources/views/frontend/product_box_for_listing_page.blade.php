@@ -145,7 +145,7 @@
                         {{ translate('Add to Cart') }}
                     </span>
                     <span><i class="las la-2x la-shopping-cart"></i></span>
-                </a> 
+                </a>
             @endif
         @endif
 

@@ -321,8 +321,14 @@ $bottomHeaderTextColor = get_setting('bottom_header_text_color');
 
                 <!-- Center: logo (always centered on mobile) -->
                 <div class="rm-header__center">
-                    <a href="{{ route('home') }}" class="rm-logo-text text-reset">
-                        RICHMINIS
+                    <a href="{{ route('home') }}" class="rm-logo-text text-reset d-flex align-items-center">
+                        @php $header_logo = get_setting('header_logo'); @endphp
+                        @if ($header_logo)
+                            <img src="{{ uploaded_asset($header_logo) }}" alt="{{ env('APP_NAME') }}"
+                                id="header-logo-preview" class="mw-100 h-30px h-md-40px">
+                        @else
+                            {{ get_setting('site_name') ?? env('APP_NAME') }}
+                        @endif
                     </a>
                 </div>
 
