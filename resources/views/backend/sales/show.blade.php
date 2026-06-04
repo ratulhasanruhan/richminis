@@ -168,7 +168,7 @@
                                             <option value="">
                                                 {{ translate('Select Shipping System') }}
                                             </option>
-                                            @foreach ($shipping_systems as $shipping_system)  
+                                            @foreach ($shipping_systems as $shipping_system)
                                             <option value="{{$shipping_system->name}}">
                                                 {{ ucfirst($shipping_system->name) }}
                                             </option>
@@ -176,7 +176,7 @@
                                         </select>
                                     @endif
                                 @else
-                                    <input type="text" class="form-control" value="{{ ucfirst(translate($shipping_method)) }}" disabled>    
+                                    <input type="text" class="form-control" value="{{ ucfirst(translate($shipping_method)) }}" disabled>
                                 @endif
                             </div>
                             @if ($order->shipping_method == 'shiprocket')
@@ -280,8 +280,8 @@
                                 <input type="text" class="form-control" id="update_tracking_code"
                                     value="{{ $order->tracking_code }}">
                             </div>
-                        @endif    
-                        @if($order->shipping_method === 'shiprocket' && $order->shiprocket_awb) 
+                        @endif
+                        @if($order->shipping_method === 'shiprocket' && $order->shiprocket_awb)
                             <div class="col-12 col-md-4 col-xl-4 col-xxl-2 mb-2">
                                 <label>
                                     {{ translate('Download Label') }}
@@ -353,8 +353,8 @@
                             </strong><br>
                             {{ json_decode($order->shipping_address)->email }}<br>
                             {{ json_decode($order->shipping_address)->phone }}<br>
-                            {{ json_decode($order->shipping_address)->address }}, {{ json_decode($order->shipping_address)->city }}, @if(isset(json_decode($order->shipping_address)->state)) {{ json_decode($order->shipping_address)->state }} - @endif {{ json_decode($order->shipping_address)->postal_code }}<br>
-                            {{ json_decode($order->shipping_address)->country }}
+                            @if(!empty(json_decode($order->shipping_address)->state)) {{ json_decode($order->shipping_address)->state }}<br>@endif
+                            @if(!empty(json_decode($order->shipping_address)->address)) {{ json_decode($order->shipping_address)->address }}<br>@endif
                         </address>
                     @else
                         <address>
@@ -384,8 +384,8 @@
                     <strong class="text-main">{{ translate('Sold By') }}: </strong>
                     <br>
                     {{ $order->shop->name ?? get_setting('site_name') }}
-                    
-                    @php 
+
+                    @php
                         $gstin = get_seller_gstin($order);
                     @endphp
 
@@ -397,7 +397,7 @@
                     <br>
                     <strong class="text-main"> {{ get_seller_address($order) }} </strong>
 
-                    
+
                 </div>
                 <div class="col-md-4">
                     <table class="ml-auto">
@@ -475,7 +475,7 @@
                                 <th data-breakpoints="lg" class="min-col text-uppercase text-center">
                                     {{ translate('Price') }}</th>
                                 @endif
-                                
+
                                 <th data-breakpoints="lg" class="min-col text-uppercase text-right">
                                     {{ translate('Total') }}</th>
                             </tr>
@@ -561,8 +561,8 @@
                                     <td class="text-center">
                                         {{ single_price($orderDetail->price - $orderDetail->coupon_discount) }}
                                     </td>
-                                    
-                                    @php 
+
+                                    @php
                                         $gst_amount = get_gst_by_price_and_rate($orderDetail->price - $orderDetail->coupon_discount , $orderDetail->gst_rate);
                                         $shipping_gst = get_gst_by_price_and_rate($orderDetail->shipping_cost, $orderDetail->gst_rate);
                                     @endphp
@@ -577,7 +577,7 @@
                                     @else
                                     <td class="text-center">
                                         {{ single_price($gst_amount) }}
-                                    </td>	
+                                    </td>
                                     @endif
 
                                     @else
@@ -658,7 +658,7 @@
                                 {{ single_price($order->orderDetails->sum('gst_amount')) }}
                             </td>
                         </tr>
-                        
+
                         @else
                         <tr>
                             <td>
@@ -701,7 +701,7 @@
                                 {{ single_price($order->grand_total) }}
                             </td>
                         </tr>
-                        
+
                     </tbody>
                 </table>
                 <div class="no-print text-right">
@@ -1040,51 +1040,51 @@
         });
 
         $(document).ready(function () {
-        
+
             const orderId = {{ $order->id }};
             const shipmentId = "{{ $order->shiprocket_shipment_id }}";
             const courierAssigned = {{ $order->shiprocket_courier_id ? 'true' : 'false' }};
-        
+
             if (!shipmentId || courierAssigned) return;
-        
+
             $.post("{{ route('shiprocket.couriers') }}", {
                 _token: AIZ.data.csrf,
                 order_id: orderId
             }).done(function (res) {
-        
+
                 if (!res.success) {
                     AIZ.plugins.notify('danger', res.message);
                     return;
                 }
-        
+
                 let html = '<option value="">{{ translate("Select Courier") }}</option>';
-        
+
                 res.couriers.forEach(c => {
                     html += `<option value="${c.id}">${c.name}</option>`;
                 });
-        
+
                 $('#shiprocket_courier')
                     .html(html)
                     .selectpicker('refresh');
             });
-        
+
             $('#shiprocket_courier').on('change', function () {
                 if ($(this).val()) {
                     $('#confirm-awb-modal').modal('show');
                 }
             });
-        
+
         $('#confirm-awb-btn').on('click', function () {
-        
+
             const selectedCourierId = $('#shiprocket_courier').val();
-        
+
             if (!selectedCourierId) {
                 AIZ.plugins.notify('warning', '{{ translate("Please select a courier first.") }}');
                 return;
             }
-        
+
             $('#confirm-awb-modal').modal('hide');
-        
+
             $.post("{{ route('shiprocket.assign.awb') }}", {
                 _token: AIZ.data.csrf,
                 order_id: orderId,
@@ -1098,12 +1098,12 @@
                 }
             });
         });
-        
-        
+
+
         $('#confirm-awb-modal').on('hidden.bs.modal', function () {
             $('#shiprocket_courier').selectpicker('val', '');
         });
-        
+
         });
 
 

@@ -92,11 +92,8 @@
                             </div>
                             <div style="font-size:13pt;font-weight:bold;margin-top:6px;color:{{ $ink }};">{{ $billing->name }}</div>
                             <div style="font-size:9pt;color:{{ $muted }};margin-top:6px;line-height:1.45;">
-                                {{ $billing->address ? $billing->address.', ' : '' }}
-                                {{ $billing->city ? $billing->city.', ' : '' }}
-                                {{ !empty($billing->state) ? $billing->state.' ' : '' }}
-                                {{ $billing->postal_code ? $billing->postal_code.' ' : '' }}
-                                {{ $billing->country }}
+                                {{ !empty($billing->state) ? $billing->state : '' }}
+                                @if(!empty($billing->address)) <br>{{ $billing->address }} @endif
                             </div>
                             @if($billing->email)
                                 <div style="font-size:9pt;margin-top:4px;color:{{ $ink }};">{{ $billing->email }}</div>
