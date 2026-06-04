@@ -281,25 +281,36 @@
 <div class="rm-space"></div>
 
 <!-- EDITORIAL BANNER / SLIDER -->
-@php $homeBanner1Images = get_setting('home_banner1_images', null, $lang); @endphp
+@php
+    $homeBanner1Images = get_setting('home_banner1_images', null, $lang);
+    $homeBanner1MobileImages = get_setting('home_banner1_images_for_mobile', null, $lang);
+@endphp
 @if ($homeBanner1Images != null)
     <section class="rm-editorial py-0">
         <div class="container-fluid px-0">
             @php
                 $banner_1_imags = json_decode($homeBanner1Images, true) ?? [];
+                $banner_1_mobile_images = $homeBanner1MobileImages ? (json_decode($homeBanner1MobileImages, true) ?? []) : [];
                 $home_banner1_links = get_setting('home_banner1_links', null, $lang);
             @endphp
             <div class="aiz-carousel arrow-inactive-none arrow-dark arrow-x-15" data-items="1" data-arrows="true" data-dots="false" data-autoplay="true" data-infinite="true">
                 @foreach ($banner_1_imags as $key => $value)
+                    @php
+                        $desktop_src = uploaded_asset($value);
+                        $mobile_value = $banner_1_mobile_images[$key] ?? null;
+                        $mobile_src = $mobile_value ? uploaded_asset($mobile_value) : $desktop_src;
+                    @endphp
                     <div class="carousel-box overflow-hidden">
                         <a href="{{ isset(json_decode($home_banner1_links, true)[$key]) ? json_decode($home_banner1_links, true)[$key] : '' }}" class="d-block text-reset">
-                            <img
-                                src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
-                                data-src="{{ uploaded_asset($value) }}"
-                                class="lazyload has-transition"
-                                alt="{{ env('APP_NAME') }} editorial"
-                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
-                            >
+                            <picture>
+                                <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                <img
+                                    src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
+                                    data-src="{{ $desktop_src }}"
+                                    class="lazyload has-transition"
+                                    alt="{{ env('APP_NAME') }} editorial"
+                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}'">
+                            </picture>
                         </a>
                     </div>
                 @endforeach
