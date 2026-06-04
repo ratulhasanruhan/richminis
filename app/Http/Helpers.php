@@ -661,7 +661,7 @@ if (!function_exists('home_price')) {
                 $highest_price += $product_tax->tax;
             }
         }
-        
+
         if(addon_is_activated('gst_system')){
             $lowest_price += ($lowest_price * $product->gst_rate) / 100;
             $highest_price += ($highest_price * $product->gst_rate) / 100;
@@ -1570,8 +1570,8 @@ if (!function_exists('checkout_done')) {
             $order->save();
 
             // Order paid notification to Customer, Seller, & Admin
-            EmailUtility::order_email($order, 'paid'); 
-            
+            EmailUtility::order_email($order, 'paid');
+
             try {
                 NotificationUtility::sendOrderPlacedNotification($order);
                 calculateCommissionAffilationClubPoint($order);
@@ -1726,6 +1726,40 @@ if (!function_exists('calculateCommissionAffilationClubPoint')) {
 
         $order->commission_calculated = 1;
         $order->save();
+    }
+}
+
+// Order code generator — format: YYMMDDNNNN (10 chars, sequential per day)
+// Example: 2506040001, 2506040002 …
+if (!function_exists('generate_order_code')) {
+    function generate_order_code(): string
+    {
+        $prefix = date('ymd'); // 6 chars, e.g. 250604
+
+        // Find the highest sequence used today (codes that are exactly 10 digits
+        // and start with today's prefix).
+        $last = Order::where('code', 'like', $prefix . '%')
+            ->whereRaw('LENGTH(code) = 10')
+            ->whereRaw('code REGEXP ?', ['^[0-9]{10}$'])
+            ->orderByDesc('code')
+            ->value('code');
+
+        $seq = $last ? ((int) substr($last, 6) + 1) : 1;
+
+        // Build the candidate code and loop until we find one not already in the DB.
+        // This guards against race conditions in high-traffic scenarios.
+        $attempts = 0;
+        do {
+            // Roll over beyond 9999 (9,999+ orders/day is extremely unlikely).
+            if ($seq > 9999) {
+                $seq = 1;
+            }
+            $code = $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+            $seq++;
+            $attempts++;
+        } while (Order::where('code', $code)->exists() && $attempts < 100);
+
+        return $code;
     }
 }
 
@@ -3039,10 +3073,10 @@ if (!function_exists('timezones')) {
 function formatToArray($input) {
     // Remove extra quotes from the string
     $cleanedString = trim($input, '"');
-    
+
     // Split the string by commas to get each element
     $values = explode(',', $cleanedString);
-    
+
     // Filter out "NaN" and non-numeric values, convert to integers
     $result = array_filter($values, function($value) {
         return is_numeric($value);
@@ -3050,7 +3084,7 @@ function formatToArray($input) {
 
     // Convert numeric values to integers
     $result = array_map('intval', $result);
-    
+
     return $result;
 }
 
@@ -3062,7 +3096,7 @@ if (!function_exists('preorder_product_availability_check')) {
         if($product->is_available){
             return true;
         }
-        $publishDate = Carbon::parse($product->available_date); 
+        $publishDate = Carbon::parse($product->available_date);
         if (Carbon::today()->greaterThanOrEqualTo($publishDate)) {
             return true;
         }
@@ -3076,11 +3110,11 @@ if (!function_exists('preorder_fill_color')) {
     function preorder_fill_color($current_order_status, $previous_order_status = 0)
     {
         $color = match (true) {
-            $current_order_status === 2 => '#28a745', 
-            $current_order_status === 3 => '#dc3545', 
-            $current_order_status === 1 || $previous_order_status == 2 => '#FF6002', 
-            $current_order_status === 0 => '#9d9da6', 
-            default => '#000000', 
+            $current_order_status === 2 => '#28a745',
+            $current_order_status === 3 => '#dc3545',
+            $current_order_status === 1 || $previous_order_status == 2 => '#FF6002',
+            $current_order_status === 0 => '#9d9da6',
+            default => '#000000',
         };
         return $color;
     }
@@ -3234,7 +3268,7 @@ if (!function_exists('preorder_payment_type')) {
     }
 }
 
-// preorder product 
+// preorder product
 if (!function_exists('filter_preorder_product')) {
     function filter_preorder_product($products)
     {
@@ -3265,8 +3299,8 @@ function filter_single_preorder_product($product)
         }
         // Return the product if the user is not a seller (e.g., admin)
         return $product;
-    } 
-    
+    }
+
     // If vendor system is not activated, return the product directly
     return $product;
 }
@@ -3329,7 +3363,7 @@ function youtubeVideoId($url)
 if (!function_exists('get_all_sale_alert_products')) {
     function get_all_sale_alert_products() {
         return CustomSaleAlert::with('product')->get()->map(function($alert) {
-            if (!$alert->product) return null; 
+            if (!$alert->product) return null;
 
             return [
                 'id' => $alert->product->id,
@@ -3426,7 +3460,7 @@ if (!function_exists('gst_applicable_product_rate')) {
 }
 
 
-//fetch gst by price and rate 
+//fetch gst by price and rate
 if (!function_exists('get_gst_by_price_and_rate')) {
     function get_gst_by_price_and_rate($price, $gst_rate)
     {
@@ -3594,7 +3628,7 @@ if (! function_exists('preorder_same_state_shipping')) {
 }
 
 
-//get POS discounted gst 
+//get POS discounted gst
 if (!function_exists('pos_cart_product_gst')) {
     function pos_cart_product_gst($cart_product, $product, $discount, $shipping,  $formatted = true)
     {

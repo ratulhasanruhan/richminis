@@ -87,7 +87,7 @@ class OrderController extends Controller
             $order->payment_type = $request->payment_type;
             $order->delivery_viewed = '0';
             $order->payment_status_viewed = '0';
-            $order->code = date('Ymd-His') . rand(10, 99);
+            $order->code = generate_order_code();
             $order->date = strtotime('now');
             if ($set_paid) {
                 $order->payment_status = 'paid';
@@ -145,7 +145,7 @@ class OrderController extends Controller
                 $order_detail->gst_amount = (($order_detail->shipping_cost + $order_detail->tax + $order_detail->price - $cartItem['discount'])*$product->gst_rate)/100;
                 $gst+=$order_detail->gst_amount;
                 }
-                
+
 
                 //End of storing shipping cost
                 if (addon_is_activated('club_point')) {
@@ -159,7 +159,7 @@ class OrderController extends Controller
                 $product->save();
 
                 $order->seller_id = $product->user_id;
-              
+
                 $order->shipping_type = $cartItem['shipping_type'];
                 if ($cartItem['shipping_type'] == 'pickup_point') {
                     $order->pickup_point_id = $cartItem['pickup_point'];

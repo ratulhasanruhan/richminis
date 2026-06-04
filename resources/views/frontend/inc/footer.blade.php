@@ -175,7 +175,7 @@
             text-align: center;
         }
         @media (max-width: 991px){
-            .rm-footer__inner { padding: 44px 0 18px; }
+            .rm-footer__inner { padding: 44px 20px 18px; }
             .rm-footer__columns{
                 grid-template-columns: 1fr;
                 gap: 32px;

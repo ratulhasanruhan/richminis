@@ -45,7 +45,7 @@ class OrderController extends Controller
 
 
     public function all_orders(Request $request){
-       
+
         $order_from = '';
         $seller_types =[];
         $shipping_type ='';
@@ -108,12 +108,12 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::findOrFail(decrypt($id));
-        
+
         $order_shipping_address = json_decode($order->shipping_address);
         $delivery_boys = User::where('city', $order_shipping_address->city)
                 ->where('user_type', 'delivery_boy')
                 ->get();
-                
+
         if(env('DEMO_MODE') != 'On') {
             $order->viewed = 1;
             $order->save();
@@ -213,7 +213,7 @@ class OrderController extends Controller
             $order->payment_type = $request->payment_option;
             $order->delivery_viewed = '0';
             $order->payment_status_viewed = '0';
-            $order->code = date('Ymd-His') . rand(10, 99);
+            $order->code = generate_order_code();
             $order->date = strtotime('now');
             $order->save();
 
@@ -259,7 +259,7 @@ class OrderController extends Controller
                 $order_detail->gst_amount = (($order_detail->shipping_cost + $order_detail->tax + $order_detail->price - $cartItem['discount'])*$product->gst_rate)/100;
                 $gst+=$order_detail->gst_amount;
                 }
-                
+
                 if (addon_is_activated('refund_request')) {
 
                     $refund_type = get_setting('refund_type');
@@ -276,7 +276,7 @@ class OrderController extends Controller
 
                     }
                 }
-                
+
                 $shipping += $order_detail->shipping_cost;
                 //End of storing shipping cost
                 $order_detail->quantity = $cartItem['quantity'];
@@ -410,7 +410,7 @@ class OrderController extends Controller
         }
 
         return 1;
-    } 
+    }
 
     public function order_details(Request $request)
     {
@@ -633,7 +633,7 @@ class OrderController extends Controller
 
         // Payment Status change email notification to Admin, seller, Customer
         if($request->status == 'paid'){
-            EmailUtility::order_email($order, $request->status);  
+            EmailUtility::order_email($order, $request->status);
         }
 
         //Sends Web Notifications to Admin, seller, Customer
@@ -768,7 +768,7 @@ class OrderController extends Controller
                 }
             }
         }
-        
+
         if ($request->search != null) {
             $sort_search = $request->search;
 
