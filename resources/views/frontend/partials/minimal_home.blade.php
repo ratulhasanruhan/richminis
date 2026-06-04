@@ -313,7 +313,7 @@
     <div class="container-fluid px-0">
         <div class="rm-title-strip">NEW IN</div>
         <div class="container">
-        <div id="section_newest"></div>
+            <div id="section_newest"></div>
             <div class="text-center">
                 <a class="text-reset animate-underline-primary rm-see-more-bottom" href="{{ route('search', ['sort_by' => 'newest']) }}">See more</a>
             </div>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AizUploadController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\SetupPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\PaymentInformationController;
 use App\Http\Controllers\BlogController;
@@ -153,6 +154,11 @@ Route::controller(LoginController::class)->group(function () {
     Route::post('/apple-callback', 'handleAppleCallback');
     Route::get('/account-deletion', 'account_deletion')->name('account_delete');
     Route::get('/handle-demo-login', 'handle_demo_login')->name('handleDemoLogin');
+});
+
+Route::controller(SetupPasswordController::class)->group(function () {
+    Route::get('/account/setup-password/{token}', 'showForm')->name('account.setup-password.show');
+    Route::post('/account/setup-password', 'update')->name('account.setup-password.update');
 });
 
 Route::controller(VerificationController::class)->group(function () {
