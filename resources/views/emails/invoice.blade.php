@@ -187,11 +187,8 @@
                         <tr><td class="strong">{{ $billing->name }}</td></tr>
                         <tr>
                             <td class="gry-color">
-                                {{ $billing->address ?? '' }}{{ $billing->address ? ', ' : '' }}
-                                {{ $billing->city ?? '' }}{{ $billing->city ? ', ' : '' }}
-                                {{ $billing->state ?? '' }}{{ !empty($billing->state) ? ' - ' : '' }}
-                                {{ $billing->postal_code ?? '' }}{{ $billing->postal_code ? ', ' : '' }}
-                                {{ $billing->country ?? '' }}
+                                {{ !empty($billing->state) ? $billing->state : '' }}
+                                @if(!empty($billing->address)) <br>{{ $billing->address }} @endif
                             </td>
                         </tr>
                         @if(!empty($billing->email))
@@ -210,11 +207,8 @@
                         <tr><td class="strong">{{ $shipping->name }}</td></tr>
                         <tr>
                             <td class="gry-color">
-                                {{ $shipping->address ?? '' }}{{ $shipping->address ? ', ' : '' }}
-                                {{ $shipping->city ?? '' }}{{ $shipping->city ? ', ' : '' }}
-                                {{ $shipping->state ?? '' }}{{ !empty($shipping->state) ? ' - ' : '' }}
-                                {{ $shipping->postal_code ?? '' }}{{ $shipping->postal_code ? ', ' : '' }}
-                                {{ $shipping->country ?? '' }}
+                                {{ !empty($shipping->state) ? $shipping->state : '' }}
+                                @if(!empty($shipping->address)) <br>{{ $shipping->address }} @endif
                             </td>
                         </tr>
                         @if(!empty($shipping->email))
@@ -265,7 +259,7 @@
                                 @if($orderDetail->variation) ({{ $orderDetail->variation }}) @endif
                                 <br>
                                 <small class="gry-color">
-                                    {{ translate('SKU') }}: 
+                                    {{ translate('SKU') }}:
                                     @php
                                         $stock = json_decode($orderDetail->product->stocks->first() ?? '{}', true);
                                         echo $stock['sku'] ?? 'N/A';
