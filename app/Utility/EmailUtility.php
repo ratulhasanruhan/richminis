@@ -7,6 +7,7 @@ use App\Models\EmailTemplate;
 use App\Models\User;
 use Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Password;
 
 class EmailUtility
 {

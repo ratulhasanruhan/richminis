@@ -167,8 +167,8 @@
                 </tfoot>
             </table>
 
-            <!-- Coupon System -->
-            @if (get_setting('coupon_system') == 1)
+            <!-- Coupon System (hidden on checkout while proceed === 0) -->
+            @if (get_setting('coupon_system') == 1 && ($proceed ?? 1) != 0)
                 @if ($coupon_discount > 0 && $coupon_code)
                     <div class="mt-3">
                         <form class="" id="remove-coupon-form" enctype="multipart/form-data">
