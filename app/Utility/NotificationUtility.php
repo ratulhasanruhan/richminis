@@ -17,7 +17,7 @@ use App\Models\FirebaseNotification;
 class NotificationUtility
 {
     public static function sendOrderPlacedNotification($order, $request = null)
-    {       
+    {
         //sends email to Customer, Seller and Admin with the invoice pdf attached
         $adminId = get_admin()->id;
         $userIds = array($order->seller_id);
@@ -44,7 +44,7 @@ class NotificationUtility
                         Mail::to($user->email)->queue(new InvoiceEmailManager($array));
                     } catch (\Exception $e) {}
                 }
-            }   
+            }
         }
 
         if (addon_is_activated('otp_system') && SmsTemplate::where('identifier', 'order_placement')->first()->status == 1) {
@@ -57,7 +57,7 @@ class NotificationUtility
         }
 
         $adminSmsPhone = env('ADMIN_ORDER_SMS_PHONE');
-        if (addon_is_activated('otp_system') && !empty($adminSmsPhone)) {
+        if (!empty($adminSmsPhone)) {
             try {
                 $shipping = json_decode($order->shipping_address ?? '{}');
                 $site = get_setting('site_name') ?: config('app.name');
@@ -97,14 +97,14 @@ class NotificationUtility
     }
 
     public static function sendNotification($order, $order_status)
-    {     
+    {
         $adminId = get_admin()->id;
         $userIds = array($order->user->id, $order->seller_id);
         if ($order->seller_id != $adminId) {
             array_push($userIds, $adminId);
         }
         $users = User::findMany($userIds);
-        
+
         $order_notification = array();
         $order_notification['order_id'] = $order->id;
         $order_notification['order_code'] = $order->code;
@@ -122,7 +122,7 @@ class NotificationUtility
     }
 
     public static function sendFirebaseNotification($req)
-    {        
+    {
         $url = 'https://fcm.googleapis.com/v1/projects/myproject-b5ae1/messages:send';
 
         $fields = array
