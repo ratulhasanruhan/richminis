@@ -23,7 +23,7 @@
     </p>
 @endif
 
-<!-- Size Combination -->
+{{-- <!-- Size Combination -->
 <div class="mt-4 mb-4">
     @if($measurement_option_inch == 1 || $measurement_option_cen == 1)
         <ul class="nav nav-tabs border-0" role="tablist">
@@ -95,7 +95,7 @@
             </div>
         @endif
     </div>
-</div>
+</div> --}}
 
 @if ($size_chart->photos != null || $size_chart->description != null)
     <!-- Image & description -->
