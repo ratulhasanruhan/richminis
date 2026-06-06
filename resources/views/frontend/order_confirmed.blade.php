@@ -101,19 +101,15 @@
                                         @endphp
                                         <td class="w-50 fw-600 border-top-0 pl-0 py-2">{{ translate('Shipping address')}}:</td>
                                         <td class="border-top-0 py-2">
-                                            {{ $shipping->address }}, 
-                                            {{ $shipping?->city ? $shipping->city . ', ' : '' }}
-                                            {{ isset($shipping->state) ? $shipping->state . ', ' : '' }}
-                                            {{ $shipping->country }}
+                                            {{ !empty($shipping->state) ? $shipping->state : '' }}
+                                            @if(!empty($shipping->address)) <br>{{ $shipping->address }} @endif
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="w-50 fw-600 border-top-0 pl-0 py-2">{{ translate('Billing address')}}:</td>
                                         <td class="border-top-0 py-2">
-                                            {{ $billing->address }}, 
-                                            {{ $billing?->city ? $billing->city . ', ' : '' }}
-                                            {{ isset($billing->state) ? $billing->state . ', ' : '' }}
-                                            {{ $billing->country }}
+                                            {{ !empty($billing->state) ? $billing->state : '' }}
+                                            @if(!empty($billing->address)) <br>{{ $billing->address }} @endif
                                         </td>
                                     </tr>
                                 </table>
@@ -148,7 +144,7 @@
                                 <!-- Order Code -->
                                 <div class="text-center py-1 mb-4">
                                     <h2 class="h5 fs-20">{{ translate('Order Code:')}} <span class="fw-700 text-primary">{{ $order->code }}</span></h2>
-                                    <h5 class="h5 fs-14">{{ translate('Delivery Type:')}} 
+                                    <h5 class="h5 fs-14">{{ translate('Delivery Type:')}}
                                         <span class="fw-700">
                                             @if ($order->shipping_type != null && $order->shipping_type == 'home_delivery')
                                                 {{  translate('Home Delivery') }}
@@ -175,7 +171,7 @@
 
 
                                     @if(get_seller_gstin($order) != null)
-                                    <h5 class="h5 fs-14">{{ translate('GSTIN')}}: 
+                                    <h5 class="h5 fs-14">{{ translate('GSTIN')}}:
                                         <span class="fw-700">
                                             {{get_seller_gstin($order)}}
                                         </span>
@@ -248,7 +244,7 @@
                                                             {{ single_price($orderDetail->price - $orderDetail->coupon_discount) }}
                                                         </td>
 
-                                                        @php 
+                                                        @php
                                                             $gst_amount = get_gst_by_price_and_rate($orderDetail->price - $orderDetail->coupon_discount , $orderDetail->gst_rate);
                                                             $shipping_gst = get_gst_by_price_and_rate($orderDetail->shipping_cost, $orderDetail->gst_rate);
                                                             @endphp
@@ -398,4 +394,3 @@
     <!-- Facebook Pixel purchase Event -->
     @endif
 @endsection
-        
