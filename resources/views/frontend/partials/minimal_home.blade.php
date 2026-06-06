@@ -374,7 +374,7 @@
 
 <section class="pt-0 pb-2">
     <div class="container-fluid px-0">
-        <div class="rm-title-strip">RARE PICKS</div>
+        <div class="rm-title-strip">{{ env('FEATURED_PRODUCT_TITLE', 'RARE PICKS') }}</div>
         <div class="container">
             <div id="section_featured"></div>
             <div class="text-center">

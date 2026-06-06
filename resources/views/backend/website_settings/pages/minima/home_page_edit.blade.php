@@ -150,6 +150,13 @@
 							{{ translate('Top Brands') }}
 						</a>
 					</li>
+					<!-- Featured Product & Admin SMS Settings -->
+					<li class="nav-item">
+						<a class="nav-link" id="featured-product-sms-tab" href="#featured_product_sms"
+							data-toggle="tab" data-target="#featured_product_sms" type="button" role="tab" aria-controls="featured_product_sms" aria-selected="false">
+							{{ translate('Featured Product & SMS Settings') }}
+						</a>
+					</li>
 				</ul>
 			</div>
 
@@ -1304,6 +1311,33 @@
 								<!-- Save Button -->
 								<div class="mt-4 text-right">
 									<button type="submit" class="btn btn-success w-230px btn-md rounded-2 fs-14 fw-700 shadow-success">{{ translate('Save') }}</button>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<!-- Featured Product & Admin SMS Settings -->
+					<div class="tab-pane fade" id="featured_product_sms" role="tabpanel" aria-labelledby="featured-product-sms-tab">
+						<form action="{{ route('env_key_update.update') }}" method="POST">
+							@csrf
+							<input type="hidden" name="tab" value="featured_product_sms">
+							<div class="bg-white p-3 p-sm-2rem">
+								<div class="form-group row">
+									<input type="hidden" name="types[]" value="FEATURED_PRODUCT_TITLE">
+									<label class="col-md-3 col-form-label">{{ translate('Featured Product Title') }}</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control" name="FEATURED_PRODUCT_TITLE" value="{{ env('FEATURED_PRODUCT_TITLE', 'RARE PICKS') }}" placeholder="{{ translate('Featured Product Title') }}">
+									</div>
+								</div>
+								<div class="form-group row">
+									<input type="hidden" name="types[]" value="ADMIN_ORDER_SMS_PHONE">
+									<label class="col-md-3 col-form-label">{{ translate('Admin SMS Number') }}</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control" name="ADMIN_ORDER_SMS_PHONE" value="{{ env('ADMIN_ORDER_SMS_PHONE') }}" placeholder="{{ translate('Admin SMS Number') }}">
+									</div>
+								</div>
+								<div class="mt-4 text-right">
+									<button type="submit" class="btn btn-success w-230px btn-md rounded-2 fs-14 fw-700 shadow-success">{{ translate('Save Settings') }}</button>
 								</div>
 							</div>
 						</form>
