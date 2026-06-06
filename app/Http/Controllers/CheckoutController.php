@@ -414,7 +414,7 @@ class CheckoutController extends Controller
             if (empty($to)) {
                 throw new \Exception('Missing phone for OTP');
             }
-            $message = 'Your ' . ($site = (get_setting('site_name') ?: config('app.name'))) . ' OTP is: ' . $user->verification_code;
+            $message = "Your RICHMINIS order confirmation OTP is " . $user->verification_code . ".\n\nValid for 5 minutes.";
             (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $message, null);
         } catch (\Exception $e) {
             Log::warning('checkout_otp_send_failed', [
@@ -494,7 +494,7 @@ class CheckoutController extends Controller
                 throw new \Exception('Missing phone for OTP');
             }
             $site = get_setting('site_name') ?: config('app.name');
-            $message = 'Your ' . $site . ' OTP is: ' . $user->verification_code;
+            $message = "Your RICHMINIS order confirmation OTP is " . $user->verification_code . ".\n\nValid for 5 minutes.";
             (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $message, null);
         } catch (\Exception $e) {
             Log::warning('checkout_otp_send_failed_redirect', [
@@ -1013,8 +1013,7 @@ class CheckoutController extends Controller
             $shipping = json_decode($combined_order->shipping_address);
             $to = $shipping->phone ?? null;
             if (!empty($to)) {
-                $site = get_setting('site_name') ?: config('app.name');
-                $text = 'Order confirmed. Thank you for choosing ' . $site . '.';
+                $text = 'Order confirmed! Thank you for choosing RICHMINIS. We’ve sent an email to set up your password and track your order updates. Please check your email.';
                 (new SendSmsService)->sendSMS($to, env('MIM_SENDER_ID'), $text, null);
             }
         } catch (\Exception $e) {

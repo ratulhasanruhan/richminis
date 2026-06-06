@@ -43,6 +43,30 @@
     <meta property="og:image" content="{{ uploaded_asset($page->meta_image) }}" />
     <meta property="og:description" content="{{ $page->meta_description }}" />
     <meta property="og:site_name" content="{{ env('APP_NAME') }}" />
+    <style>
+        .policy-content-wrapper,
+        .policy-content-wrapper * {
+            font-family: 'Raleway', sans-serif !important;
+        }
+        .policy-content-wrapper p,
+        .policy-content-wrapper span,
+        .policy-content-wrapper li,
+        .policy-content-wrapper div {
+            font-weight: 400 !important;
+        }
+        .policy-content-wrapper strong,
+        .policy-content-wrapper strong *,
+        .policy-content-wrapper b,
+        .policy-content-wrapper b *,
+        .policy-content-wrapper h1,
+        .policy-content-wrapper h2,
+        .policy-content-wrapper h3,
+        .policy-content-wrapper h4,
+        .policy-content-wrapper h5,
+        .policy-content-wrapper h6 {
+            font-weight: 700 !important;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -67,7 +91,7 @@
 </section>
 <section class="mb-4">
     <div class="container">
-        <div class="p-4 bg-white rounded shadow-sm overflow-hidden mw-100 text-left">
+        <div class="p-4 bg-white rounded shadow-sm overflow-hidden mw-100 text-left policy-content-wrapper">
             @php
                 echo $page->getTranslation('content');
             @endphp
