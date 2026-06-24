@@ -443,7 +443,20 @@ class HomeController extends Controller
                 lastViewedProducts($detailedProduct->id, auth()->user()->id);
             }
 
-            return view('frontend.product_details', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status', 'order_id'));
+            $capiEventId = 'view_item_' . uniqid();
+            try {
+                \App\Utility\FacebookCapiUtility::sendEvent('ViewContent', [
+                    'content_ids' => [(string) $detailedProduct->id],
+                    'content_name' => $detailedProduct->name,
+                    'content_type' => 'product',
+                    'value' => (float) $detailedProduct->unit_price,
+                    'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                ], $capiEventId);
+            } catch (\Exception $e) {
+                // Fail silently
+            }
+
+            return view('frontend.product_details', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status', 'order_id', 'capiEventId'));
         }
         abort(404);
     }

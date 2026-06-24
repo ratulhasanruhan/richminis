@@ -32,6 +32,24 @@
                                 <input type="text" class="form-control" name="FACEBOOK_PIXEL_ID" value="{{  env('FACEBOOK_PIXEL_ID') }}" placeholder="{{ translate('Facebook Pixel ID') }}" required>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="types[]" value="FACEBOOK_CAPI_ACCESS_TOKEN">
+                            <div class="col-lg-3">
+                                <label class="col-from-label">{{ translate('Facebook CAPI Access Token') }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control" name="FACEBOOK_CAPI_ACCESS_TOKEN" value="{{  env('FACEBOOK_CAPI_ACCESS_TOKEN') }}" placeholder="{{ translate('Facebook CAPI Access Token') }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="types[]" value="FACEBOOK_CAPI_TEST_EVENT_CODE">
+                            <div class="col-lg-3">
+                                <label class="col-from-label">{{ translate('Facebook CAPI Test Event Code') }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control" name="FACEBOOK_CAPI_TEST_EVENT_CODE" value="{{  env('FACEBOOK_CAPI_TEST_EVENT_CODE') }}" placeholder="{{ translate('Facebook CAPI Test Event Code (Optional)') }}">
+                            </div>
+                        </div>
                         <div class="form-group mb-0 text-right">
                             <button type="submit" class="btn btn-sm btn-primary">{{translate('Save')}}</button>
                         </div>

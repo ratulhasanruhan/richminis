@@ -123,7 +123,31 @@ class CheckoutController extends Controller
 
             $carts = $carts->fresh();
 
-            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info'));
+            $capiEventId = 'initiate_checkout_' . uniqid();
+            $contents = [];
+            foreach ($carts as $cartItem) {
+                $product = Product::find($cartItem['product_id']);
+                if ($product) {
+                    $contents[] = [
+                        'id' => (string) $product->id,
+                        'quantity' => (int) $cartItem['quantity'],
+                        'item_price' => (float) cart_product_price($cartItem, $product, false, false)
+                    ];
+                }
+            }
+
+            try {
+                \App\Utility\FacebookCapiUtility::sendEvent('InitiateCheckout', [
+                    'content_type' => 'product',
+                    'value' => (float) $total,
+                    'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                    'contents' => $contents
+                ], $capiEventId);
+            } catch (\Exception $e) {
+                // Fail silently
+            }
+
+            return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info', 'capiEventId'));
         }
         flash(translate('Please Select cart items to Proceed'))->error();
         return back();
@@ -1022,7 +1046,45 @@ class CheckoutController extends Controller
 
         $this->sendCheckoutNewAccountSetupEmail($combined_order->orders->first()->code ?? null);
 
-        return view('frontend.order_confirmed', compact('combined_order'));
+        $capiEventId = 'purchase_' . $combined_order->id;
+        $contents = [];
+        $totalValue = 0;
+        $email = null;
+        $phone = null;
+
+        if ($combined_order->shipping_address) {
+            $shipping = json_decode($combined_order->shipping_address);
+            $email = $shipping->email ?? null;
+            $phone = $shipping->phone ?? null;
+        }
+
+        foreach ($combined_order->orders as $order) {
+            $totalValue += $order->grand_total;
+            foreach ($order->orderDetails as $orderDetail) {
+                if ($orderDetail->product) {
+                    $contents[] = [
+                        'id' => (string) $orderDetail->product->id,
+                        'quantity' => (int) $orderDetail->quantity,
+                        'item_price' => (float) $orderDetail->price
+                    ];
+                }
+            }
+        }
+
+        try {
+            \App\Utility\FacebookCapiUtility::sendEvent('Purchase', [
+                'content_type' => 'product',
+                'value' => (float) $totalValue,
+                'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                'contents' => $contents,
+                '_user_email' => $email,
+                '_user_phone' => $phone
+            ], $capiEventId);
+        } catch (\Exception $e) {
+            // Fail silently
+        }
+
+        return view('frontend.order_confirmed', compact('combined_order', 'capiEventId'));
     }
 
     /**

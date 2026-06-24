@@ -776,4 +776,47 @@
         @include('frontend.partials.google_map')
     @endif
 
+    <!-- Google Tag Manager & Facebook Pixel InitiateCheckout Tracking -->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            @if (get_setting('facebook_pixel') == 1 && isset($capiEventId))
+            fbq('track', 'InitiateCheckout', {
+                content_type: 'product',
+                value: {{ $total }},
+                currency: '{{ get_system_currency()->code }}',
+                content_ids: [
+                    @foreach ($carts as $cartItem)
+                        '{{ $cartItem->product_id }}',
+                    @endforeach
+                ]
+            }, {eventID: '{{ $capiEventId }}'});
+            @endif
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+                event: "begin_checkout",
+                ecommerce: {
+                    currency: "{{ get_system_currency()->code }}",
+                    value: {{ $total }},
+                    items: [
+                        @foreach ($carts as $cartItem)
+                        @php
+                            $product = \App\Models\Product::find($cartItem->product_id);
+                        @endphp
+                        @if($product)
+                        {
+                            item_id: "{{ $product->id }}",
+                            item_name: "{{ escape($product->name) }}",
+                            price: {{ cart_product_price($cartItem, $product, false, false) }},
+                            quantity: {{ $cartItem->quantity }},
+                            item_category: "{{ optional($product->category)->name ?? '' }}"
+                        },
+                        @endif
+                        @endforeach
+                    ]
+                }
+            });
+        });
+    </script>
 @endsection

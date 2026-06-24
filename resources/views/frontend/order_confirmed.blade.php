@@ -376,21 +376,68 @@
 @endsection
 
 @section('script')
-    @if (get_setting('facebook_pixel') == 1)
-    <!-- Facebook Pixel purchase Event -->
-    <script>
+    @php
+        $total_shipping = 0;
+        foreach ($combined_order->orders as $order) {
+            $total_shipping += $order->orderDetails->sum('shipping_cost');
+        }
+        $total_tax = $combined_order->orders->sum('tax');
+        $grand_total = 0;
+        foreach ($combined_order->orders as $order) {
+            $grand_total += $order->grand_total;
+        }
+    @endphp
+
+    <script type="text/javascript">
         $(document).ready(function(){
             var currend_code = '{{ get_system_currency()->code }}';
-            var amount = 'single_price($combined_order->grand_total) }}';
-            fbq('track', 'Purchase',
-                {
+            var amount = {{ $grand_total }};
+
+            @if (get_setting('facebook_pixel') == 1 && isset($capiEventId))
+            fbq('track', 'Purchase', {
+                value: amount,
+                currency: currend_code,
+                content_type: 'product',
+                content_ids: [
+                    @foreach ($combined_order->orders as $order)
+                        @foreach ($order->orderDetails as $orderDetail)
+                            @if($orderDetail->product)
+                                '{{ $orderDetail->product->id }}',
+                            @endif
+                        @endforeach
+                    @endforeach
+                ]
+            }, {eventID: '{{ $capiEventId }}'});
+            @endif
+
+            // GTM Purchase Event dataLayer
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+                event: "purchase",
+                ecommerce: {
+                    transaction_id: "{{ $combined_order->id }}",
                     value: amount,
                     currency: currend_code,
-                    content_type: 'product'
+                    tax: {{ $total_tax }},
+                    shipping: {{ $total_shipping }},
+                    items: [
+                        @foreach ($combined_order->orders as $order)
+                            @foreach ($order->orderDetails as $orderDetail)
+                                @if($orderDetail->product)
+                                {
+                                    item_id: "{{ $orderDetail->product->id }}",
+                                    item_name: "{{ escape($orderDetail->product->name) }}",
+                                    price: {{ $orderDetail->price }},
+                                    quantity: {{ $orderDetail->quantity }},
+                                    item_category: "{{ optional($orderDetail->product->category)->name ?? '' }}"
+                                },
+                                @endif
+                            @endforeach
+                        @endforeach
+                    ]
                 }
-            );
+            });
         });
     </script>
-    <!-- Facebook Pixel purchase Event -->
-    @endif
 @endsection

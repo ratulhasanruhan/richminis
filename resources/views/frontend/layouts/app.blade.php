@@ -11,6 +11,13 @@
 @endif
 
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WTW4TNN5');</script>
+    <!-- End Google Tag Manager -->
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="app-url" content="{{ getBaseURL() }}">
@@ -280,6 +287,10 @@
 
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WTW4TNN5"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <!-- aiz-main-wrapper -->
     <div class="aiz-main-wrapper d-flex flex-column bg-white aiz-{{ get_setting('homepage_select') }}">
         @php
@@ -991,14 +1002,38 @@
                        AIZ.extra.plusMinus();
                        AIZ.plugins.slickCarousel();
                        updateNavCart(data.nav_cart_view,data.cart_count);
+
+                       // Standard GTM E-commerce Data Layer & FB Pixel AddToCart
+                       if (data && data.status == 1) {
+                           window.dataLayer = window.dataLayer || [];
+                           window.dataLayer.push({ ecommerce: null });
+                           window.dataLayer.push({
+                               event: 'add_to_cart',
+                               ecommerce: {
+                                   currency: '{{ get_system_currency()->code }}',
+                                   value: parseFloat(data.product_price) * parseInt(data.quantity),
+                                   items: [{
+                                       item_id: String(data.product_id),
+                                       item_name: data.product_name,
+                                       price: parseFloat(data.product_price),
+                                       quantity: parseInt(data.quantity),
+                                       item_category: data.category || ''
+                                   }]
+                               }
+                           });
+
+                           if ("{{ get_setting('facebook_pixel') }}" == 1 && data.capi_event_id){
+                               fbq('track', 'AddToCart', {
+                                   content_ids: [String(data.product_id)],
+                                   content_name: data.product_name,
+                                   content_type: 'product',
+                                   value: parseFloat(data.product_price),
+                                   currency: '{{ get_system_currency()->code }}'
+                               }, {eventID: data.capi_event_id});
+                           }
+                       }
                     }
                 });
-
-                if ("{{ get_setting('facebook_pixel') }}" == 1){
-                    // Facebook Pixel AddToCart Event
-                    fbq('track', 'AddToCart', {content_type: 'product'});
-                    // Facebook Pixel AddToCart Event
-                }
             }
             else{
                 animateAddToCartButton('#added_to_cart_btn', 'reset');
@@ -1051,6 +1086,36 @@
                             }
 
                             $('#addToCart .modal-body').scrollTop(0);
+
+                            // Standard GTM E-commerce Data Layer & FB Pixel AddToCart
+                            if (data && data.status == 1) {
+                                window.dataLayer = window.dataLayer || [];
+                                window.dataLayer.push({ ecommerce: null });
+                                window.dataLayer.push({
+                                    event: 'add_to_cart',
+                                    ecommerce: {
+                                        currency: '{{ get_system_currency()->code }}',
+                                        value: parseFloat(data.product_price) * parseInt(data.quantity),
+                                        items: [{
+                                            item_id: String(data.product_id),
+                                            item_name: data.product_name,
+                                            price: parseFloat(data.product_price),
+                                            quantity: parseInt(data.quantity),
+                                            item_category: data.category || ''
+                                        }]
+                                    }
+                                });
+
+                                if ("{{ get_setting('facebook_pixel') }}" == 1 && data.capi_event_id){
+                                    fbq('track', 'AddToCart', {
+                                        content_ids: [String(data.product_id)],
+                                        content_name: data.product_name,
+                                        content_type: 'product',
+                                        value: parseFloat(data.product_price),
+                                        currency: '{{ get_system_currency()->code }}'
+                                    }, {eventID: data.capi_event_id});
+                                }
+                            }
                         } else {
                             $('#addToCart-modal-body').html('<div class="text-center p-5 text-danger">Product details not available.</div>');
                         }
@@ -1060,10 +1125,6 @@
                         $('.c-preloader').hide();
                     }
                 });
-
-                if ("{{ get_setting('facebook_pixel') }}" == 1){
-                    fbq('track', 'AddToCart', {content_type: 'product'});
-                }
             }
             else{
                 AIZ.plugins.notify('warning', "{{ translate('Please choose all the options') }}");

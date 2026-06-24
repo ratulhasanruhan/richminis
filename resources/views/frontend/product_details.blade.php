@@ -823,4 +823,36 @@
     </script>
     @endif
     <!-- ======================== Custom Viewer End  ================== -->
+
+    <!-- Google Tag Manager & Facebook Pixel ViewContent Tracking -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            @if (get_setting('facebook_pixel') == 1 && isset($capiEventId))
+            fbq('track', 'ViewContent', {
+                content_ids: ['{{ $detailedProduct->id }}'],
+                content_name: '{{ escape($detailedProduct->name) }}',
+                content_type: 'product',
+                value: {{ $detailedProduct->unit_price }},
+                currency: '{{ get_system_currency()->code }}'
+            }, {eventID: '{{ $capiEventId }}'});
+            @endif
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+                event: "view_item",
+                ecommerce: {
+                    currency: "{{ get_system_currency()->code }}",
+                    value: {{ $detailedProduct->unit_price }},
+                    items: [{
+                        item_id: "{{ $detailedProduct->id }}",
+                        item_name: "{{ escape($detailedProduct->name) }}",
+                        price: {{ $detailedProduct->unit_price }},
+                        quantity: 1,
+                        item_category: "{{ optional($detailedProduct->category)->name ?? '' }}"
+                    }]
+                }
+            });
+        });
+    </script>
 @endsection

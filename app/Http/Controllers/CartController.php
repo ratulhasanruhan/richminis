@@ -158,11 +158,37 @@ class CartController extends Controller
             $carts = Cart::where('temp_user_id', $temp_user_id)->get();
         }
 
+        $capiEventId = 'add_to_cart_' . uniqid();
+        try {
+            \App\Utility\FacebookCapiUtility::sendEvent('AddToCart', [
+                'content_ids' => [(string) $product->id],
+                'content_name' => $product->name,
+                'content_type' => 'product',
+                'value' => (float) $price,
+                'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                'contents' => [
+                    [
+                        'id' => (string) $product->id,
+                        'quantity' => (int) $quantity,
+                        'item_price' => (float) $price
+                    ]
+                ]
+            ], $capiEventId);
+        } catch (\Exception $e) {
+            // Fail silently
+        }
+
         return array(
             'status' => 1,
             'cart_count' => count($carts),
             'modal_view' => view('frontend.partials.cart.addedToCart', compact('product', 'cart'))->render(),
             'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
+            'capi_event_id' => $capiEventId,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'product_price' => $price,
+            'quantity' => $quantity,
+            'category' => optional($product->category)->name,
         );
     }
 
