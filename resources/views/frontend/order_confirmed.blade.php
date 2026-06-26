@@ -427,7 +427,7 @@
                                 @if($orderDetail->product)
                                 {
                                     item_id: "{{ $orderDetail->product->id }}",
-                                    item_name: "{{ escape($orderDetail->product->name) }}",
+                                    item_name: @json($orderDetail->product->name),
                                     price: {{ $orderDetail->price }},
                                     quantity: {{ $orderDetail->quantity }},
                                     item_category: "{{ optional($orderDetail->product->category)->name ?? '' }}"

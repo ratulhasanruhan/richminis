@@ -807,7 +807,7 @@
                         @if($product)
                         {
                             item_id: "{{ $product->id }}",
-                            item_name: "{{ escape($product->name) }}",
+                            item_name: @json($product->name),
                             price: {{ cart_product_price($cartItem, $product, false, false) }},
                             quantity: {{ $cartItem->quantity }},
                             item_category: "{{ optional($product->category)->name ?? '' }}"
