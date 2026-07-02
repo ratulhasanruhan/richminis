@@ -11,12 +11,137 @@
 @endif
 
 <head>
+    @php
+        $tracking_user_data = [];
+        $pixel_user_data = [];
+
+        // 1. Check if we have combined_order (order confirmation page)
+        if (isset($combined_order) && $combined_order->shipping_address) {
+            $shipping = json_decode($combined_order->shipping_address);
+            if ($shipping) {
+                $email = strtolower(trim($shipping->email ?? ''));
+                $phone = preg_replace('/\D/', '', $shipping->phone ?? '');
+                $name = trim($shipping->name ?? '');
+                $parts = explode(' ', $name);
+                $first_name = $parts[0] ?? '';
+                $last_name = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+                $city = trim($shipping->city ?? '');
+                $state = trim($shipping->state ?? '');
+                $zip = trim($shipping->postal_code ?? '');
+                $country = trim($shipping->country ?? '');
+
+                $tracking_user_data = [
+                    'email' => $email ?: null,
+                    'phone_number' => $phone ? ('+' . ltrim($phone, '+')) : null,
+                    'address' => [
+                        'first_name' => $first_name ?: null,
+                        'last_name' => $last_name ?: null,
+                        'city' => $city ?: null,
+                        'region' => $state ?: null,
+                        'postal_code' => $zip ?: null,
+                        'country' => $country ?: null,
+                    ]
+                ];
+
+                $pixel_user_data = [
+                    'em' => $email ?: null,
+                    'ph' => $phone ?: null,
+                    'fn' => strtolower($first_name) ?: null,
+                    'ln' => strtolower($last_name) ?: null,
+                    'ct' => str_replace(' ', '', strtolower($city)) ?: null,
+                    'st' => str_replace(' ', '', strtolower($state)) ?: null,
+                    'zp' => str_replace(' ', '', strtolower($zip)) ?: null,
+                ];
+
+                if ($country) {
+                    $countryObj = \App\Models\Country::where('name', $country)->first();
+                    if ($countryObj) {
+                        $pixel_user_data['country'] = strtolower($countryObj->code);
+                    }
+                }
+            }
+        }
+        // 2. Otherwise check if user is logged in
+        elseif (auth()->check()) {
+            $user = auth()->user();
+            $email = strtolower(trim($user->email));
+            $phone = preg_replace('/\D/', '', $user->phone ?? '');
+            $name = trim($user->name);
+            $parts = explode(' ', $name);
+            $first_name = $parts[0] ?? '';
+            $last_name = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+
+            $tracking_user_data = [
+                'email' => $email ?: null,
+                'phone_number' => $phone ? ('+' . ltrim($phone, '+')) : null,
+                'address' => [
+                    'first_name' => $first_name ?: null,
+                    'last_name' => $last_name ?: null,
+                ]
+            ];
+
+            $pixel_user_data = [
+                'em' => $email ?: null,
+                'ph' => $phone ?: null,
+                'fn' => strtolower($first_name) ?: null,
+                'ln' => strtolower($last_name) ?: null,
+            ];
+
+            $default_address = $user->addresses()->where('set_default', 1)->first() ?? $user->addresses()->first();
+            if ($default_address) {
+                $city = trim($default_address->city->name ?? '');
+                $state = trim($default_address->state->name ?? '');
+                $zip = trim($default_address->postal_code ?? '');
+                
+                $tracking_user_data['address']['city'] = $city ?: null;
+                $tracking_user_data['address']['region'] = $state ?: null;
+                $tracking_user_data['address']['postal_code'] = $zip ?: null;
+
+                $pixel_user_data['ct'] = str_replace(' ', '', strtolower($city)) ?: null;
+                $pixel_user_data['st'] = str_replace(' ', '', strtolower($state)) ?: null;
+                $pixel_user_data['zp'] = str_replace(' ', '', strtolower($zip)) ?: null;
+
+                if ($default_address->country) {
+                    $tracking_user_data['address']['country'] = $default_address->country->name ?: null;
+                    $pixel_user_data['country'] = strtolower($default_address->country->code);
+                }
+            }
+        }
+
+        // Clean up arrays recursively
+        $clean_array = function($arr) use (&$clean_array) {
+            $result = [];
+            foreach ($arr as $key => $val) {
+                if (is_array($val)) {
+                    $val = $clean_array($val);
+                    if (!empty($val)) {
+                        $result[$key] = $val;
+                    }
+                } elseif ($val !== null && $val !== '') {
+                    $result[$key] = $val;
+                }
+            }
+            return $result;
+        };
+
+        $tracking_user_data = $clean_array($tracking_user_data);
+        $pixel_user_data = $clean_array($pixel_user_data);
+    @endphp
+
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WTW4TNN5');</script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        @if (!empty($tracking_user_data))
+            window.dataLayer.push({
+                'user_data': @json($tracking_user_data)
+            });
+        @endif
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-WTW4TNN5');
+    </script>
     <!-- End Google Tag Manager -->
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -257,6 +382,9 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
+        @if (!empty($tracking_user_data))
+            gtag('set', 'user_data', @json($tracking_user_data));
+        @endif
         gtag('config', '{{ env('TRACKING_ID') }}');
     </script>
 @endif
@@ -272,7 +400,7 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '{{ env('FACEBOOK_PIXEL_ID') }}');
+        fbq('init', '{{ env('FACEBOOK_PIXEL_ID') }}', @json($pixel_user_data));
         fbq('track', 'PageView');
     </script>
     <noscript>

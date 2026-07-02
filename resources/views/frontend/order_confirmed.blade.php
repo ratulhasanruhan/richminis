@@ -386,6 +386,73 @@
         foreach ($combined_order->orders as $order) {
             $grand_total += $order->grand_total;
         }
+
+        $email = '';
+        $phone = '';
+        $name = '';
+        $city = '';
+        $state = '';
+        $zip = '';
+        $countryName = '';
+
+        $first_order = $combined_order->orders->first();
+        if ($first_order && $first_order->shipping_address) {
+            $shipping = json_decode($first_order->shipping_address);
+            if ($shipping) {
+                $email = $shipping->email ?? '';
+                $phone = $shipping->phone ?? '';
+                $name = $shipping->name ?? '';
+                $city = $shipping->city ?? '';
+                $state = $shipping->state ?? '';
+                $zip = $shipping->postal_code ?? '';
+                $countryName = $shipping->country ?? '';
+            }
+        }
+
+        if (empty($email) && auth()->check()) {
+            $email = auth()->user()->email;
+        }
+        if (empty($phone) && auth()->check()) {
+            $phone = auth()->user()->phone;
+        }
+        if (empty($name) && auth()->check()) {
+            $name = auth()->user()->name;
+        }
+
+        $parts = explode(' ', trim($name));
+        $first_name = $parts[0] ?? '';
+        $last_name = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+        
+        $gtm_purchase_user_data = [
+            'email' => $email ?: null,
+            'phone_number' => $phone ? ('+' . ltrim($phone, '+')) : null,
+            'address' => [
+                'first_name' => $first_name ?: null,
+                'last_name' => $last_name ?: null,
+                'city' => $city ?: null,
+                'region' => $state ?: null,
+                'postal_code' => $zip ?: null,
+                'country' => $countryName ?: null,
+            ]
+        ];
+
+        // Clean up arrays recursively
+        $clean_array = function($arr) use (&$clean_array) {
+            $result = [];
+            foreach ($arr as $key => $val) {
+                if (is_array($val)) {
+                    $val = $clean_array($val);
+                    if (!empty($val)) {
+                        $result[$key] = $val;
+                    }
+                } elseif ($val !== null && $val !== '') {
+                    $result[$key] = $val;
+                }
+            }
+            return $result;
+        };
+
+        $gtm_purchase_user_data = $clean_array($gtm_purchase_user_data);
     @endphp
 
     <script type="text/javascript">
@@ -410,11 +477,18 @@
             }, {eventID: '{{ $capiEventId }}'});
             @endif
 
+            @if (get_setting('google_analytics') == 1 && !empty($gtm_purchase_user_data))
+            gtag('set', 'user_data', @json($gtm_purchase_user_data));
+            @endif
+
             // GTM Purchase Event dataLayer
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ ecommerce: null });
             window.dataLayer.push({
                 event: "purchase",
+                @if (!empty($gtm_purchase_user_data))
+                user_data: @json($gtm_purchase_user_data),
+                @endif
                 ecommerce: {
                     transaction_id: "{{ $combined_order->id }}",
                     value: amount,

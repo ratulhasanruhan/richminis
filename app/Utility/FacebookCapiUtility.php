@@ -40,10 +40,30 @@ class FacebookCapiUtility
 
         $email = null;
         $phone = null;
+        $firstName = null;
+        $lastName = null;
+        $city = null;
+        $country = null;
+        $state = null;
+        $zip = null;
 
         if (auth()->check()) {
-            $email = auth()->user()->email;
-            $phone = auth()->user()->phone;
+            $user = auth()->user();
+            $email = $user->email;
+            $phone = $user->phone;
+            $parts = explode(' ', trim($user->name));
+            $firstName = $parts[0] ?? null;
+            $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
+
+            $default_address = $user->addresses()->where('set_default', 1)->first() ?? $user->addresses()->first();
+            if ($default_address) {
+                $city = $default_address->city->name ?? null;
+                $state = $default_address->state->name ?? null;
+                $zip = $default_address->postal_code ?? null;
+                if ($default_address->country) {
+                    $country = $default_address->country->code ?? null;
+                }
+            }
         }
 
         // Retrieve passed parameters for custom override
@@ -55,6 +75,30 @@ class FacebookCapiUtility
             $phone = $customData['_user_phone'];
             unset($customData['_user_phone']);
         }
+        if (isset($customData['_user_first_name'])) {
+            $firstName = $customData['_user_first_name'];
+            unset($customData['_user_first_name']);
+        }
+        if (isset($customData['_user_last_name'])) {
+            $lastName = $customData['_user_last_name'];
+            unset($customData['_user_last_name']);
+        }
+        if (isset($customData['_user_city'])) {
+            $city = $customData['_user_city'];
+            unset($customData['_user_city']);
+        }
+        if (isset($customData['_user_country'])) {
+            $country = $customData['_user_country'];
+            unset($customData['_user_country']);
+        }
+        if (isset($customData['_user_state'])) {
+            $state = $customData['_user_state'];
+            unset($customData['_user_state']);
+        }
+        if (isset($customData['_user_zip'])) {
+            $zip = $customData['_user_zip'];
+            unset($customData['_user_zip']);
+        }
 
         if ($email) {
             $userData['em'] = [hash('sha256', strtolower(trim($email)))];
@@ -64,6 +108,24 @@ class FacebookCapiUtility
             if ($cleanPhone) {
                 $userData['ph'] = [hash('sha256', $cleanPhone)];
             }
+        }
+        if ($firstName) {
+            $userData['fn'] = [hash('sha256', strtolower(trim($firstName)))];
+        }
+        if ($lastName) {
+            $userData['ln'] = [hash('sha256', strtolower(trim($lastName)))];
+        }
+        if ($city) {
+            $userData['ct'] = [hash('sha256', str_replace(' ', '', strtolower(trim($city))))];
+        }
+        if ($country) {
+            $userData['country'] = [hash('sha256', strtolower(trim($country)))];
+        }
+        if ($state) {
+            $userData['st'] = [hash('sha256', str_replace(' ', '', strtolower(trim($state))))];
+        }
+        if ($zip) {
+            $userData['zp'] = [hash('sha256', str_replace(' ', '', strtolower(trim($zip))))];
         }
 
         // Fetch _fbp and _fbc cookies

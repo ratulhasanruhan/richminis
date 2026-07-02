@@ -136,12 +136,48 @@ class CheckoutController extends Controller
                 }
             }
 
+            $email = null;
+            $phone = null;
+            $firstName = null;
+            $lastName = null;
+            $city = null;
+            $countryCode = null;
+            $state = null;
+            $zip = null;
+
+            if (auth()->check()) {
+                $user = auth()->user();
+                $email = $user->email;
+                $phone = $user->phone;
+                $parts = explode(' ', trim($user->name));
+                $firstName = $parts[0] ?? null;
+                $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
+
+                $address = Address::where('user_id', $user->id)->where('set_default', 1)->first() ?? Address::where('user_id', $user->id)->first();
+                if ($address) {
+                    $city = $address->city->name ?? null;
+                    $state = $address->state->name ?? null;
+                    $zip = $address->postal_code ?? null;
+                    if ($address->country) {
+                        $countryCode = $address->country->code;
+                    }
+                }
+            }
+
             try {
                 \App\Utility\FacebookCapiUtility::sendEvent('InitiateCheckout', [
                     'content_type' => 'product',
                     'value' => (float) $total,
                     'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
-                    'contents' => $contents
+                    'contents' => $contents,
+                    '_user_email' => $email,
+                    '_user_phone' => $phone,
+                    '_user_first_name' => $firstName,
+                    '_user_last_name' => $lastName,
+                    '_user_city' => $city,
+                    '_user_country' => $countryCode,
+                    '_user_state' => $state,
+                    '_user_zip' => $zip
                 ], $capiEventId);
             } catch (\Exception $e) {
                 // Fail silently
@@ -1051,11 +1087,32 @@ class CheckoutController extends Controller
         $totalValue = 0;
         $email = null;
         $phone = null;
+        $firstName = null;
+        $lastName = null;
+        $city = null;
+        $countryCode = null;
+        $state = null;
+        $zip = null;
 
         if ($combined_order->shipping_address) {
             $shipping = json_decode($combined_order->shipping_address);
             $email = $shipping->email ?? null;
             $phone = $shipping->phone ?? null;
+            $name = $shipping->name ?? null;
+            if ($name) {
+                $parts = explode(' ', trim($name));
+                $firstName = $parts[0] ?? null;
+                $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
+            }
+            $city = $shipping->city ?? null;
+            $state = $shipping->state ?? null;
+            $zip = $shipping->postal_code ?? null;
+            if (!empty($shipping->country)) {
+                $country = \App\Models\Country::where('name', $shipping->country)->first();
+                if ($country) {
+                    $countryCode = $country->code;
+                }
+            }
         }
 
         foreach ($combined_order->orders as $order) {
@@ -1078,7 +1135,13 @@ class CheckoutController extends Controller
                 'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
                 'contents' => $contents,
                 '_user_email' => $email,
-                '_user_phone' => $phone
+                '_user_phone' => $phone,
+                '_user_first_name' => $firstName,
+                '_user_last_name' => $lastName,
+                '_user_city' => $city,
+                '_user_country' => $countryCode,
+                '_user_state' => $state,
+                '_user_zip' => $zip
             ], $capiEventId);
         } catch (\Exception $e) {
             // Fail silently
