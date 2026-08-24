@@ -305,26 +305,16 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Discount -->
+                                {{--
+                                    The Discount and Discount Type inputs that used to sit here wrote
+                                    the same products.discount column as the Discount field in the
+                                    Price panel, and ran after it, so an untouched value here silently
+                                    replaced whatever was typed there. There is only one discount
+                                    column, so the deal now just contributes its schedule.
+                                --}}
                                 <div class="form-group row">
-                                    <label class="col-md-3 col-from-label">{{translate('Discount')}}</label>
-                                    <div class="col-xxl-9">
-                                        <input type="number" name="flash_discount" value="{{ $product->discount }}" min="0" step="0.01" class="form-control">
-                                    </div>
-                                </div>
-                                <!-- Discount Type -->
-                                <div class="form-group row">
-                                    <label class="col-md-3 col-from-label">{{translate('Discount Type')}}</label>
-                                    <div class="col-xxl-9">
-                                        <select class="form-control aiz-selectpicker" name="flash_discount_type" id="">
-                                            <option value="">{{ translate('Choose Discount Type') }}</option>
-                                            <option value="amount" @if($product->discount_type == 'amount') selected @endif>
-                                                {{translate('Flat')}}
-                                            </option>
-                                            <option value="percent" @if($product->discount_type == 'percent') selected @endif>
-                                                {{translate('Percent')}}
-                                            </option>
-                                        </select>
+                                    <div class="col-12">
+                                        <small class="text-muted">{{ translate('The discount itself is set in the Discount field of the Price section. Adding the product to a flash deal applies that deal\'s start and end dates to it.') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -635,7 +625,10 @@
                                 <!-- Unit price -->
                                 <div class="form-group mb-2">
                                     <label class="col-from-label">{{translate('Unit price')}} <span class="text-danger">*</span></label>
-                                    <input type="number" min="0" step="0.01" placeholder="{{translate('Unit price')}}" name="unit_price" class="form-control @error('unit_price') is-invalid @enderror" value="{{$product->unit_price}}">
+                                    <input type="number" min="0" step="0.01" placeholder="{{translate('Unit price')}}" name="unit_price" class="form-control @error('unit_price') is-invalid @enderror" value="{{ old('unit_price', $product->unit_price) }}">
+                                    @error('unit_price')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 @php
@@ -652,14 +645,20 @@
                                     <label class="col-from-label">{{translate('Discount')}} <span class="text-danger">*</span></label>
                                    <div class="row">
                                         <div class="col-md-6">
-                                            <input type="number" lang="en" step="0.01" placeholder="{{translate('Discount')}}" name="discount" class="form-control @error('discount') is-invalid @enderror" value="{{ $product->discount }}">
+                                            <input type="number" lang="en" step="0.01" placeholder="{{translate('Discount')}}" name="discount" class="form-control @error('discount') is-invalid @enderror" value="{{ old('discount', $product->discount) }}">
                                         </div>
                                         <div class="col-md-3">
+                                            @php $discount_type = old('discount_type', $product->discount_type); @endphp
                                             <select class="form-control aiz-selectpicker" name="discount_type">
-                                                <option value="amount" <?php if ($product->discount_type == 'amount') echo "selected"; ?> >{{translate('Flat')}}</option>
-                                                <option value="percent" <?php if ($product->discount_type == 'percent') echo "selected"; ?> >{{translate('Percent')}}</option>
+                                                <option value="amount" @if ($discount_type == 'amount') selected @endif>{{translate('Flat')}}</option>
+                                                <option value="percent" @if ($discount_type == 'percent') selected @endif>{{translate('Percent')}}</option>
                                             </select>
                                         </div>
+                                        @error('discount')
+                                            <div class="col-12">
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            </div>
+                                        @enderror
                                    </div>
                                 </div>
 

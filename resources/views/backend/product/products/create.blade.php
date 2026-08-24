@@ -294,22 +294,16 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Discount -->
+                                {{--
+                                    The Discount and Discount Type inputs that used to sit here wrote
+                                    the same products.discount column as the Discount field in the
+                                    Price panel, and ran after it, so their default of 0 silently
+                                    replaced whatever was typed there. There is only one discount
+                                    column, so the deal now just contributes its schedule.
+                                --}}
                                 <div class="form-group row">
-                                    <label class="col-md-3 col-from-label">{{translate('Discount')}}</label>
-                                    <div class="col-xxl-9">
-                                        <input type="number" name="flash_discount" value="0" min="0" step="0.01" class="form-control">
-                                    </div>
-                                </div>
-                                <!-- Discount Type -->
-                                <div class="form-group row">
-                                    <label class="col-md-3 col-from-label">{{translate('Discount Type')}}</label>
-                                    <div class="col-xxl-9">
-                                        <select class="form-control aiz-selectpicker" name="flash_discount_type" id="flash_discount_type">
-                                            <option value="">{{ translate('Choose Discount Type') }}</option>
-                                            <option value="amount">{{translate('Flat')}}</option>
-                                            <option value="percent">{{translate('Percent')}}</option>
-                                        </select>
+                                    <div class="col-12">
+                                        <small class="text-muted">{{ translate('The discount itself is set in the Discount field of the Price section. Adding the product to a flash deal applies that deal\'s start and end dates to it.') }}</small>
                                     </div>
                                 </div>
                             </div>

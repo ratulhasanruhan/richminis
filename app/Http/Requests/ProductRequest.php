@@ -68,7 +68,10 @@ class ProductRequest extends FormRequest
             'unit_price.numeric'        => translate('Unit price must be numeric'),
             'discount.required'         => translate('Discount is required'),
             'discount.numeric'          => translate('Discount must be numeric'),
-            'discount.lt'               => translate('Discount should be less than unit price'),
+            // The rule differs by discount type, so the message has to as well.
+            'discount.lt'               => $this->get('discount_type') == 'amount'
+                                            ? translate('Discount should be less than unit price')
+                                            : translate('Percentage discount should be less than 100'),
             'current_stock.required'    => translate('Current stock is required'),
             'current_stock.numeric'     => translate('Current stock must be numeric'),
             'starting_bid.required'     => translate('Starting Bid is required'),

@@ -183,6 +183,12 @@
             @endif
         @endforeach
 
+        // Validation failures redirect back with the error bag and nothing else. Without this the
+        // form silently reloads with the stored values and the change looks like it never saved.
+        @foreach ($errors->all() as $error)
+            AIZ.plugins.notify('danger', @json($error));
+        @endforeach
+
         $('.dropdown-menu a[data-toggle="tab"]').click(function(e) {
             e.stopPropagation()
             $(this).tab('show')
