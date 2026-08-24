@@ -264,8 +264,23 @@
         <form id="option-choice-form" class="product-details-page">
             @csrf
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
-            
-            <!-- Pricing card removed per request -->
+
+            <!--Pricing Start-->
+            @php
+                $discount_percentage = discount_in_percentage($detailedProduct);
+                $has_discount =
+                    $discount_percentage > 0 &&
+                    home_price($detailedProduct) != home_discounted_price($detailedProduct);
+            @endphp
+            <div class="d-flex flex-wrap align-items-center mt-4" id="product_price_summary">
+                <span class="fs-24 fw-bold text-dark{{ $rmThecorePriceClass }}" id="product_discounted_price">{{ home_discounted_price($detailedProduct) }}</span>
+                @if ($detailedProduct->unit != null)
+                    <span class="fs-14 fw-400 text-gray">/{{ $detailedProduct->getTranslation('unit') }}</span>
+                @endif
+                <del class="fs-16 fw-400 text-gray ml-3{{ $rmThecorePriceClass }}@if (!$has_discount) d-none @endif" id="product_base_price">{{ home_price($detailedProduct) }}</del>
+                <span class="fs-12 fw-bold text-white py-1 px-10px discount-badge rounded-1 ml-3 @if (!$has_discount) d-none @endif" id="product_discount_badge">-{{ $discount_percentage }}%</span>
+            </div>
+            <!--Pricing End-->
 
             @if ($detailedProduct->wholesale_product == 1)
                 <!-- Wholesale Start-->

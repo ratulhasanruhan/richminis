@@ -709,6 +709,9 @@ class HomeController extends Controller
             }
         }
 
+        // Kept aside before the discount is applied so the details page can strike it through.
+        $base_price = $price;
+
         $quantity = $product_stock->qty;
         $max_limit = $product_stock->qty;
 
@@ -761,10 +764,29 @@ class HomeController extends Controller
         $price += ($price * $product->gst_rate) / 100;
         }
 
+        // The same taxes on the undiscounted price, so both sides of the comparison match.
+        $base_tax = 0;
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $base_tax += ($base_price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'amount') {
+                $base_tax += $product_tax->tax;
+            }
+        }
+
+        $base_price += $base_tax;
+        if (addon_is_activated('gst_system')) {
+            $base_price += ($base_price * $product->gst_rate) / 100;
+        }
+
         $sku= $product_stock->sku ?? 'N/A';
 
         return array(
             'price' => single_price($price * $request->quantity),
+            'unit_price' => single_price($price),
+            'base_price' => single_price($base_price),
+            'has_discount' => $base_price > $price,
+            'discount_percentage' => $base_price > 0 ? round((($base_price - $price) * 100) / $base_price) : 0,
             'quantity' => $quantity,
             'digital' => $product->digital,
             'variation' => $str,

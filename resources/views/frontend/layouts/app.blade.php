@@ -1067,6 +1067,15 @@
 
                         $('#option-choice-form #chosen_price_div').removeClass('d-none');
                         $('#option-choice-form #chosen_price_div #chosen_price').html(data.price);
+
+                        // Keep the unit price, the struck through original and the discount badge
+                        // in step with the selected variation.
+                        if (typeof data.unit_price !== 'undefined') {
+                            var showDiscount = data.has_discount && data.discount_percentage > 0;
+                            $('#product_discounted_price').html(data.unit_price);
+                            $('#product_base_price').html(data.base_price).toggleClass('d-none', !showDiscount);
+                            $('#product_discount_badge').html('-' + data.discount_percentage + '%').toggleClass('d-none', !showDiscount);
+                        }
                         $('#variant_sku_section #variant_sku').html(data.sku);
                         $('#option-choice-form #selected_variant').html(data.variation);
                         $('#available-quantity').html(data.quantity);

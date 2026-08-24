@@ -8,6 +8,7 @@ use Response;
 use Auth;
 use Storage;
 use Image;
+use Log;
 use enshrined\svgSanitize\Sanitizer;
 use Str;
 
@@ -109,217 +110,287 @@ class AizUploadController extends Controller
             "xlsx" => "document"
         );
 
-        if ($request->hasFile('aiz_file')) {
-            $upload = new Upload;
-            $extension = strtolower($request->file('aiz_file')->getClientOriginalExtension());
+        // A file bigger than upload_max_filesize/post_max_size never reaches hasFile(), and an
+        // interrupted one arrives invalid. Both used to fall through and return an empty body,
+        // which the uploader reported as a success that produced nothing.
+        if (!$request->hasFile('aiz_file')) {
+            return $this->upload_failed(translate('No file was received. It is most likely bigger than the upload limit of the server.'));
+        }
 
-            if (
-                env('DEMO_MODE') == 'On' &&
-                isset($type[$extension]) &&
-                $type[$extension] == 'archive'
-            ) {
-                return '{}';
-            }
+        $file = $request->file('aiz_file');
 
-            if (isset($type[$extension])) {
-                $upload->file_original_name = null;
-                $arr = explode('.', $request->file('aiz_file')->getClientOriginalName());
-                for ($i = 0; $i < count($arr) - 1; $i++) {
-                    if ($i == 0) {
-                        $upload->file_original_name .= $arr[$i];
-                    } else {
-                        $upload->file_original_name .= "." . $arr[$i];
-                    }
-                }
+        if (!$file->isValid()) {
+            return $this->upload_failed($file->getErrorMessage());
+        }
 
-                if ($extension == 'webp') {
-                    $img = $request->file('aiz_file');
+        $extension = strtolower($file->getClientOriginalExtension());
 
-                    $extension = $img->getClientOriginalExtension();
-                    $filename = Str::random(40) . '.' . $extension;
-
-                    $path = public_path('uploads/all');
-
-                    if (!file_exists($path)) {
-                        mkdir($path, 0777, true);
-                    }
-
-                    $fileSizeKB = round($img->getSize() / 1024, 2);
-
-
-                    $img->move($path, $filename);
-
-                    $upload->extension = $extension;
-                    $upload->file_name = 'uploads/all/' . $filename;
-                    $upload->user_id = Auth::user()->id;
-                    $upload->type = $type[$upload->extension];
-                    $upload->file_size = $fileSizeKB . ' kb';
-                    $upload->save();
-
-                    return '{}';
-                } elseif ($extension == 'gif') {
-                    $img = $request->file('aiz_file');
-
-                    $extension = $img->getClientOriginalExtension();
-                    $filename = Str::random(40) . '.' . $extension;
-
-                    $path = public_path('uploads/all');
-
-                    if (!file_exists($path)) {
-                        mkdir($path, 0777, true);
-                    }
-
-                    $fileSizeKB = round($img->getSize() / 1024, 2);
-
-
-                    $img->move($path, $filename);
-
-                    $upload->extension = $extension;
-                    $upload->file_name = 'uploads/all/' . $filename;
-                    $upload->user_id = Auth::user()->id;
-                    $upload->type = $type[$upload->extension];
-                    $upload->file_size = $fileSizeKB . ' kb';
-                    $upload->save();
-
-                    return '{}';
-                } elseif ($extension == 'svg') {
-                    $sanitizer = new Sanitizer();
-                    // Load the dirty svg
-                    $dirtySVG = file_get_contents($request->file('aiz_file'));
-
-                    // Pass it to the sanitizer and get it back clean
-                    $cleanSVG = $sanitizer->sanitize($dirtySVG);
-
-                    // Load the clean svg
-                    file_put_contents($request->file('aiz_file'), $cleanSVG);
-                }
-
-                $size = $request->file('aiz_file')->getSize();
-
-                if ($type[$extension] == 'image' && $extension != 'svg') {
-                    if (get_setting('uploaded_image_format') != "default") {
-                        $extension = get_setting('uploaded_image_format');
-                    }
-                    try {
-                        $path = 'uploads/all/'. Str::random(40) . '.' .$extension;
-                        $img = Image::make($request->file('aiz_file')->getRealPath())->encode($extension, 75);
-                        $height = $img->height();
-                        $width = $img->width();
-
-                        // watermark
-                        if (get_setting('use_image_watermark') == 'on') {
-                            $watermark_position = get_setting('watermark_position', 'top-left');
-                            // watermark Image
-                            if (get_setting('image_watermark_type') == "image") {
-                                $watermarkImg = Image::make(uploaded_asset(get_setting('watermark_image')));
-                                if ($width > $height) {
-                                    $wmarkHeight = $height / 2;
-                                    $watermarkImg->resize(null, $wmarkHeight, function ($constraint) {
-                                        $constraint->aspectRatio();
-                                    });
-                                } else {
-                                    $wmarkWidth = $width / 2;
-                                    $watermarkImg->resize(null, $wmarkWidth, function ($constraint) {
-                                        $constraint->aspectRatio();
-                                    });
-                                }
-                                $img->insert($watermarkImg, $watermark_position, 10, 10);
-
-                                // // --------watermark Image multiple times------
-                                // if ($width > 1999) {
-                                //     $watermark = 'watermark-2x.png';
-                                // } else {
-                                //     $watermark = 'watermark-1x.png';
-                                // }
-                                // $watermarkImg = Image::make('public/assets/img/'.$watermark);
-                                // $wmarkWidth=$watermarkImg->width();
-                                // $wmarkHeight=$watermarkImg->height();
-                                // $x=10;
-                                // $y=10;
-                                // while($y<=$height){
-                                //     $img->insert($watermarkImg,'top-left',$x,$y);
-                                //     $x+=$wmarkWidth+40;
-                                //     if($x>=$width){
-                                //         $x=0;
-                                //         $y+=$wmarkHeight+30;
-                                //     }
-                                // }
-
-                                // watermark Text
-                            } elseif (get_setting('image_watermark_type') == "text") {
-                                if ($watermark_position == 'center') {
-                                    $valign = 'middle';
-                                    $align = 'center';
-                                    $x = round($width / 2);
-                                    $y =  round($height / 2);
-                                } else {
-                                    $valign = explode('-', $watermark_position)[0];
-                                    $align = explode('-', $watermark_position)[1];
-                                    $x = ($align == 'right') ? ($width - 20) : 20;
-                                    $y =  ($valign == 'bottom') ? ($height - 20) : 20;
-                                }
-                                $img->text(get_setting('watermark_text', 'Watermark Text Here'), $x, $y, function ($font) use ($valign, $align) {
-                                    $font->file(base_path('public/assets/fonts/robotoMedium.ttf'));
-                                    $font->size(get_setting('watermark_text_size', 20));
-                                    $font->color(get_setting('watermark_text_color', '#e1e1e1'));
-                                    $font->align($align);
-                                    $font->valign($valign);
-                                });
-                            }
-                        }
-
-                        // Image optimization
-                        if (get_setting('disable_image_optimization') != 1) {
-                            if ($width > $height && $width > 1500) {
-                                $img->resize(1500, null, function ($constraint) {
-                                    $constraint->aspectRatio();
-                                });
-                            } elseif ($height > 1500) {
-                                $img->resize(null, 800, function ($constraint) {
-                                    $constraint->aspectRatio();
-                                });
-                            }
-                        }
-
-                        $img->save(base_path('public/') . $path);
-                        clearstatcache();
-                        $size = $img->filesize();
-                    } catch (\Exception $e) {
-                        //dd($e);
-                    }
-                } else {
-                    $path = $request->file('aiz_file')->store('uploads/all', 'local');
-                }
-
-                if (env('FILESYSTEM_DRIVER') != 'local') {
-                    // Return MIME type ala mimetype extension
-                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                    // Get the MIME type of the file
-                    $file_mime = finfo_file($finfo, base_path('public/') . $path);
-
-                    Storage::disk(env('FILESYSTEM_DRIVER'))->put(
-                        $path,
-                        file_get_contents(base_path('public/') . $path),
-                        [
-                            'visibility' => 'public',
-                            'ContentType' =>  $extension == 'svg' ? 'image/svg+xml' : $file_mime
-                        ]
-                    );
-
-                    if ($arr[0] != 'updates') {
-                        unlink(base_path('public/') . $path);
-                    }
-                }
-
-                $upload->extension = $extension;
-                $upload->file_name = $path;
-                $upload->user_id = Auth::user()->id;
-                $upload->type = $type[$upload->extension];
-                $upload->file_size = $size;
-                $upload->save();
-            }
+        if (
+            env('DEMO_MODE') == 'On' &&
+            isset($type[$extension]) &&
+            $type[$extension] == 'archive'
+        ) {
             return '{}';
         }
+
+        if (!isset($type[$extension])) {
+            return $this->upload_failed(translate('Unsupported file type') . ': .' . $extension);
+        }
+
+        $original_name = null;
+        $arr = explode('.', $file->getClientOriginalName());
+        for ($i = 0; $i < count($arr) - 1; $i++) {
+            if ($i == 0) {
+                $original_name .= $arr[$i];
+            } else {
+                $original_name .= "." . $arr[$i];
+            }
+        }
+
+        if ($extension == 'svg') {
+            $sanitizer = new Sanitizer();
+            // Load the dirty svg
+            $dirtySVG = file_get_contents($file->getRealPath());
+
+            // Pass it to the sanitizer and get it back clean
+            $cleanSVG = $sanitizer->sanitize($dirtySVG);
+
+            // Load the clean svg
+            file_put_contents($file->getRealPath(), $cleanSVG);
+        }
+
+        // Held onto because process_image() may swap the extension for the configured output format.
+        $file_type = $type[$extension];
+
+        // svg is not a bitmap, and webp/gif are kept as they are so animation and transparency survive.
+        $reencode = $file_type == 'image' && !in_array($extension, ['svg', 'webp', 'gif']);
+
+        if ($reencode) {
+            try {
+                $processed = $this->process_image($file, $extension);
+                $path = $processed['path'];
+                $size = $processed['size'];
+                $extension = $processed['extension'];
+            } catch (\Throwable $e) {
+                // Re-encoding is an optimisation, not the upload itself. Keep the original file
+                // rather than saving a database row that points at a file we never wrote.
+                Log::warning('Image processing failed for "' . $original_name . '.' . $extension . '": ' . $e->getMessage());
+                $path = $file->store('uploads/all', 'local');
+                $size = $file->getSize();
+            }
+        } else {
+            $path = $file->store('uploads/all', 'local');
+            $size = $file->getSize();
+        }
+
+        if (empty($path)) {
+            return $this->upload_failed(translate('The file could not be written. Please check the write permission of the uploads folder.'));
+        }
+
+        if (env('FILESYSTEM_DRIVER') != 'local') {
+            // Return MIME type ala mimetype extension
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            // Get the MIME type of the file
+            $file_mime = finfo_file($finfo, base_path('public/') . $path);
+
+            Storage::disk(env('FILESYSTEM_DRIVER'))->put(
+                $path,
+                file_get_contents(base_path('public/') . $path),
+                [
+                    'visibility' => 'public',
+                    'ContentType' =>  $extension == 'svg' ? 'image/svg+xml' : $file_mime
+                ]
+            );
+
+            if ($arr[0] != 'updates') {
+                unlink(base_path('public/') . $path);
+            }
+        } elseif (!file_exists(base_path('public/') . $path)) {
+            // Never register a file the media manager would not be able to serve.
+            return $this->upload_failed(translate('The file could not be written. Please check the write permission of the uploads folder.'));
+        }
+
+        $upload = new Upload;
+        $upload->file_original_name = $original_name;
+        $upload->extension = $extension;
+        $upload->file_name = $path;
+        $upload->user_id = Auth::user()->id;
+        $upload->type = $file_type;
+        $upload->file_size = $size;
+        $upload->save();
+
+        return '{}';
+    }
+
+    /**
+     * Re-encode, watermark and downscale a bitmap image.
+     *
+     * @throws \Throwable when the image cannot be written; the caller keeps the original file instead.
+     */
+    private function process_image($file, $extension)
+    {
+        if (get_setting('uploaded_image_format') != "default") {
+            $extension = get_setting('uploaded_image_format');
+        }
+
+        $path = 'uploads/all/' . Str::random(40) . '.' . $extension;
+        $absolute_path = base_path('public/') . $path;
+
+        if (!is_dir(dirname($absolute_path))) {
+            mkdir(dirname($absolute_path), 0755, true);
+        }
+
+        // GD holds the whole bitmap in memory. Exhausting memory_limit is a fatal error that no
+        // catch block can recover from, so when it does not fit we skip processing altogether.
+        if (!$this->image_fits_in_memory($file->getRealPath())) {
+            throw new \RuntimeException('Not enough memory to process this image, storing the original instead.');
+        }
+
+        @set_time_limit(120);
+
+        $img = Image::make($file->getRealPath())->encode($extension, 75);
+        $height = $img->height();
+        $width = $img->width();
+
+        // watermark
+        if (get_setting('use_image_watermark') == 'on') {
+            $watermark_position = get_setting('watermark_position', 'top-left');
+            // watermark Image
+            if (get_setting('image_watermark_type') == "image") {
+                $watermarkImg = Image::make(uploaded_asset(get_setting('watermark_image')));
+                if ($width > $height) {
+                    $wmarkHeight = $height / 2;
+                    $watermarkImg->resize(null, $wmarkHeight, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                } else {
+                    $wmarkWidth = $width / 2;
+                    $watermarkImg->resize(null, $wmarkWidth, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                }
+                $img->insert($watermarkImg, $watermark_position, 10, 10);
+
+                // watermark Text
+            } elseif (get_setting('image_watermark_type') == "text") {
+                if ($watermark_position == 'center') {
+                    $valign = 'middle';
+                    $align = 'center';
+                    $x = round($width / 2);
+                    $y =  round($height / 2);
+                } else {
+                    $valign = explode('-', $watermark_position)[0];
+                    $align = explode('-', $watermark_position)[1];
+                    $x = ($align == 'right') ? ($width - 20) : 20;
+                    $y =  ($valign == 'bottom') ? ($height - 20) : 20;
+                }
+                $img->text(get_setting('watermark_text', 'Watermark Text Here'), $x, $y, function ($font) use ($valign, $align) {
+                    $font->file(base_path('public/assets/fonts/robotoMedium.ttf'));
+                    $font->size(get_setting('watermark_text_size', 20));
+                    $font->color(get_setting('watermark_text_color', '#e1e1e1'));
+                    $font->align($align);
+                    $font->valign($valign);
+                });
+            }
+        }
+
+        // Image optimization
+        if (get_setting('disable_image_optimization') != 1) {
+            if ($width > $height && $width > 1500) {
+                $img->resize(1500, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+            } elseif ($height > 1500) {
+                $img->resize(null, 1500, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+            }
+        }
+
+        $img->save($absolute_path);
+        $img->destroy();
+        clearstatcache(true, $absolute_path);
+
+        if (!file_exists($absolute_path) || filesize($absolute_path) == 0) {
+            throw new \RuntimeException('The re-encoded image was not written to ' . $path);
+        }
+
+        return [
+            'path' => $path,
+            'size' => filesize($absolute_path),
+            'extension' => $extension,
+        ];
+    }
+
+    /**
+     * Estimate whether GD can decode this image within the remaining memory_limit,
+     * raising the limit first when the host allows it.
+     */
+    private function image_fits_in_memory($absolute_path)
+    {
+        // Raising memory_limit past this is not worth it: the host would rather kill the process
+        // than let a single upload take that much, and storing the original is a fine outcome.
+        $ceiling = 768 * 1024 * 1024;
+
+        $info = @getimagesize($absolute_path);
+
+        if ($info === false) {
+            return false;
+        }
+
+        $channels = isset($info['channels']) ? $info['channels'] : 4;
+        $bits = isset($info['bits']) ? $info['bits'] : 8;
+
+        // Source bitmap + the resized copy + encoder buffers, plus headroom for the framework.
+        $needed = (int) ($info[0] * $info[1] * ($bits / 8) * $channels * 2.5) + (32 * 1024 * 1024);
+
+        if ($this->memory_headroom() >= $needed) {
+            return true;
+        }
+
+        $wanted = $needed + memory_get_usage(true);
+
+        if ($wanted > $ceiling) {
+            return false;
+        }
+
+        @ini_set('memory_limit', ((int) ceil($wanted / 1048576)) . 'M');
+
+        return $this->memory_headroom() >= $needed;
+    }
+
+    /**
+     * Bytes still available under memory_limit, or PHP_INT_MAX when the limit is unlimited.
+     */
+    private function memory_headroom()
+    {
+        $limit = trim((string) ini_get('memory_limit'));
+
+        if ($limit === '' || (int) $limit < 0) {
+            return PHP_INT_MAX;
+        }
+
+        $bytes = (int) $limit;
+        switch (strtolower(substr($limit, -1))) {
+            case 'g':
+                $bytes *= 1024;
+                // no break
+            case 'm':
+                $bytes *= 1024;
+                // no break
+            case 'k':
+                $bytes *= 1024;
+        }
+
+        return max(0, $bytes - memory_get_usage(true));
+    }
+
+    /**
+     * Uppy only surfaces a message to the user when the response is not a 2xx.
+     */
+    private function upload_failed($message)
+    {
+        return response()->json(['error' => $message], 422);
     }
 
     public function get_uploaded_files(Request $request)
