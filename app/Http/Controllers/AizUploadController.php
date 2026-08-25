@@ -236,8 +236,15 @@ class AizUploadController extends Controller
         $path = 'uploads/all/' . Str::random(40) . '.' . $extension;
         $absolute_path = base_path('public/') . $path;
 
+        // Concurrent requests can both see the directory missing and race to create it; mkdir()
+        // then fails for the loser even though the directory now exists, so re-check afterward
+        // instead of trusting mkdir()'s return value.
         if (!is_dir(dirname($absolute_path))) {
-            mkdir(dirname($absolute_path), 0755, true);
+            @mkdir(dirname($absolute_path), 0755, true);
+        }
+
+        if (!is_dir(dirname($absolute_path))) {
+            throw new \RuntimeException('Could not create ' . dirname($absolute_path));
         }
 
         // GD holds the whole bitmap in memory. Exhausting memory_limit is a fatal error that no

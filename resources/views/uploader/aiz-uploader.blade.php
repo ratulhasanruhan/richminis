@@ -85,8 +85,11 @@
 	// This modal is appended to the body just before AIZ.plugins.aizUppy() builds the uploader,
 	// so it is the last chance to adjust the XHRUpload options that aiz-core.js leaves at their
 	// defaults: limit 0 (every selected file is posted at once) and a 30s no-progress timeout.
-	// On shared hosting a batch of photos then exceeds the concurrent PHP process limit and all
-	// but one or two files are killed, so the uploads are queued a couple at a time instead.
+	// limit:2 still let a shared-hosting plan's PHP process/CPU quota get exceeded when a batch
+	// landed alongside normal site traffic, killing some requests outright (seen live: 4 files
+	// uploaded, 1 succeeded, 3 errored). Serializing to one at a time, plus retrying a failure a
+	// few times before giving up, absorbs that kind of transient resource contention instead of
+	// just surfacing it to the user.
 	(function () {
 		if (typeof Uppy === 'undefined' || Uppy.aizUploadPatched) {
 			return;
@@ -97,8 +100,9 @@
 
 		Uppy.XHRUpload = function (uppy, opts) {
 			return new XHRUpload(uppy, $.extend({
-				limit: 2,
+				limit: 1,
 				timeout: 180000,
+				retryDelays: [0, 2000, 5000, 10000],
 				getResponseError: function (responseText) {
 					try {
 						var body = JSON.parse(responseText);
