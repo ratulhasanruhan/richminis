@@ -255,9 +255,31 @@ class AizUploadController extends Controller
 
         @set_time_limit(120);
 
-        $img = Image::make($file->getRealPath())->encode($extension, 75);
+        // Decode only - do not encode() yet. The old code encoded the full-resolution bitmap
+        // here and only resized afterward, so a 5000px source paid for a full-size JPEG/WEBP
+        // encode that the resize below immediately threw away: on a CPU/memory-capped shared
+        // host that extra pass is exactly the difference between a 1000px upload (skips the
+        // resize branch entirely, since it's under the 1500px threshold) succeeding and a
+        // 5000px one timing out or exhausting memory. Resize first, encode once at the end.
+        $img = Image::make($file->getRealPath());
         $height = $img->height();
         $width = $img->width();
+
+        // Image optimization
+        if (get_setting('disable_image_optimization') != 1) {
+            if ($width > $height && $width > 1500) {
+                $img->resize(1500, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+            } elseif ($height > 1500) {
+                $img->resize(null, 1500, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+            }
+            // Watermark sizing/position below must use the size it will actually be drawn on.
+            $width = $img->width();
+            $height = $img->height();
+        }
 
         // watermark
         if (get_setting('use_image_watermark') == 'on') {
@@ -301,19 +323,8 @@ class AizUploadController extends Controller
             }
         }
 
-        // Image optimization
-        if (get_setting('disable_image_optimization') != 1) {
-            if ($width > $height && $width > 1500) {
-                $img->resize(1500, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-            } elseif ($height > 1500) {
-                $img->resize(null, 1500, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-            }
-        }
-
+        // Single encode, on the already-resized (and, if applicable, watermarked) image.
+        $img->encode($extension, 75);
         $img->save($absolute_path);
         $img->destroy();
         clearstatcache(true, $absolute_path);

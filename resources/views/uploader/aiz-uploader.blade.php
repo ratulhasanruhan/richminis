@@ -96,6 +96,41 @@
 		}
 		Uppy.aizUploadPatched = true;
 
+		// Confirmed live: a filename containing an apostrophe (e.g. "Kids' Sneakers.webp")
+		// gets the whole upload silently rejected before our PHP code ever runs - the
+		// response isn't JSON at all, which only happens when something in front of the
+		// app (Hostinger's edge/WAF) blocks the request outright. A lone quote character in
+		// a form field is a classic pattern generic firewall rules flag as a SQL-injection
+		// attempt. We can't touch that firewall's config, so the fix is to never send a
+		// filename it could react to in the first place.
+		var Core = Uppy.Core;
+
+		Uppy.Core = function (opts) {
+			var patchedOpts = $.extend({}, opts, {
+				onBeforeFileAdded: function (currentFile, files) {
+					var safeName = currentFile.name
+						.replace(/[^A-Za-z0-9 _.()-]/g, '-')
+						.replace(/-{2,}/g, '-')
+						.replace(/^[-\s]+|[-\s]+$/g, '');
+
+					if (!safeName) {
+						safeName = 'file-' + Date.now();
+					}
+
+					if (opts && typeof opts.onBeforeFileAdded === 'function') {
+						currentFile = opts.onBeforeFileAdded(currentFile, files) || currentFile;
+					}
+
+					return currentFile.name === safeName
+						? currentFile
+						: Object.assign({}, currentFile, { name: safeName });
+				}
+			});
+			return new Core(patchedOpts);
+		};
+		Uppy.Core.prototype = Core.prototype;
+		Uppy.Core.VERSION = Core.VERSION;
+
 		var XHRUpload = Uppy.XHRUpload;
 
 		Uppy.XHRUpload = function (uppy, opts) {
