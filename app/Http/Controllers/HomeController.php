@@ -731,16 +731,7 @@ class HomeController extends Controller
         }
 
         //discount calculation
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {

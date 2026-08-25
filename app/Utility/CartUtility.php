@@ -50,15 +50,7 @@ class CartUtility
 
     public static function discount_calculation($product, $price)
     {
-        $discount_applicable = false;
-
-        if (
-            $product->discount_start_date == null ||
-            (strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-                strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date)
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {

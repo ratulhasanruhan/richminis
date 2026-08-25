@@ -283,6 +283,31 @@ if (!function_exists('single_price')) {
     }
 }
 
+if (!function_exists('product_discount_applicable')) {
+    /**
+     * Is the product's discount in effect right now?
+     *
+     * Either bound may be missing - a flash deal with no end date leaves discount_end_date empty -
+     * and a missing bound means "open ended", never "expired". The check this replaces required
+     * both bounds as soon as a start date existed, so a discount with no end date was silently
+     * inert everywhere it was priced.
+     */
+    function product_discount_applicable($product)
+    {
+        $now = strtotime(date('d-m-Y H:i:s'));
+
+        if (!empty($product->discount_start_date) && $now < $product->discount_start_date) {
+            return false;
+        }
+
+        if (!empty($product->discount_end_date) && $now > $product->discount_end_date) {
+            return false;
+        }
+
+        return true;
+    }
+}
+
 if (!function_exists('discount_in_percentage')) {
     function discount_in_percentage($product)
     {
@@ -317,16 +342,7 @@ if (!function_exists('cart_product_price')) {
             }
 
             //discount calculation
-            $discount_applicable = false;
-
-            if ($product->discount_start_date == null) {
-                $discount_applicable = true;
-            } elseif (
-                strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-                strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-            ) {
-                $discount_applicable = true;
-            }
+            $discount_applicable = product_discount_applicable($product);
 
             if ($discount_applicable) {
                 if ($product->discount_type == 'percent') {
@@ -370,16 +386,7 @@ if (!function_exists('cart_product_tax')) {
         $price = $product_stock->price;
 
         //discount calculation
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -437,16 +444,7 @@ if (!function_exists('cart_product_gst')) {
         }
 
         //discount calculation
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -485,17 +483,8 @@ if (!function_exists('cart_product_discount')) {
         $price = $product_stock->price;
 
         //discount calculation
-        $discount_applicable = false;
         $discount = 0;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -528,16 +517,7 @@ if (!function_exists('carts_product_discount')) {
             $price = $product_stock->price;
 
             //discount calculation
-            $discount_applicable = false;
-
-            if ($product->discount_start_date == null) {
-                $discount_applicable = true;
-            } elseif (
-                strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-                strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-            ) {
-                $discount_applicable = true;
-            }
+            $discount_applicable = product_discount_applicable($product);
 
             if ($discount_applicable) {
                 if ($product->discount_type == 'percent') {
@@ -707,16 +687,7 @@ if (!function_exists('home_discounted_price')) {
             }
         }
 
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -815,16 +786,7 @@ if (!function_exists('home_discounted_base_price_by_stock_id')) {
         $price = $product_stock->price;
         $tax = 0;
 
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -855,16 +817,7 @@ if (!function_exists('home_discounted_base_price')) {
         $price = $product->unit_price;
         $tax = 0;
 
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -3159,16 +3112,7 @@ if (!function_exists('preorder_home_discounted_base_price')) {
         $price = $product->unit_price;
         $tax = 0;
 
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {
@@ -3656,16 +3600,7 @@ if (!function_exists('pos_cart_product_gst')) {
         }
 
         //discount calculation
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
+        $discount_applicable = product_discount_applicable($product);
 
         if ($discount_applicable) {
             if ($product->discount_type == 'percent') {

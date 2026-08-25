@@ -36,8 +36,10 @@ class ProductFlashDealService
             if ($flash_discount_type !== null && $flash_discount_type !== '') {
                 $product->discount_type = $flash_discount_type;
             }
-            $product->discount_start_date = $flash_deal->start_date;
-            $product->discount_end_date   = $flash_deal->end_date;
+            // Normalised to null so a deal with no schedule leaves the discount open ended rather
+            // than stamping a 0 that reads as "ended in 1970".
+            $product->discount_start_date = $flash_deal->start_date ?: null;
+            $product->discount_end_date   = $flash_deal->end_date ?: null;
             $product->save();
         }
 
