@@ -72,4 +72,9 @@ class Order extends Model
     {
         return $this->hasOne(CommissionHistory::class);
     }
+
+    public function combinedOrder()
+    {
+        return $this->belongsTo(CombinedOrder::class);
+    }
 }

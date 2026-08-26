@@ -128,21 +128,23 @@
         $pixel_user_data = $clean_array($pixel_user_data);
     @endphp
 
-    <!-- Google Tag Manager -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        @if (!empty($tracking_user_data))
-            window.dataLayer.push({
-                'user_data': @json($tracking_user_data)
-            });
-        @endif
-        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-WTW4TNN5');
-    </script>
-    <!-- End Google Tag Manager -->
+    @if (request()->cookie('cookie_consent') === 'accepted')
+        <!-- Google Tag Manager -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            @if (!empty($tracking_user_data))
+                window.dataLayer.push({
+                    'user_data': @json($tracking_user_data)
+                });
+            @endif
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-WTW4TNN5');
+        </script>
+        <!-- End Google Tag Manager -->
+    @endif
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="app-url" content="{{ getBaseURL() }}">
@@ -374,7 +376,7 @@
         }
     </style>
 
-@if (get_setting('google_analytics') == 1)
+@if (get_setting('google_analytics') == 1 && request()->cookie('cookie_consent') === 'accepted')
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('TRACKING_ID') }}"></script>
 
@@ -389,7 +391,7 @@
     </script>
 @endif
 
-@if (get_setting('facebook_pixel') == 1)
+@if (get_setting('facebook_pixel') == 1 && request()->cookie('cookie_consent') === 'accepted')
     <!-- Facebook Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
@@ -415,10 +417,13 @@
 
 </head>
 <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WTW4TNN5"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+    @if (request()->cookie('cookie_consent') === 'accepted')
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WTW4TNN5"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    @endif
+    @include('frontend.partials.cookie_consent')
     <!-- aiz-main-wrapper -->
     <div class="aiz-main-wrapper d-flex flex-column bg-white aiz-{{ get_setting('homepage_select') }}">
         @php

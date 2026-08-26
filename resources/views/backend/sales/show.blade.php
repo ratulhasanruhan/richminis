@@ -377,6 +377,25 @@
                             <img src="{{ uploaded_asset(json_decode($order->manual_payment_data)->photo) }}" alt=""
                                 height="100">
                         </a>
+                    @endif
+                    @php
+                        $utm_data = $order->combinedOrder ? json_decode($order->combinedOrder->utm_data, true) : null;
+                    @endphp
+                    @if (!empty($utm_data) && (!empty($utm_data['utm_source']) || !empty($utm_data['gclid']) || !empty($utm_data['fbclid'])))
+                        <br>
+                        <strong class="text-main">{{ translate('Campaign Source') }}</strong><br>
+                        @if (!empty($utm_data['utm_source']))
+                            {{ translate('Source') }}: {{ $utm_data['utm_source'] }}
+                            @if (!empty($utm_data['utm_medium'])) / {{ $utm_data['utm_medium'] }} @endif
+                            @if (!empty($utm_data['utm_campaign'])) / {{ $utm_data['utm_campaign'] }} @endif
+                            <br>
+                        @endif
+                        @if (!empty($utm_data['fbclid']))
+                            {{ translate('Came from a Facebook/Instagram ad click') }}<br>
+                        @endif
+                        @if (!empty($utm_data['gclid']))
+                            {{ translate('Came from a Google ad click') }}<br>
+                        @endif
                         <br>
                     @endif
 

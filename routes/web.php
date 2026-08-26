@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\SetupPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\PaymentInformationController;
+use App\Http\Controllers\ProductCatalogFeedController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -574,6 +575,9 @@ Route::controller(BlogController::class)->group(function () {
     Route::post('/blog/generate-slug', 'generateSlug')->name('generate.slug');
 
 });
+
+// Must stay before the /{slug} catch-all below, or that wildcard swallows this path first.
+Route::get('/product-catalog-feed.xml', [ProductCatalogFeedController::class, 'index'])->name('product-catalog-feed');
 
 Route::controller(PageController::class)->group(function () {
     //mobile app balnk page for webview

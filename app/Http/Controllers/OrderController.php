@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\CombinedOrder;
 use App\Models\SmsTemplate;
 use Auth;
+use Session;
 use Mail;
 use App\Mail\InvoiceEmailManager;
 use App\Models\OrdersExport;
@@ -189,6 +190,11 @@ class OrderController extends Controller
         $combined_order = new CombinedOrder;
         $combined_order->user_id = Auth::user()->id;
         $combined_order->shipping_address = json_encode($shippingAddress);
+        // Captured by CaptureUtmParameters on whichever page the visitor actually landed on -
+        // by the time they reach checkout the URL itself no longer carries the utm_* params.
+        if (Session::has('utm_data')) {
+            $combined_order->utm_data = json_encode(Session::get('utm_data'));
+        }
 
         $combined_order->save();
 
