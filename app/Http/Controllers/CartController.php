@@ -177,6 +177,19 @@ class CartController extends Controller
         } catch (\Exception $e) {
             // Fail silently
         }
+        try {
+            \App\Utility\GoogleAnalyticsUtility::sendEvent('add_to_cart', [
+                'value' => (float) $price,
+                'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                'contents' => [[
+                    'id' => (string) $product->id,
+                    'quantity' => (int) $quantity,
+                    'item_price' => (float) $price,
+                ]],
+            ]);
+        } catch (\Exception $e) {
+            // Fail silently
+        }
 
         return array(
             'status' => 1,

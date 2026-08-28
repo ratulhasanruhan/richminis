@@ -103,6 +103,16 @@
                                 <input type="text" class="form-control" name="TRACKING_ID" value="{{  env('TRACKING_ID') }}" placeholder="{{ translate('Tracking ID') }}" required>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="types[]" value="GA4_MEASUREMENT_PROTOCOL_API_SECRET">
+                            <div class="col-lg-3">
+                                <label class="col-from-label">{{translate('Measurement Protocol API Secret')}}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control" name="GA4_MEASUREMENT_PROTOCOL_API_SECRET" value="{{ env('GA4_MEASUREMENT_PROTOCOL_API_SECRET') }}" placeholder="{{ translate('Measurement Protocol API Secret (Optional - enables server-side GA4 tracking)') }}">
+                                <small class="text-muted">{{ translate('Google Analytics 4 → Admin → Data Streams → your stream → Measurement Protocol API secrets.') }}</small>
+                            </div>
+                        </div>
                         <div class="form-group mb-0 text-right">
                             <button type="submit" class="btn btn-sm btn-primary">{{translate('Save')}}</button>
                         </div>

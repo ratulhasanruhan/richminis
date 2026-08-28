@@ -182,6 +182,15 @@ class CheckoutController extends Controller
             } catch (\Exception $e) {
                 // Fail silently
             }
+            try {
+                \App\Utility\GoogleAnalyticsUtility::sendEvent('begin_checkout', [
+                    'value' => (float) $total,
+                    'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                    'contents' => $contents,
+                ]);
+            } catch (\Exception $e) {
+                // Fail silently
+            }
 
             return view('frontend.checkout', compact('carts', 'address_id', 'total', 'carrier_list', 'shipping_info', 'capiEventId'));
         }
@@ -1143,6 +1152,18 @@ class CheckoutController extends Controller
                 '_user_state' => $state,
                 '_user_zip' => $zip
             ], $capiEventId);
+        } catch (\Exception $e) {
+            // Fail silently
+        }
+        try {
+            \App\Utility\GoogleAnalyticsUtility::sendEvent('purchase', [
+                'value' => (float) $totalValue,
+                'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                'contents' => $contents,
+                // Same combined_order->id used for the Facebook event_id above - GA4 uses
+                // transaction_id the same way, to dedupe a resent/reloaded confirmation page.
+                'transaction_id' => $combined_order->id,
+            ]);
         } catch (\Exception $e) {
             // Fail silently
         }

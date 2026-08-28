@@ -455,6 +455,19 @@ class HomeController extends Controller
             } catch (\Exception $e) {
                 // Fail silently
             }
+            try {
+                \App\Utility\GoogleAnalyticsUtility::sendEvent('view_item', [
+                    'value' => (float) $detailedProduct->unit_price,
+                    'currency' => get_system_currency() ? get_system_currency()->code : 'USD',
+                    'contents' => [[
+                        'id' => (string) $detailedProduct->id,
+                        'quantity' => 1,
+                        'item_price' => (float) $detailedProduct->unit_price,
+                    ]],
+                ]);
+            } catch (\Exception $e) {
+                // Fail silently
+            }
 
             return view('frontend.product_details', compact('detailedProduct', 'product_queries', 'total_query', 'reviews', 'review_status', 'order_id', 'capiEventId'));
         }
