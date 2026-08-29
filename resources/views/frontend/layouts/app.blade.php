@@ -403,7 +403,10 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '{{ env('FACEBOOK_PIXEL_ID') }}', @json($pixel_user_data));
-        fbq('track', 'PageView');
+        // eventID shared with the server-side PageView call (SendServerSidePageView middleware)
+        // so Meta merges the two into one event instead of counting this visit twice on devices
+        // where the browser-side Pixel does manage to fire.
+        fbq('track', 'PageView', {}, {eventID: '{{ $pageViewCapiEventId ?? '' }}'});
     </script>
     <noscript>
         <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ env('FACEBOOK_PIXEL_ID') }}&ev=PageView&noscript=1"/>

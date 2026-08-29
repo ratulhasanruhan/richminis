@@ -50,7 +50,8 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\Language::class,
             \App\Http\Middleware\HttpsProtocol::class,
             \App\Http\Middleware\CheckForMaintenanceMode::class,
-            \App\Http\Middleware\CaptureUtmParameters::class
+            \App\Http\Middleware\CaptureUtmParameters::class,
+            \App\Http\Middleware\SendServerSidePageView::class
         ],
 
         'api' => [
