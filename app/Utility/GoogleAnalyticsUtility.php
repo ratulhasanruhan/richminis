@@ -28,13 +28,6 @@ class GoogleAnalyticsUtility
             return;
         }
 
-        // Same cookie the frontend consent banner sets/checks (frontend.partials.cookie_consent)
-        // - server-side events shouldn't fire for a visitor who hasn't accepted tracking, same as
-        // the client-side gtag.js already doesn't load for them (and so never sets _ga either).
-        if (request()->cookie('cookie_consent') !== 'accepted') {
-            return;
-        }
-
         $clientId = self::resolveClientId();
 
         $items = [];

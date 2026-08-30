@@ -128,23 +128,21 @@
         $pixel_user_data = $clean_array($pixel_user_data);
     @endphp
 
-    @if (request()->cookie('cookie_consent') === 'accepted')
-        <!-- Google Tag Manager -->
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            @if (!empty($tracking_user_data))
-                window.dataLayer.push({
-                    'user_data': @json($tracking_user_data)
-                });
-            @endif
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-WTW4TNN5');
-        </script>
-        <!-- End Google Tag Manager -->
-    @endif
+    <!-- Google Tag Manager -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        @if (!empty($tracking_user_data))
+            window.dataLayer.push({
+                'user_data': @json($tracking_user_data)
+            });
+        @endif
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-WTW4TNN5');
+    </script>
+    <!-- End Google Tag Manager -->
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="app-url" content="{{ getBaseURL() }}">
@@ -376,7 +374,7 @@
         }
     </style>
 
-@if (get_setting('google_analytics') == 1 && request()->cookie('cookie_consent') === 'accepted')
+@if (get_setting('google_analytics') == 1)
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('TRACKING_ID') }}"></script>
 
@@ -391,7 +389,7 @@
     </script>
 @endif
 
-@if (get_setting('facebook_pixel') == 1 && request()->cookie('cookie_consent') === 'accepted')
+@if (get_setting('facebook_pixel') == 1)
     <!-- Facebook Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
@@ -403,11 +401,13 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '{{ env('FACEBOOK_PIXEL_ID') }}', @json($pixel_user_data));
-        fbq('track', 'PageView');
+        // PageView itself is deliberately not tracked here anymore - Zaraz's Meta Pixel tool
+        // (configured with just the Pixel ID, first-party-proxied through Cloudflare) sends it
+        // instead. Firing it from both places at once was producing two independent PageView
+        // hits per pageload with no shared event_id, which Meta couldn't deduplicate. fbq('init')
+        // still has to run here regardless, since every other event on the site (ViewContent,
+        // AddToCart, Purchase) calls fbq('track', ...) elsewhere and depends on this having run.
     </script>
-    <noscript>
-        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ env('FACEBOOK_PIXEL_ID') }}&ev=PageView&noscript=1"/>
-    </noscript>
     <!-- End Facebook Pixel Code -->
 @endif
 
@@ -417,12 +417,10 @@
 
 </head>
 <body>
-    @if (request()->cookie('cookie_consent') === 'accepted')
-        <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WTW4TNN5"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-        <!-- End Google Tag Manager (noscript) -->
-    @endif
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WTW4TNN5"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     @include('frontend.partials.cookie_consent')
     <!-- aiz-main-wrapper -->
     <div class="aiz-main-wrapper d-flex flex-column bg-white aiz-{{ get_setting('homepage_select') }}">

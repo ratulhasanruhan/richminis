@@ -27,12 +27,6 @@ class FacebookCapiUtility
             return $eventId;
         }
 
-        // Same cookie the frontend consent banner sets/checks (frontend.partials.cookie_consent)
-        // - server-side events shouldn't fire for a visitor who hasn't accepted tracking, same as
-        // the client-side Pixel already doesn't load for them.
-        if (request()->cookie('cookie_consent') !== 'accepted') {
-            return $eventId;
-        }
 
         // Generate event ID if not provided
         if (!$eventId) {
