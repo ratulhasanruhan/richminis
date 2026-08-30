@@ -401,12 +401,10 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '{{ env('FACEBOOK_PIXEL_ID') }}', @json($pixel_user_data));
-        // PageView itself is deliberately not tracked here anymore - Zaraz's Meta Pixel tool
-        // (configured with just the Pixel ID, first-party-proxied through Cloudflare) sends it
-        // instead. Firing it from both places at once was producing two independent PageView
-        // hits per pageload with no shared event_id, which Meta couldn't deduplicate. fbq('init')
-        // still has to run here regardless, since every other event on the site (ViewContent,
-        // AddToCart, Purchase) calls fbq('track', ...) elsewhere and depends on this having run.
+        // eventID shared with the server-side PageView call (SendServerSidePageView middleware)
+        // so Meta merges the two into one event instead of counting this visit twice on devices
+        // where the browser-side Pixel does manage to fire.
+        fbq('track', 'PageView', {}, {eventID: '{{ $pageViewCapiEventId ?? '' }}'});
     </script>
     <!-- End Facebook Pixel Code -->
 @endif
