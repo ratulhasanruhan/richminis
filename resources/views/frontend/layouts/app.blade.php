@@ -136,6 +136,15 @@
                 'user_data': @json($tracking_user_data)
             });
         @endif
+        // Same event_id as the server-side PageView (SendServerSidePageView middleware) and the
+        // direct fbq() call below. Pushed before gtm.js loads so it's available the moment the
+        // container initializes. This alone does not deduplicate anything - if GTM-WTW4TNN5 has
+        // its own Facebook Pixel tag configured inside it, that tag needs to be manually set up
+        // (in the GTM dashboard, not here) to read this key as its Event ID field. Exposing the
+        // value is the code-side half of that fix; wiring the GTM tag to use it is the other half.
+        window.dataLayer.push({
+            'fb_event_id': '{{ $pageViewCapiEventId ?? '' }}'
+        });
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

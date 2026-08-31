@@ -382,8 +382,15 @@ if (!function_exists('cart_product_tax')) {
         if ($cart_product['variation'] != null) {
             $str = $cart_product['variation'];
         }
+        // A cart item can outlive the specific variant it points to - the seller can edit a
+        // product's colors/sizes after a customer already added one to their cart, leaving the
+        // cart holding a variant string that no longer matches any stock row. Treat that as
+        // priced at 0 rather than fatal-erroring the whole cart/checkout page for every item.
+        $price = 0;
         $product_stock = $product->stocks->where('variant', $str)->first();
-        $price = $product_stock->price;
+        if ($product_stock) {
+            $price = $product_stock->price;
+        }
 
         //discount calculation
         $discount_applicable = product_discount_applicable($product);
@@ -479,8 +486,13 @@ if (!function_exists('cart_product_discount')) {
         if ($cart_product['variation'] != null) {
             $str = $cart_product['variation'];
         }
+        // Same stale-variant case as cart_product_tax() above - a cart item whose exact variant
+        // no longer exists on the product should price at 0, not fatal-error the page.
+        $price = 0;
         $product_stock = $product->stocks->where('variant', $str)->first();
-        $price = $product_stock->price;
+        if ($product_stock) {
+            $price = $product_stock->price;
+        }
 
         //discount calculation
         $discount = 0;
@@ -510,11 +522,21 @@ if (!function_exists('carts_product_discount')) {
         foreach ($cart_products as $key => $cart_product) {
             $str = '';
             $product = \App\Models\Product::find($cart_product['product_id']);
+            if (!$product) {
+                // The product itself was deleted after this cart item was added - nothing left
+                // to discount.
+                continue;
+            }
             if ($cart_product['variation'] != null) {
                 $str = $cart_product['variation'];
             }
+            // Same stale-variant case as cart_product_tax() above - the seller can edit a
+            // product's colors/sizes after a customer already added one to their cart.
+            $price = 0;
             $product_stock = $product->stocks->where('variant', $str)->first();
-            $price = $product_stock->price;
+            if ($product_stock) {
+                $price = $product_stock->price;
+            }
 
             //discount calculation
             $discount_applicable = product_discount_applicable($product);

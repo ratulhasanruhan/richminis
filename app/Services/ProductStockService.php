@@ -25,13 +25,18 @@ class ProductStockService
             $product->save();
             foreach ($combinations as $key => $combination) {
                 $str = ProductUtility::get_combination_string($combination, $collection);
+                $key_suffix = str_replace('.', '_', $str);
                 $product_stock = new ProductStock();
                 $product_stock->product_id = $product->id;
                 $product_stock->variant = $str;
-                $product_stock->price = request()['price_' . str_replace('.', '_', $str)];
-                $product_stock->sku = request()['sku_' . str_replace('.', '_', $str)];
-                $product_stock->qty = request()['qty_' . str_replace('.', '_', $str)];
-                $product_stock->image = request()['img_' . str_replace('.', '_', $str)];
+                // A draft can be autosaved mid-composition, before every variant combination has
+                // a price/qty typed in yet - price and qty are NOT NULL columns, so a missing
+                // form field (request() returns null, not the column default) used to fail the
+                // whole save outright rather than just leaving that combination unpriced for now.
+                $product_stock->price = request()['price_' . $key_suffix] ?? $collection['unit_price'] ?? 0;
+                $product_stock->sku = request()['sku_' . $key_suffix];
+                $product_stock->qty = request()['qty_' . $key_suffix] ?? 0;
+                $product_stock->image = request()['img_' . $key_suffix];
                 $product_stock->save();
             }
         } else {
