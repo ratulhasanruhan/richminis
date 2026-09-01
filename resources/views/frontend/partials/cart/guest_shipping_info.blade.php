@@ -268,6 +268,7 @@
 
 
 
+@if (get_setting('checkout_otp_verification', 1) == 1 && addon_is_activated('otp_system'))
 <div class="px-3 pt-3 pb-4 row">
     <div class="col-md-2 mt-md-2"></div>
     <div class="col-md-10">
@@ -276,3 +277,4 @@
         </div>
     </div>
 </div>
+@endif
