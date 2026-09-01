@@ -9,6 +9,13 @@
     the page intercepting the click before it reaches the button.
 --}}
 @if (!request()->cookie('cookie_consent'))
+    <style>
+        @media (max-width: 991px) {
+            #aiz-cookie-consent {
+                bottom: 75px !important;
+            }
+        }
+    </style>
     <div id="aiz-cookie-consent"
         class="position-fixed d-flex flex-wrap align-items-center justify-content-between"
         style="left:16px; right:16px; bottom:16px; z-index:99999; pointer-events:auto; gap:16px;

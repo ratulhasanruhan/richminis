@@ -697,14 +697,43 @@
     @endif
 
     <style>
-    .sc-q8c6tt-3 {
-        bottom: 54px !important;
+    /* WhatsApp / GetButton floating widget clearance above mobile bottom nav */
+    [id^="gb-widget"],
+    [class*="gb-widget"],
+    .sc-q8c6tt-3,
+    div[class*="getbutton"],
+    [id^="wh-widget"],
+    #wh-widget-send-button {
+        bottom: 80px !important;
+        right: 16px !important;
+        z-index: 1030 !important;
+    }
+
+    @media (max-width: 991px) {
+        [id^="gb-widget"],
+        [class*="gb-widget"],
+        .sc-q8c6tt-3,
+        div[class*="getbutton"],
+        [id^="wh-widget"],
+        #wh-widget-send-button {
+            bottom: 85px !important;
+            right: 12px !important;
+            z-index: 1030 !important;
+        }
+
+        #aiz-cookie-consent {
+            bottom: 75px !important;
+        }
+
+        .aiz-mobile-bottom-nav {
+            z-index: 16000200 !important;
+            pointer-events: auto !important;
+        }
     }
 
     a[aria-label="Go to GetButton.io website"] {
         display: none !important;
     }
-    
 </style>
 
     <script>

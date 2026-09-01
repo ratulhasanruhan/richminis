@@ -272,7 +272,7 @@
 </footer>
 
 <!-- Mobile bottom nav -->
-<div class="aiz-mobile-bottom-nav d-xl-none fixed-bottom border-top border-sm-bottom border-sm-left border-sm-right mx-auto mb-sm-2" style="background-color: rgb(255 255 255 / 90%)!important;">
+<div class="aiz-mobile-bottom-nav d-xl-none fixed-bottom border-top border-sm-bottom border-sm-left border-sm-right mx-auto mb-sm-2" style="background-color: rgb(255 255 255 / 95%)!important; z-index: 16000200 !important;">
     <div class="row align-items-center gutters-5">
         <!-- Home -->
         <div class="col">
@@ -349,64 +349,54 @@
         @endif
 
         <!-- Account -->
-        <div class="col">
+        <div class="col position-relative" style="z-index: 2;">
             @if (Auth::check())
                 @if(isAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3">
+                    <a href="{{ route('admin.dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3 {{ areActiveRoutes(['admin.dashboard'],'svg-active')}}">
                         <span class="d-block mx-auto">
-                            @if($user->avatar_original != null)
+                            @if($user && $user->avatar_original != null)
                                 <img src="{{ $user_avatar }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @else
                                 <img src="{{ static_asset('assets/img/avatar-place.png') }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @endif
                         </span>
-                        <span class="d-block mt-1 fs-10 fw-600 text-reset">{{ translate('My Account') }}</span>
+                        <span class="d-block mt-1 fs-10 fw-600 text-reset {{ areActiveRoutes(['admin.dashboard'],'text-primary')}}">{{ translate('My Account') }}</span>
                     </a>
                 @elseif(isSeller())
-                    <a href="{{ route('dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3">
+                    <a href="{{ route('dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3 {{ areActiveRoutes(['dashboard'],'svg-active')}}">
                         <span class="d-block mx-auto">
-                            @if($user->avatar_original != null)
+                            @if($user && $user->avatar_original != null)
                                 <img src="{{ $user_avatar }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @else
                                 <img src="{{ static_asset('assets/img/avatar-place.png') }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @endif
                         </span>
-                        <span class="d-block mt-1 fs-10 fw-600 text-reset">{{ translate('My Account') }}</span>
+                        <span class="d-block mt-1 fs-10 fw-600 text-reset {{ areActiveRoutes(['dashboard'],'text-primary')}}">{{ translate('My Account') }}</span>
                     </a>
                 @else
-                    <a href="javascript:void(0)" class="text-secondary d-block text-center pb-2 pt-3 mobile-side-nav-thumb" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
+                    <a href="{{ route('dashboard') }}" class="text-secondary d-block text-center pb-2 pt-3 {{ areActiveRoutes(['dashboard'],'svg-active')}}">
                         <span class="d-block mx-auto">
-                            @if($user->avatar_original != null)
+                            @if($user && $user->avatar_original != null)
                                 <img src="{{ $user_avatar }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @else
                                 <img src="{{ static_asset('assets/img/avatar-place.png') }}" alt="{{ translate('avatar') }}" class="rounded-circle size-20px">
                             @endif
                         </span>
-                        <span class="d-block mt-1 fs-10 fw-600 text-reset">{{ translate('My Account') }}</span>
+                        <span class="d-block mt-1 fs-10 fw-600 text-reset {{ areActiveRoutes(['dashboard'],'text-primary')}}">{{ translate('My Account') }}</span>
                     </a>
                 @endif
             @else
-                <a href="{{ route('user.login') }}" class="text-secondary d-block text-center pb-2 pt-3">
+                <a href="{{ route('user.login') }}" class="text-secondary d-block text-center pb-2 pt-3 {{ areActiveRoutes(['user.login'],'svg-active')}}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                         <g id="Group_8094" data-name="Group 8094" transform="translate(3176 -602)">
                           <path id="Path_2924" data-name="Path 2924" d="M331.144,0a4,4,0,1,0,4,4,4,4,0,0,0-4-4m0,7a3,3,0,1,1,3-3,3,3,0,0,1-3,3" transform="translate(-3499.144 602)" fill="#b5b5bf"/>
                           <path id="Path_2925" data-name="Path 2925" d="M332.144,20h-10a3,3,0,0,0,0,6h10a3,3,0,0,0,0-6m0,5h-10a2,2,0,0,1,0-4h10a2,2,0,0,1,0,4" transform="translate(-3495.144 592)" fill="#b5b5bf"/>
                         </g>
                     </svg>
-                    <span class="d-block mt-1 fs-10 fw-600 text-reset">{{ translate('My Account') }}</span>
+                    <span class="d-block mt-1 fs-10 fw-600 text-reset {{ areActiveRoutes(['user.login'],'text-primary')}}">{{ translate('My Account') }}</span>
                 </a>
             @endif
         </div>
 
     </div>
 </div>
-
-@if (Auth::check() && auth()->user()->user_type == 'customer')
-    <!-- User Side nav -->
-    <div class="aiz-mobile-side-nav collapse-sidebar-wrap sidebar-xl d-xl-none z-1035">
-        <div class="overlay dark c-pointer overlay-fixed" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav" data-same=".mobile-side-nav-thumb"></div>
-        <div class="collapse-sidebar bg-white">
-            @include('frontend.inc.user_side_nav')
-        </div>
-    </div>
-@endif
