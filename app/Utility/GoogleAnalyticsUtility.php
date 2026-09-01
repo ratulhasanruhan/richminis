@@ -66,14 +66,21 @@ class GoogleAnalyticsUtility
         try {
             // GA4's spec wants measurement_id/api_secret as query params on the URL, and the
             // event data as the JSON body - two different places, not one call.
-            Http::timeout(3)
+            $response = Http::timeout(3)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(
                     'https://www.google-analytics.com/mp/collect?measurement_id=' . urlencode($measurementId) . '&api_secret=' . urlencode($apiSecret),
                     $payload
                 );
+
+            // Worth knowing: GA4's collect endpoint returns 204 even for a malformed event -
+            // there's no useful validation feedback here the way Meta's API gives one, only
+            // outright request failures (bad measurement_id/api_secret, network issues, etc.).
+            if (!$response->successful()) {
+                Log::error("GA4 Measurement Protocol rejected event '{$eventName}': HTTP {$response->status()} - " . $response->body());
+            }
         } catch (\Exception $e) {
-            Log::error('GA4 Measurement Protocol request failed: ' . $e->getMessage());
+            Log::error("GA4 Measurement Protocol request failed for event '{$eventName}': " . $e->getMessage());
         }
     }
 

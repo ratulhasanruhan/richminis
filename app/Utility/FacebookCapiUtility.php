@@ -161,11 +161,22 @@ class FacebookCapiUtility
 
         try {
             // Post payload to Facebook Graph API
-            Http::timeout(3)
+            $response = Http::timeout(3)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post("https://graph.facebook.com/v19.0/{$pixelId}/events?access_token={$accessToken}", $payload);
+
+            // A non-2xx response doesn't throw in Laravel's HTTP client by default, so a rejected
+            // event (bad parameter, expired token, etc.) was previously indistinguishable from a
+            // successful one - this event would just silently never reach Meta, with the code
+            // believing it had sent correctly. Logging the actual response is what lets a real
+            // delivery failure be told apart from Meta's dashboards simply not surfacing something
+            // that did arrive (e.g. Test Events' own dedup-pairing display, which Meta documents as
+            // not a perfect mirror of production).
+            if (!$response->successful()) {
+                Log::error("Facebook CAPI rejected event '{$eventName}' (event_id={$eventId}): HTTP {$response->status()} - " . $response->body());
+            }
         } catch (\Exception $e) {
-            Log::error("Facebook CAPI request failed: " . $e->getMessage());
+            Log::error("Facebook CAPI request failed for event '{$eventName}' (event_id={$eventId}): " . $e->getMessage());
         }
 
         return $eventId;

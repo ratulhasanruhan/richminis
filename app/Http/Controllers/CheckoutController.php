@@ -310,9 +310,36 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $user->email_verified_at = $user->email_verified_at ?? date('Y-m-d H:i:s');
         $user->verification_code = null;
         $user->save();
+
+        $this->completeGuestCheckoutVerification($request, $user);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'result' => true,
+                'message' => translate('OTP verified'),
+            ]);
+        }
+        flash(translate('OTP verified. You can place your order now.'))->success();
+        return redirect()->route('checkout');
+    }
+
+    /**
+     * Everything that has to happen for a guest to actually be able to place an order, once
+     * they're allowed to proceed - whether that's because they entered a correct OTP, or because
+     * the OTP System addon is switched off and there was never a code to check. Shared by
+     * verifyCheckoutOtp() and requestCheckoutOtp() (when OTP is disabled) so this logic - log in,
+     * move their cart over from the guest session, and turn the shipping/billing info they typed
+     * into real Address records - exists in exactly one place rather than three slightly
+     * different copies of it.
+     */
+    private function completeGuestCheckoutVerification(Request $request, User $user)
+    {
+        if (empty($user->email_verified_at)) {
+            $user->email_verified_at = date('Y-m-d H:i:s');
+            $user->save();
+        }
 
         auth()->login($user, true);
 
@@ -377,14 +404,6 @@ class CheckoutController extends Controller
         }
 
         $request->session()->put('checkout_otp_verified', $user->id);
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'result' => true,
-                'message' => translate('OTP verified'),
-            ]);
-        }
-        flash(translate('OTP verified. You can place your order now.'))->success();
-        return redirect()->route('checkout');
     }
 
     public function requestCheckoutOtp(Request $request)
@@ -478,6 +497,22 @@ class CheckoutController extends Controller
         ];
         $request->session()->put('checkout_guest_shipping_info', $guest);
 
+        // Same site-wide "OTP System" addon toggle (Admin > Addons) the rest of the app already
+        // checks via addon_is_activated('otp_system') - when it's off there's no code to send or
+        // check, so skip straight to everything a correct OTP entry would otherwise unlock.
+        if (!addon_is_activated('otp_system')) {
+            $user->verification_code = null;
+            $user->save();
+
+            $this->completeGuestCheckoutVerification($request, $user);
+
+            return response()->json([
+                'result' => true,
+                'already_verified' => true,
+                'message' => translate('Verified'),
+            ]);
+        }
+
         try {
             $to = $phoneE164 ?: $user->phone;
             if (empty($to)) {
@@ -549,12 +584,32 @@ class CheckoutController extends Controller
             $user->user_type = 'customer';
         }
 
-        $user->verification_code = rand(100000, 999999);
-        $user->save();
-
         if ($isNewCheckoutAccount) {
             $request->session()->put('checkout_new_account_user_id', $user->id);
         }
+
+        // Reuses the site-wide "OTP System" addon toggle (Admin > Addons) rather than a separate
+        // setting - that's the same flag createUser() below and the rest of the app already check
+        // via addon_is_activated('otp_system'), so turning OTP off here is consistent with turning
+        // it off everywhere else, not a second independent switch to keep in sync.
+        //
+        // In the normal flow the frontend's AJAX call to requestCheckoutOtp() already completed
+        // verification before the form ever submits here, so the early session check above this
+        // point already returns true and this branch is never reached at all. It only matters as
+        // a fallback for a direct form submit that skipped that AJAX step (JS disabled, etc.) -
+        // completeGuestCheckoutVerification() degrades gracefully with no shipping info in that
+        // case (skips creating an Address rather than erroring), same as it always has.
+        if (!addon_is_activated('otp_system')) {
+            $user->verification_code = null;
+            $user->save();
+
+            $this->completeGuestCheckoutVerification($request, $user);
+
+            return true;
+        }
+
+        $user->verification_code = rand(100000, 999999);
+        $user->save();
 
         // Send OTP via SMS
         try {
