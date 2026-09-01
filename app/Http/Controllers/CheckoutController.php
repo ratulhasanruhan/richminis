@@ -497,10 +497,12 @@ class CheckoutController extends Controller
         ];
         $request->session()->put('checkout_guest_shipping_info', $guest);
 
-        // Same site-wide "OTP System" addon toggle (Admin > Addons) the rest of the app already
-        // checks via addon_is_activated('otp_system') - when it's off there's no code to send or
-        // check, so skip straight to everything a correct OTP entry would otherwise unlock.
-        if (!addon_is_activated('otp_system')) {
+        // Dedicated toggle (Admin > Setup & Configurations > Order Configuration) that only
+        // controls this checkout step - deliberately separate from the site-wide "OTP System"
+        // addon (which also gates registration/login OTP elsewhere) so one can be off without
+        // touching the other. Default true (required) when never set, so an existing install
+        // that hasn't touched this setting keeps behaving exactly as it did before it existed.
+        if (get_setting('checkout_otp_verification', 1) != 1) {
             $user->verification_code = null;
             $user->save();
 
@@ -588,10 +590,8 @@ class CheckoutController extends Controller
             $request->session()->put('checkout_new_account_user_id', $user->id);
         }
 
-        // Reuses the site-wide "OTP System" addon toggle (Admin > Addons) rather than a separate
-        // setting - that's the same flag createUser() below and the rest of the app already check
-        // via addon_is_activated('otp_system'), so turning OTP off here is consistent with turning
-        // it off everywhere else, not a second independent switch to keep in sync.
+        // Same dedicated checkout-only toggle checked in requestCheckoutOtp() above - see the
+        // comment there for why it's kept separate from the site-wide "OTP System" addon.
         //
         // In the normal flow the frontend's AJAX call to requestCheckoutOtp() already completed
         // verification before the form ever submits here, so the early session check above this
@@ -599,7 +599,7 @@ class CheckoutController extends Controller
         // a fallback for a direct form submit that skipped that AJAX step (JS disabled, etc.) -
         // completeGuestCheckoutVerification() degrades gracefully with no shipping info in that
         // case (skips creating an Address rather than erroring), same as it always has.
-        if (!addon_is_activated('otp_system')) {
+        if (get_setting('checkout_otp_verification', 1) != 1) {
             $user->verification_code = null;
             $user->save();
 

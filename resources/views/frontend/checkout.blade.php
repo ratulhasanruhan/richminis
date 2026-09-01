@@ -309,11 +309,12 @@
                                     data: $('#checkout-form').serialize(),
                                     success: function (res) {
                                         rmSetBtnLoading($btn, false);
-                                        // The OTP System addon can be switched off in Admin - when it is,
-                                        // requestCheckoutOtp() completes verification immediately (there's
-                                        // no code to send or check) and reports back already_verified,
-                                        // same flag used when a returning guest re-checks out in the same
-                                        // session. Either way, no modal to show - just place the order.
+                                        // "Require OTP at Checkout" (Admin > Order Configuration) can be
+                                        // switched off - when it is, requestCheckoutOtp() completes
+                                        // verification immediately (there's no code to send or check) and
+                                        // reports back already_verified, same flag used when a returning
+                                        // guest re-checks out in the same session. Either way, no modal to
+                                        // show - just place the order.
                                         if (res && res.already_verified) {
                                             rmCheckout.otpVerified = true;
                                             $('#checkout-form').submit();

@@ -41,6 +41,38 @@
             </form>
         </div>
     </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 h6">{{translate('Checkout OTP Verification')}}</h5>
+            </div>
+            <form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
+              <div class="card-body">
+                   @csrf
+                    <div class="form-group row mb-0">
+                        <div class="col-md-4">
+                            <label class="control-label">{{translate('Require OTP at Checkout')}}</label>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="aiz-switch aiz-switch-success mb-0">
+                                <input type="hidden" name="types[]" value="checkout_otp_verification">
+                                <input value="1" name="checkout_otp_verification" type="checkbox" @if (get_setting('checkout_otp_verification', 1) == 1)
+                                    checked
+                                @endif>
+                                <span class="slider round"></span>
+                            </label>
+                            <div class="fs-12 text-muted mt-2">
+                                {{ translate('Controls only the OTP step during guest checkout. Turning this off does not affect the site-wide OTP System addon used for account registration/login elsewhere.') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-0 text-right">
+                        <button type="submit" class="btn btn-sm btn-primary">{{translate('Save')}}</button>
+                    </div>
+              </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @endsection
