@@ -129,7 +129,7 @@ class PurchaseHistoryController extends Controller
                 'product_id' => $product->id
             ]);
 
-            $product_stock = $product->stocks->where('variant', $orderDetail->variation)->first();
+            $product_stock = $product ? $product->getStock($orderDetail->variation) : null;
             if ($product_stock) {
                 $quantity = 1;
 

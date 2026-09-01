@@ -62,22 +62,22 @@ class ProductController extends Controller
             $str .= $temp_str;
         }
 
-        $product_stock = $product->stocks->where('variant', $str)->first();
-        $price = $product_stock->price;
+        $product_stock = $product ? $product->getStock($str) : null;
+        $price = $product_stock ? $product_stock->price : ($product ? $product->unit_price : 0);
 
 
-        if ($product->wholesale_product) {
+        if ($product && $product->wholesale_product && $product_stock) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $quantity)->where('max_qty', '>=', $quantity)->first();
             if ($wholesalePrice) {
                 $price = $wholesalePrice->price;
             }
         }
 
-        $stock_qty = $product_stock->qty;
-        $stock_txt = $product_stock->qty;
-        $max_limit = $product_stock->qty;
+        $stock_qty = optional($product_stock)->qty ?? 0;
+        $stock_txt = optional($product_stock)->qty ?? 0;
+        $max_limit = optional($product_stock)->qty ?? 0;
 
-        if ($stock_qty >= 1 && $product->min_qty <= $stock_qty) {
+        if ($stock_qty >= 1 && (!$product || $product->min_qty <= $stock_qty)) {
             $in_stock = 1;
         } else {
             $in_stock = 0;

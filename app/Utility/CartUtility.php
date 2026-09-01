@@ -30,12 +30,12 @@ class CartUtility
 
     public static function get_price($product, $product_stock, $quantity)
     {
-        $price = $product_stock->price;
-        if ($product->auction_product == 1) {
+        $price = $product_stock ? $product_stock->price : ($product ? $product->unit_price : 0);
+        if ($product && $product->auction_product == 1) {
             $price = $product->bids->max('amount');
         }
 
-        if ($product->wholesale_product) {
+        if ($product && $product->wholesale_product && $product_stock) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $quantity)
                 ->where('max_qty', '>=', $quantity)
                 ->first();

@@ -329,12 +329,12 @@ if (!function_exists('cart_product_price')) {
                 $str = $cart_product['variation'];
             }
             $price = 0;
-            $product_stock = $product->stocks->where('variant', $str)->first();
+            $product_stock = $product->getStock($str);
             if ($product_stock) {
                 $price = $product_stock->price;
             }
 
-            if ($product->wholesale_product) {
+            if ($product->wholesale_product && $product_stock) {
                 $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $cart_product['quantity'])->where('max_qty', '>=', $cart_product['quantity'])->first();
                 if ($wholesalePrice) {
                     $price = $wholesalePrice->price;
@@ -387,7 +387,7 @@ if (!function_exists('cart_product_tax')) {
         // cart holding a variant string that no longer matches any stock row. Treat that as
         // priced at 0 rather than fatal-erroring the whole cart/checkout page for every item.
         $price = 0;
-        $product_stock = $product->stocks->where('variant', $str)->first();
+        $product_stock = $product->getStock($str);
         if ($product_stock) {
             $price = $product_stock->price;
         }
@@ -435,12 +435,12 @@ if (!function_exists('cart_product_gst')) {
         // $price = $product_stock->price;
 
         $price = 0;
-        $product_stock = $product->stocks->where('variant', $str)->first();
+        $product_stock = $product->getStock($str);
         if ($product_stock) {
             $price = $product_stock->price * $cart_product['quantity'];
         }
 
-        if ($product->wholesale_product) {
+        if ($product->wholesale_product && $product_stock) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $cart_product['quantity'])->where('max_qty', '>=', $cart_product['quantity'])->first();
             if ($wholesalePrice) {
                 $price = $wholesalePrice->price * $cart_product['quantity'];
@@ -489,7 +489,7 @@ if (!function_exists('cart_product_discount')) {
         // Same stale-variant case as cart_product_tax() above - a cart item whose exact variant
         // no longer exists on the product should price at 0, not fatal-error the page.
         $price = 0;
-        $product_stock = $product->stocks->where('variant', $str)->first();
+        $product_stock = $product->getStock($str);
         if ($product_stock) {
             $price = $product_stock->price;
         }
@@ -533,7 +533,7 @@ if (!function_exists('carts_product_discount')) {
             // Same stale-variant case as cart_product_tax() above - the seller can edit a
             // product's colors/sizes after a customer already added one to their cart.
             $price = 0;
-            $product_stock = $product->stocks->where('variant', $str)->first();
+            $product_stock = $product->getStock($str);
             if ($product_stock) {
                 $price = $product_stock->price;
             }
@@ -1668,14 +1668,15 @@ if (!function_exists('product_restock')) {
             $variant = '';
         }
 
-        $product_stock = ProductStock::where('product_id', $orderDetail->product_id)
-            ->where('variant', $variant)
-            ->first();
+        $product = \App\Models\Product::find($orderDetail->product_id);
+        $product_stock = $product ? $product->getStock($variant) : null;
 
         if ($product_stock != null && (!in_array($orderDetail->delivery_status, ['delivered', 'cancelled']))) {
             $product = $product_stock->product;
-            $product->num_of_sale -= $orderDetail->quantity;
-            $product->save();
+            if ($product) {
+                $product->num_of_sale -= $orderDetail->quantity;
+                $product->save();
+            }
 
             $product_stock->qty += $orderDetail->quantity;
             $product_stock->save();
@@ -3606,12 +3607,12 @@ if (!function_exists('pos_cart_product_gst')) {
         // $price = $product_stock->price;
 
         $price = 0;
-        $product_stock = $product->stocks->where('variant', $str)->first();
+        $product_stock = $product->getStock($str);
         if ($product_stock) {
             $price = $product_stock->price * $cart_product['quantity'];
         }
 
-        if ($product->wholesale_product) {
+        if ($product->wholesale_product && $product_stock) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $cart_product['quantity'])->where('max_qty', '>=', $cart_product['quantity'])->first();
             if ($wholesalePrice) {
                 $price = $wholesalePrice->price * $cart_product['quantity'];

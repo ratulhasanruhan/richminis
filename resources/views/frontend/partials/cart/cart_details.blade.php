@@ -87,7 +87,7 @@
                                     @php
                                         $product = get_single_product($product_id);
                                         $cartItem = $carts->toQuery()->where('product_id', $product_id)->where('variation', $admin_product_variation[$key])->first();
-                                        $product_stock = $product->stocks->where('variant', $cartItem->variation)->first();
+                                        $product_stock = $product ? $product->getStock($admin_product_variation[$key]) : null;
                                         $total = $total + cart_product_price($cartItem, $product, false) * $cartItem->quantity;
                                     @endphp
                                     <li class="list-group-item px-0 border-md-0">
@@ -146,7 +146,7 @@
                                                                 class="col border-0 text-center px-0 fs-14 input-number"
                                                                 placeholder="1" value="{{ $cartItem['quantity'] }}"
                                                                 min="{{ $product->min_qty }}"
-                                                                max="{{ $product_stock->qty }}"
+                                                                max="{{ optional($product_stock)->qty ?? 0 }}"
                                                                 onchange="updateQuantity({{ $cartItem->id }}, this)" style="min-width: 45px;">
                                                             <button
                                                                 class="btn col-auto btn-icon btn-sm btn-light rounded-0"
@@ -203,7 +203,7 @@
                                         @php
                                             $product = get_single_product($product_id);
                                             $cartItem = $carts->toQuery()->where('product_id', $product_id)->where('variation', $seller_product_variation[$key][$key2])->first();
-                                            $product_stock = $product->stocks->where('variant', $cartItem->variation)->first();
+                                            $product_stock = $product ? $product->getStock($seller_product_variation[$key][$key2]) : null;
                                             $total = $total + cart_product_price($cartItem, $product, false) * $cartItem->quantity;
                                         @endphp
                                         <li class="list-group-item px-0 border-md-0">
@@ -263,7 +263,7 @@
                                                                     class="col border-0 text-center px-0 fs-14 input-number"
                                                                     placeholder="1" value="{{ $cartItem['quantity'] }}"
                                                                     min="{{ $product->min_qty }}"
-                                                                    max="{{ $product_stock->qty }}"
+                                                                    max="{{ optional($product_stock)->qty ?? 0 }}"
                                                                     onchange="updateQuantity({{ $cartItem->id }}, this)" style="min-width: 45px;">
                                                                 <button
                                                                     class="btn col-auto btn-icon btn-sm btn-light rounded-0"

@@ -709,13 +709,13 @@ class HomeController extends Controller
             }
         }
 
-        $product_stock = $product->stocks->where('variant', $str)->first();
+        $product_stock = $product ? $product->getStock($str) : null;
 
-        $price = $product_stock->price;
+        $price = $product_stock ? $product_stock->price : ($product ? $product->unit_price : 0);
         $image = $product_stock->image ?? '';
 
 
-        if ($product->wholesale_product) {
+        if ($product && $product->wholesale_product && $product_stock) {
             $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();
             if ($wholesalePrice) {
                 $price = $wholesalePrice->price;
@@ -725,10 +725,10 @@ class HomeController extends Controller
         // Kept aside before the discount is applied so the details page can strike it through.
         $base_price = $price;
 
-        $quantity = $product_stock->qty;
-        $max_limit = $product_stock->qty;
+        $quantity = $product_stock ? $product_stock->qty : 0;
+        $max_limit = $product_stock ? $product_stock->qty : 0;
 
-        if ($quantity >= 1 && $product->min_qty <= $quantity) {
+        if ($quantity >= 1 && (!$product || $product->min_qty <= $quantity)) {
             $in_stock = 1;
         } else {
             $in_stock = 0;

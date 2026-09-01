@@ -83,6 +83,24 @@ class Product extends Model
         return $this->hasMany(ProductStock::class);
     }
 
+    public function getStock($variant = null)
+    {
+        if (!$this->stocks || $this->stocks->isEmpty()) {
+            return null;
+        }
+
+        if ($variant !== null && $variant !== '') {
+            $stock = $this->stocks->where('variant', $variant)->first();
+            if ($stock) {
+                return $stock;
+            }
+        }
+
+        return $this->stocks->where('variant', '')->first()
+            ?: $this->stocks->where('variant', null)->first()
+            ?: $this->stocks->first();
+    }
+
     public function taxes()
     {
         return $this->hasMany(ProductTax::class);

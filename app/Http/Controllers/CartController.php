@@ -107,7 +107,7 @@ class CartController extends Controller
 
         //check the color enabled or disabled for the product
         $str = CartUtility::create_cart_variant($product, $request->all());
-        $product_stock = $product->stocks->where('variant', $str)->first();
+        $product_stock = $product ? $product->getStock($str) : null;
 
         if($authUser != null) {
             $user_id = $authUser->id;
@@ -134,7 +134,7 @@ class CartController extends Controller
                     'nav_cart_view' => view('frontend.partials.cart.cart')->render(),
                 );
             }
-            if ($product_stock->qty < $cart->quantity + $request['quantity']) {
+            if (!$product_stock || $product_stock->qty < $cart->quantity + $request['quantity']) {
                 return array(
                     'status' => 0,
                     'cart_count' => count($carts),
@@ -232,12 +232,12 @@ class CartController extends Controller
 
         if ($cartItem['id'] == $request->id) {
             $product = Product::find($cartItem['product_id']);
-            $product_stock = $product->stocks->where('variant', $cartItem['variation'])->first();
-            $quantity = $product_stock->qty;
-            $price = $product_stock->price;
+            $product_stock = $product ? $product->getStock($cartItem['variation']) : null;
+            $quantity = $product_stock ? $product_stock->qty : 0;
+            $price = $product_stock ? $product_stock->price : ($product ? $product->unit_price : 0);
 
             //discount calculation
-            $discount_applicable = product_discount_applicable($product);
+            $discount_applicable = $product ? product_discount_applicable($product) : false;
 
             if ($discount_applicable) {
                 if ($product->discount_type == 'percent') {
@@ -248,12 +248,12 @@ class CartController extends Controller
             }
 
             if ($quantity >= $request->quantity) {
-                if ($request->quantity >= $product->min_qty) {
+                if (!$product || $request->quantity >= $product->min_qty) {
                     $cartItem['quantity'] = $request->quantity;
                 }
             }
 
-            if ($product->wholesale_product) {
+            if ($product && $product->wholesale_product && $product_stock) {
                 $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();
                 if ($wholesalePrice) {
                     $price = $wholesalePrice->price;

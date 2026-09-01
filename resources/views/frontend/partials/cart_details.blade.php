@@ -21,11 +21,11 @@
                             @foreach ($carts as $key => $cartItem)
                                 @php
                                     $product = get_single_product($cartItem['product_id']);
-                                    $product_stock = $product->stocks->where('variant', $cartItem['variation'])->first();
+                                    $product_stock = $product ? $product->getStock($cartItem['variation']) : null;
                                     // $total = $total + ($cartItem['price']  + $cartItem['tax']) * $cartItem['quantity'];
                                     $total = $total + cart_product_price($cartItem, $product, false) * $cartItem['quantity'];
-                                    $product_name_with_choice = $product->getTranslation('name');
-                                    if ($cartItem['variation'] != null) {
+                                    $product_name_with_choice = $product ? $product->getTranslation('name') : '';
+                                    if ($product && $cartItem['variation'] != null) {
                                         $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variation'];
                                     }
                                 @endphp
@@ -33,7 +33,7 @@
                                     <div class="row gutters-5 align-items-center">
                                         <!-- Quantity -->
                                         <div class="col-md-1 col order-1 order-md-0">
-                                            @if ($cartItem['digital'] != 1 && $product->auction_product == 0)
+                                            @if ($cartItem['digital'] != 1 && $product && $product->auction_product == 0)
                                                 <div class="d-flex flex-column align-items-start aiz-plus-minus mr-2 ml-0">
                                                     <button
                                                         class="btn col-auto btn-icon btn-sm btn-circle btn-light"
@@ -45,7 +45,7 @@
                                                         class="col border-0 text-left px-0 flex-grow-1 fs-14 input-number"
                                                         placeholder="1" value="{{ $cartItem['quantity'] }}"
                                                         min="{{ $product->min_qty }}"
-                                                        max="{{ $product_stock->qty }}"
+                                                        max="{{ optional($product_stock)->qty ?? 0 }}"
                                                         onchange="updateQuantity({{ $cartItem['id'] }}, this)" style="padding-left:0.75rem !important;">
                                                     <button
                                                         class="btn col-auto btn-icon btn-sm btn-circle btn-light"
