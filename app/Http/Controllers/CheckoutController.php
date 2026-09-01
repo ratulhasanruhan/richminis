@@ -502,7 +502,7 @@ class CheckoutController extends Controller
         // addon (which also gates registration/login OTP elsewhere) so one can be off without
         // touching the other. Default true (required) when never set, so an existing install
         // that hasn't touched this setting keeps behaving exactly as it did before it existed.
-        if (get_setting('checkout_otp_verification', 1) != 1) {
+        if (get_setting('checkout_otp_verification', 1) != 1 || !addon_is_activated('otp_system')) {
             $user->verification_code = null;
             $user->save();
 

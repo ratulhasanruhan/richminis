@@ -128,6 +128,7 @@
         var rmCheckout = {
             isGuest: {{ Auth::check() ? 'false' : 'true' }},
             otpVerified: {{ (session()->has('checkout_otp_user_id') && session('checkout_otp_verified') == session('checkout_otp_user_id')) ? 'true' : 'false' }},
+            otpRequired: {{ (get_setting('checkout_otp_verification', 1) == 1 && addon_is_activated('otp_system')) ? 'true' : 'false' }},
             requestOtpUrl: "{{ route('checkout.request_otp') }}",
             verifyOtpUrl: "{{ route('checkout.verify_otp') }}"
         };
@@ -266,7 +267,6 @@
 
         function submitOrder(el) {
             var $btn = $(el);
-            rmSetBtnLoading($btn, true, "{{ translate('Processing...') }}");
             if ($('#agree_checkbox').is(":checked")) {
                 if (minimum_order_amount_check && $('#sub_total').val() < minimum_order_amount) {
                     AIZ.plugins.notify('danger',
@@ -301,14 +301,14 @@
                         if (allIsOk) {
                             // Guest flow: request OTP first, show modal, then finally submit after verification
                             if (rmCheckout.isGuest && !rmCheckout.otpVerified) {
-                                rmSetBtnLoading($btn, true, "{{ translate('Sending OTP...') }}");
+                                var loadingText = rmCheckout.otpRequired ? "{{ translate('Sending OTP...') }}" : "{{ translate('Confirming Order...') }}";
+                                rmSetBtnLoading($btn, true, loadingText);
                                 $.ajax({
                                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                                     method: "POST",
                                     url: rmCheckout.requestOtpUrl,
                                     data: $('#checkout-form').serialize(),
                                     success: function (res) {
-                                        rmSetBtnLoading($btn, false);
                                         // "Require OTP at Checkout" (Admin > Order Configuration) can be
                                         // switched off - when it is, requestCheckoutOtp() completes
                                         // verification immediately (there's no code to send or check) and
@@ -317,9 +317,11 @@
                                         // show - just place the order.
                                         if (res && res.already_verified) {
                                             rmCheckout.otpVerified = true;
+                                            rmSetBtnLoading($btn, true, "{{ translate('Confirming Order...') }}");
                                             $('#checkout-form').submit();
                                             return;
                                         }
+                                        rmSetBtnLoading($btn, false);
                                         $('#rm-checkout-otp-code').val('');
                                         $('#rm-checkout-otp-error').addClass('d-none').text('');
                                         $('#rm-checkout-otp-verify-btn').prop('disabled', false);
@@ -329,7 +331,9 @@
                                     },
                                     error: function (xhr) {
                                         rmSetBtnLoading($btn, false);
-                                        var msg = "{{ translate('Could not send OTP. Please try again later.') }}";
+                                        var msg = rmCheckout.otpRequired 
+                                            ? "{{ translate('Could not send OTP. Please try again later.') }}"
+                                            : "{{ translate('Could not confirm order. Please try again later.') }}";
                                         try {
                                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                                 msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(', ') : xhr.responseJSON.message;
@@ -341,13 +345,13 @@
                                 return;
                             }
 
+                            rmSetBtnLoading($btn, true, "{{ translate('Confirming Order...') }}");
                             $('#checkout-form').submit();
                         }
                     }
                 }
             } else {
                 AIZ.plugins.notify('danger', '{{ translate('You need to agree with our policies') }}');
-                rmSetBtnLoading($btn, false);
             }
         }
 
