@@ -214,13 +214,35 @@
                             $mobile_slider = $sliders_mobile[$key] ?? null;
                             $mobile_src = $mobile_slider ? my_asset($mobile_slider->file_name) : $desktop_src;
                         @endphp
+                        {{--
+                            Only the first slide is eager: it is the LCP element, so lazy-loading it
+                            would delay the largest paint. Slides 2+ go through lazysizes (already
+                            bundled in vendors.js and used by the banner carousels below), because a
+                            native loading="lazy" would not help here - the carousel container is in
+                            the viewport, so the browser treats every slide as near-viewport and
+                            fetches them all anyway.
+                        --}}
                         <picture>
-                            <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
-                            <img
-                                src="{{ $desktop_src }}"
-                                alt="{{ env('APP_NAME') }} promo"
-                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
-                            >
+                            @if ($key == 0)
+                                <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                <img
+                                    src="{{ $desktop_src }}"
+                                    alt="{{ env('APP_NAME') }} promo"
+                                    fetchpriority="high"
+                                    decoding="async"
+                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
+                                >
+                            @else
+                                <source media="(max-width: 767px)" data-srcset="{{ $mobile_src }}">
+                                <img
+                                    class="lazyload"
+                                    src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
+                                    data-src="{{ $desktop_src }}"
+                                    alt="{{ env('APP_NAME') }} promo"
+                                    decoding="async"
+                                    onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
+                                >
+                            @endif
                         </picture>
                     </a>
                 </div>
@@ -259,10 +281,13 @@
             @foreach ($homeCategories as $category)
                 @php $category_name = $category->getTranslation('name'); @endphp
                 <a class="rm-cat-card" href="{{ route('products.category', $category->slug) }}" title="{{ $category_name }}">
+                    {{-- Below the hero + marquee, so these never need to be in the first paint. --}}
                     <img
                         class="rm-cat-img"
                         src="{{ isset($category->banner) ? uploaded_asset($category->banner) : (isset($category->cover_image) ? uploaded_asset($category->cover_image) : static_asset('assets/img/placeholder.jpg')) }}"
                         alt="{{ $category_name }}"
+                        loading="lazy"
+                        decoding="async"
                         onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
                     >
                     <div class="rm-cat-label">{{ $category_name }}</div>
@@ -303,7 +328,9 @@
                     <div class="carousel-box overflow-hidden">
                         <a href="{{ isset(json_decode($home_banner1_links, true)[$key]) ? json_decode($home_banner1_links, true)[$key] : '' }}" class="d-block text-reset">
                             <picture>
-                                <source media="(max-width: 767px)" srcset="{{ $mobile_src }}">
+                                {{-- data-srcset, not srcset: a plain srcset here is fetched eagerly by the
+                                     browser and defeats the lazyload on the <img> below it for mobile. --}}
+                                <source media="(max-width: 767px)" data-srcset="{{ $mobile_src }}">
                                 <img
                                     src="{{ static_asset('assets/img/placeholder-rect.jpg') }}"
                                     data-src="{{ $desktop_src }}"

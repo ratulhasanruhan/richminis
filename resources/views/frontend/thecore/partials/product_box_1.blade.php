@@ -11,17 +11,24 @@
         @endphp
         <!-- Image -->
         <a href="{{ $product_url }}" class="d-block h-100 position-relative image-hover-effect">
+            {{--
+                data-src, not src: lazysizes only takes over when the real URL is in data-src. With
+                the class alone and a real src the browser had already fetched the image, so the
+                lazyload class did nothing and every card cost two full downloads up front.
+            --}}
             <img
                 class="lazyload mx-auto img-fit has-transition product-main-image"
                 style="object-position: center center;"
-                src="{{ get_image($product->thumbnail) }}"
+                src="{{ static_asset('assets/img/placeholder.jpg') }}"
+                data-src="{{ get_image($product->thumbnail) }}"
                 alt="{{ $product->getTranslation('name') }}"
                 title="{{ $product->getTranslation('name') }}"
                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
             <img
                 class="lazyload mx-auto img-fit has-transition product-hover-image position-absolute"
                 style="object-position: center center;"
-                src="{{ get_first_product_image($product->thumbnail, $product->photos) }}"
+                src="{{ static_asset('assets/img/placeholder.jpg') }}"
+                data-src="{{ get_first_product_image($product->thumbnail, $product->photos) }}"
                 alt="{{ $product->getTranslation('name') }}"
                 title="{{ $product->getTranslation('name') }}"
                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">

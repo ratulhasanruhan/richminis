@@ -912,9 +912,23 @@ function translate($key, $lang = null, $addslashes = false)
 
     $lang_key = preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(' ', '_', strtolower($key)));
 
-    $translations_en = Cache::rememberForever('translations-en', function () {
-        return Translation::where('lang', 'en')->pluck('lang_value', 'lang_key')->toArray();
-    });
+    // translate() runs well over a hundred times while rendering one page, and each of the
+    // rememberForever() lookups below used to re-read and unserialise an entire language's
+    // translation table from the cache store on every call. Hold the arrays for the duration of
+    // the request instead, so the store is touched once per language rather than once per string.
+    static $memo = [];
+
+    $translations_for = function ($lang) use (&$memo) {
+        if (!array_key_exists($lang, $memo)) {
+            $memo[$lang] = Cache::rememberForever("translations-{$lang}", function () use ($lang) {
+                return Translation::where('lang', $lang)->pluck('lang_value', 'lang_key')->toArray();
+            });
+        }
+
+        return $memo[$lang];
+    };
+
+    $translations_en = $translations_for('en');
 
     if (!isset($translations_en[$lang_key])) {
         $translation_def = new Translation;
@@ -932,20 +946,19 @@ function translate($key, $lang = null, $addslashes = false)
             }
 
         Cache::forget('translations-en');
+        // Drop the memo too, so a later call in this same request rebuilds it with the new key
+        // instead of reusing the copy taken before the insert.
+        unset($memo['en']);
     }
 
     // return user session lang
-    $translation_locale = Cache::rememberForever("translations-{$lang}", function () use ($lang) {
-        return Translation::where('lang', $lang)->pluck('lang_value', 'lang_key')->toArray();
-    });
+    $translation_locale = $translations_for($lang);
     if (isset($translation_locale[$lang_key])) {
         return $addslashes ? addslashes(trim($translation_locale[$lang_key])) : trim($translation_locale[$lang_key]);
     }
 
     // return default lang if session lang not found
-    $translations_default = Cache::rememberForever('translations-' . env('DEFAULT_LANGUAGE', 'en'), function () {
-        return Translation::where('lang', env('DEFAULT_LANGUAGE', 'en'))->pluck('lang_value', 'lang_key')->toArray();
-    });
+    $translations_default = $translations_for(env('DEFAULT_LANGUAGE', 'en'));
     if (isset($translations_default[$lang_key])) {
         return $addslashes ? addslashes(trim($translations_default[$lang_key])) : trim($translations_default[$lang_key]);
     }
@@ -1433,17 +1446,20 @@ if (!function_exists('resolve_city_id_for_state_wise_shipping')) {
 if (!function_exists('get_setting')) {
     function get_setting($key, $default = null, $lang = false)
     {
-        $settings = Cache::remember('business_settings', 86400, function () {
-            return BusinessSetting::all();
-        });
+        // Hash lookup against an index built once per request, rather than re-scanning the whole
+        // settings collection on every call - see BusinessSetting::indexed().
+        $index = BusinessSetting::indexed();
 
         if ($lang == false) {
-            $setting = $settings->where('type', $key)->first();
-        } else {
-            $setting = $settings->where('type', $key)->where('lang', $lang)->first();
-            $setting = !$setting ? $settings->where('type', $key)->first() : $setting;
+            return array_key_exists($key, $index['first']) ? $index['first'][$key] : $default;
         }
-        return $setting == null ? $default : $setting->value;
+
+        if (isset($index['by_lang'][$key]) && array_key_exists($lang, $index['by_lang'][$key])) {
+            return $index['by_lang'][$key][$lang];
+        }
+
+        // Fall back to the setting without a language, exactly as the old query did.
+        return array_key_exists($key, $index['first']) ? $index['first'][$key] : $default;
     }
 }
 

@@ -14,6 +14,9 @@ use Str;
 
 class AizUploadController extends Controller
 {
+    /** Longest edge, in pixels, that an optimised upload is downscaled to. */
+    private const MAX_DIMENSION = 1500;
+
     public function index(Request $request)
     {
 
@@ -162,8 +165,18 @@ class AizUploadController extends Controller
         // Held onto because process_image() may swap the extension for the configured output format.
         $file_type = $type[$extension];
 
-        // svg is not a bitmap, and webp/gif are kept as they are so animation and transparency survive.
-        $reencode = $file_type == 'image' && !in_array($extension, ['svg', 'webp', 'gif']);
+        // svg is not a bitmap, and gif is left alone so animation survives.
+        $reencode = $file_type == 'image' && !in_array($extension, ['svg', 'gif']);
+
+        // webp was skipped here for the same reason as gif, which let full-resolution banners
+        // through untouched - a 6000x3125 webp is the single biggest drag on homepage load. It is
+        // now downscaled, but only when it is genuinely oversized and not animated: a webp already
+        // within the limit is left byte-for-byte alone, because re-encoding an already-optimised
+        // webp at quality 75 costs visible quality without saving meaningful size.
+        if ($reencode && $extension == 'webp') {
+            $reencode = $this->image_exceeds_max_dimension($file->getRealPath())
+                && !$this->is_animated_webp($file->getRealPath());
+        }
 
         if ($reencode) {
             try {
@@ -267,12 +280,12 @@ class AizUploadController extends Controller
 
         // Image optimization
         if (get_setting('disable_image_optimization') != 1) {
-            if ($width > $height && $width > 1500) {
-                $img->resize(1500, null, function ($constraint) {
+            if ($width > $height && $width > self::MAX_DIMENSION) {
+                $img->resize(self::MAX_DIMENSION, null, function ($constraint) {
                     $constraint->aspectRatio();
                 });
-            } elseif ($height > 1500) {
-                $img->resize(null, 1500, function ($constraint) {
+            } elseif ($height > self::MAX_DIMENSION) {
+                $img->resize(null, self::MAX_DIMENSION, function ($constraint) {
                     $constraint->aspectRatio();
                 });
             }
@@ -338,6 +351,43 @@ class AizUploadController extends Controller
             'size' => filesize($absolute_path),
             'extension' => $extension,
         ];
+    }
+
+    /**
+     * True when the image is bigger than the longest edge process_image() would downscale it to,
+     * i.e. when re-encoding it would actually buy something.
+     */
+    private function image_exceeds_max_dimension($absolute_path)
+    {
+        if (get_setting('disable_image_optimization') == 1) {
+            return false;
+        }
+
+        $info = @getimagesize($absolute_path);
+        if ($info === false) {
+            return false;
+        }
+
+        return $info[0] > self::MAX_DIMENSION || $info[1] > self::MAX_DIMENSION;
+    }
+
+    /**
+     * Animated webp carries an ANIM chunk near the start of its RIFF container. GD decodes only the
+     * first frame, so re-encoding one would silently throw the animation away.
+     */
+    private function is_animated_webp($absolute_path)
+    {
+        $handle = @fopen($absolute_path, 'rb');
+        if ($handle === false) {
+            // Unreadable here means process_image() would fail on it anyway; treat it as animated
+            // so the original is stored untouched rather than risking a mangled file.
+            return true;
+        }
+
+        $header = fread($handle, 64);
+        fclose($handle);
+
+        return $header === false || strpos($header, 'ANIM') !== false;
     }
 
     /**
