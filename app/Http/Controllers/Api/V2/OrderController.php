@@ -50,11 +50,13 @@ class OrderController extends Controller
             $shippingAddress['name']        = $user->name;
             $shippingAddress['email']       = $user->email;
             $shippingAddress['address']     = $address->address. (isset($address->area) ? ', ' . $address->area->name : '');
-            $shippingAddress['country']     = $address->country->name;
+            // Same guard as the web OrderController: city_id is stored as null whenever
+            // resolve_city_id_for_state_wise_shipping() finds no active city for the state.
+            $shippingAddress['country']     = optional($address->country)->name;
             if(get_setting('has_state') == 1){
-            $shippingAddress['state']       = $address->state->name;
+            $shippingAddress['state']       = optional($address->state)->name;
             }
-            $shippingAddress['city']        = $address->city->name;
+            $shippingAddress['city']        = optional($address->city)->name;
             $shippingAddress['postal_code'] = $address->postal_code;
             $shippingAddress['phone']       = $address->phone;
             if ($address->latitude || $address->longitude) {

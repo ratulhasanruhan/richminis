@@ -156,11 +156,15 @@ class OrderController extends Controller
             $shippingAddress['name']        = Auth::user()->name;
             $shippingAddress['email']       = Auth::user()->email;
             $shippingAddress['address']     = $address->address. (isset($address->area) ? ', ' . $address->area->name : '');
-            $shippingAddress['country']     = $address->country->name;
+            // country/state/city are read through optional(): the address row can outlive the row
+            // it points at, and city_id in particular is written as null whenever
+            // resolve_city_id_for_state_wise_shipping() finds no active city for the chosen state.
+            // An order that is otherwise valid must not be lost over a missing label.
+            $shippingAddress['country']     = optional($address->country)->name;
             if(get_setting('has_state') == 1){
-            $shippingAddress['state']       = $address->state->name;
+            $shippingAddress['state']       = optional($address->state)->name;
             }
-            $shippingAddress['city']        = $address->city->name;
+            $shippingAddress['city']        = optional($address->city)->name;
             $shippingAddress['postal_code'] = $address->postal_code;
             $shippingAddress['phone']       = $address->phone;
             if ($address->latitude || $address->longitude) {
@@ -173,11 +177,11 @@ class OrderController extends Controller
             $billingAddress['name']        = Auth::user()->name;
             $billingAddress['email']       = Auth::user()->email;
             $billingAddress['address']     = $billing_address->address. (isset($billing_address->area) ? ', ' . $billing_address->area->name : '');
-            $billingAddress['country']     = $billing_address->country->name;
+            $billingAddress['country']     = optional($billing_address->country)->name;
             if(get_setting('has_state') == 1){
-            $billingAddress['state']       = $billing_address->state->name;
+            $billingAddress['state']       = optional($billing_address->state)->name;
             }
-            $billingAddress['city']        = $billing_address->city->name;
+            $billingAddress['city']        = optional($billing_address->city)->name;
             $billingAddress['postal_code'] = $billing_address->postal_code;
             $billingAddress['phone']       = $billing_address->phone;
             if ($billing_address->latitude || $billing_address->longitude) {

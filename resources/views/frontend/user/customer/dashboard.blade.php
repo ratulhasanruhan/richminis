@@ -184,9 +184,9 @@
                         <ul class="list-unstyled mb-5">
                             <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->address }},</span></li>
                             <li class="fs-14 fw-400 text-derk pb-1"><span> {{ $address->area ? $address->area->name . ',' : '' }}</span></li>
-                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->postal_code }} - {{ $address->city->name }},</span></li>
+                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->postal_code }} - {{ $address->city ? $address->city->name : '' }},</span></li>
                             <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->state ? $address->state->name : '' }}</span></li>
-                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->country->name }}.</span></li>
+                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->country ? $address->country->name : '' }}.</span></li>
                             <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->phone }}</span></li>
                         </ul>
                     @endif
@@ -210,9 +210,9 @@
                         <ul class="list-unstyled mb-5">
                             <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->address }},</span></li>
                             <li class="fs-14 fw-400 text-derk pb-1"><span> {{ $address->area ? $address->area->name . ',' : '' }}</span></li>
-                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->postal_code }} - {{ $address->city->name }},</span></li>
+                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->postal_code }} - {{ $address->city ? $address->city->name : '' }},</span></li>
                             <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->state ? $address->state->name : '' }}</span></li>
-                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->country->name }}.</span></li>
+                            <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->country ? $address->country->name : '' }}.</span></li>
                             <li class="fs-14 fw-400 text-derk pb-1"><span>{{ $address->phone }}</span></li>
                         </ul>
                     @endif
