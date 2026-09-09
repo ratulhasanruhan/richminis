@@ -331,14 +331,21 @@
                                     },
                                     error: function (xhr) {
                                         rmSetBtnLoading($btn, false);
-                                        var msg = rmCheckout.otpRequired 
+                                        var msg = rmCheckout.otpRequired
                                             ? "{{ translate('Could not send OTP. Please try again later.') }}"
                                             : "{{ translate('Could not confirm order. Please try again later.') }}";
-                                        try {
-                                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                                msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(', ') : xhr.responseJSON.message;
-                                            }
-                                        } catch (e) {}
+                                        // Rate limiting answers with an empty body, so the generic text
+                                        // above would hide the real reason and invite the shopper to hammer
+                                        // the button - which only extends the block. Name it instead.
+                                        if (xhr.status === 429) {
+                                            msg = "{{ translate('Too many requests right now. Please wait a minute, then try again.') }}";
+                                        } else {
+                                            try {
+                                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                                    msg = Array.isArray(xhr.responseJSON.message) ? xhr.responseJSON.message.join(', ') : xhr.responseJSON.message;
+                                                }
+                                            } catch (e) {}
+                                        }
                                         AIZ.plugins.notify('danger', msg);
                                     }
                                 });
@@ -439,10 +446,21 @@
             return $s.length ? ($s.val() || 0) : 0;
         }
 
+        // Tracks the request in flight so a new one can replace it instead of piling up.
+        var rmDeliveryAddressXhr = null;
+
         function updateDeliveryAddress(id, city_id = 0, area_id=0) {
+            // This call re-renders #delivery_info, and refreshing the selects inside it can fire
+            // change events that land straight back here. Without this abort, one district change
+            // fans out into a burst of identical POSTs - which is what the host's rate limiter
+            // answers with HTTP 429, taking the whole site down rather than just this page.
+            if (rmDeliveryAddressXhr && rmDeliveryAddressXhr.readyState !== 4) {
+                rmDeliveryAddressXhr.abort();
+            }
+
             $('.aiz-refresh').addClass('active');
             var state_id = $('select[name="state_id"]').length ? ($('select[name="state_id"]').val() || 0) : 0;
-            $.post('{{ route('checkout.updateDeliveryAddress') }}', {
+            rmDeliveryAddressXhr = $.post('{{ route('checkout.updateDeliveryAddress') }}', {
                 _token: AIZ.data.csrf,
                 address_id: id,
                 city_id: city_id,
@@ -451,11 +469,16 @@
             }, function(data) {
                 $('#delivery_info').html(data.delivery_info);
                 $('#cart_summary').html(data.cart_summary);
-                $('.aiz-refresh').removeClass('active');
                 carrierCount = data.carrier_count;
                 checkCarrerShippingInfo();
+            }).always(function (_res, status) {
+                // Cleared here rather than only on success: previously any failed request left the
+                // spinner turning forever, which is what "loading and loading" looked like.
+                if (status !== 'abort') {
+                    $('.aiz-refresh').removeClass('active');
+                }
             });
-           
+
             AIZ.plugins.bootstrapSelect("refresh");
         }
 

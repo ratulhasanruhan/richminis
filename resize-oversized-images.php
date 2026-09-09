@@ -25,7 +25,16 @@ const RESIZE_TOKEN = 'gOMRcBAR9fKb4MvYmGMcthmP';
 
 const MAX_DIMENSION = 1500;
 const QUALITY       = 82;   // Slightly above the uploader's 75: these are large marketing banners.
-const BATCH_SIZE    = 20;   // Keeps each run inside the host's max_execution_time.
+/**
+ * Images re-encoded per request.
+ *
+ * Deliberately small. Each image is a full GD decode and re-encode of a multi-megapixel file, so a
+ * large batch turns one request into a long CPU-saturating process. On shared hosting that trips
+ * the host's entry-process/CPU limits and gets the whole account throttled with HTTP 429 - taking
+ * the storefront down with it, not just this script. Several short runs are strictly better than
+ * one long one.
+ */
+const BATCH_SIZE    = 5;
 
 /**
  * Bytes per pixel above which a lossy image is considered badly compressed and worth re-encoding

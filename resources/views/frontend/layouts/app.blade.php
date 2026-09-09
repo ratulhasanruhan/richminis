@@ -745,75 +745,81 @@
     <script>
         @if (Route::currentRouteName() == 'home' || Route::currentRouteName() == '/')
 
-            if ($('#section_featured').length) {
-                $.post('{{ route('home.section.featured') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#section_featured').html(data);
-                    AIZ.plugins.slickCarousel();
-                });
-            }
+            /**
+             * Loads one homepage section, but only once it is close to being seen.
+             *
+             * These seven sections used to POST all at once the moment the page opened, so a single
+             * homepage visit cost eight requests to the origin (the HTML plus all seven). That is
+             * the entire budget the host's edge rate limiter allows before it starts answering with
+             * HTTP 429, which is why the site worked one moment and not the next, and why shoppers
+             * were being blocked part-way through checkout.
+             *
+             * Deferring them means a visitor who does not scroll costs one or two requests instead
+             * of eight, and the ones further down the page are only paid for if somebody actually
+             * looks at them.
+             */
+            function rmLoadHomeSection(selector, url, onLoaded) {
+                var $section = $(selector);
+                if (!$section.length) {
+                    return;
+                }
 
-            if ($('#todays_deal').length) {
-                $.post('{{ route('home.section.todays_deal') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#todays_deal').html(data);
-                    AIZ.plugins.slickCarousel();
-                });
-            }
-
-            if ($('#section_best_selling').length) {
-                $.post('{{ route('home.section.best_selling') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#section_best_selling').html(data);
-                    AIZ.plugins.slickCarousel();
-                });
-            }
-
-            if ($('#section_newest').length) {
-                $.post('{{ route('home.section.newest_products') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#section_newest').html(data);
-                    AIZ.plugins.slickCarousel();
-                    @if (get_setting('homepage_select') == 'thecore')
-                        if (typeof toggleViewMoreButton === 'function') {
-                            toggleViewMoreButton();
+                var requested = false;
+                function request() {
+                    if (requested) {
+                        return;
+                    }
+                    requested = true;
+                    $.post(url, { _token: '{{ csrf_token() }}' }, function (data) {
+                        $section.html(data);
+                        AIZ.plugins.slickCarousel();
+                        if (typeof onLoaded === 'function') {
+                            onLoaded();
                         }
-                    @endif
-                });
+                    });
+                }
+
+                // Older browsers without IntersectionObserver keep the previous behaviour rather
+                // than being left with permanently empty sections.
+                if (typeof IntersectionObserver === 'undefined') {
+                    request();
+                    return;
+                }
+
+                var observer = new IntersectionObserver(function (entries) {
+                    for (var i = 0; i < entries.length; i++) {
+                        if (entries[i].isIntersecting) {
+                            observer.disconnect();
+                            request();
+                            return;
+                        }
+                    }
+                // Starts fetching a little before the section is actually reached, so it is
+                // usually already filled in by the time it scrolls into view.
+                }, { rootMargin: '400px 0px' });
+
+                observer.observe($section[0]);
             }
 
-            if ($('#auction_products').length) {
-                $.post('{{ route('home.section.auction_products') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#auction_products').html(data);
-                    AIZ.plugins.slickCarousel();
-                });
-            }
+            rmLoadHomeSection('#section_featured', '{{ route('home.section.featured') }}');
+            rmLoadHomeSection('#todays_deal', '{{ route('home.section.todays_deal') }}');
+            rmLoadHomeSection('#section_best_selling', '{{ route('home.section.best_selling') }}');
+            rmLoadHomeSection('#section_newest', '{{ route('home.section.newest_products') }}', function () {
+                @if (get_setting('homepage_select') == 'thecore')
+                    if (typeof toggleViewMoreButton === 'function') {
+                        toggleViewMoreButton();
+                    }
+                @endif
+            });
+            rmLoadHomeSection('#auction_products', '{{ route('home.section.auction_products') }}');
 
             var isPreorderEnabled = @json(addon_is_activated('preorder'));
 
-            if (isPreorderEnabled && $('#section_featured_preorder_products').length) {
-                $.post('{{ route('home.section.preorder_products') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#section_featured_preorder_products').html(data);
-                    AIZ.plugins.slickCarousel();
-                });
+            if (isPreorderEnabled) {
+                rmLoadHomeSection('#section_featured_preorder_products', '{{ route('home.section.preorder_products') }}');
             }
 
-            if ($('#section_home_categories').length) {
-                $.post('{{ route('home.section.home_categories') }}', {
-                    _token: '{{ csrf_token() }}'
-                }, function(data) {
-                    $('#section_home_categories').html(data);
-                    AIZ.plugins.slickCarousel();
-                });
-            }
+            rmLoadHomeSection('#section_home_categories', '{{ route('home.section.home_categories') }}');
 
         @endif
 
